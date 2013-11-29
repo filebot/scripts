@@ -1,7 +1,11 @@
-scripts
+FileBot Script Repository
 =======
 
-Shared Groovy Scripts for FileBot Scripting.
+FileBot makes scripting and automation as easy as it gets. 
+Just script everything in Groovy instead of bothering with 
+cumbersome cmd and bash scripts. It's the same on all platforms 
+and much more powerful. The provided functions are the same as 
+in the CLI and parameter usage is also exactly the same.
 
 
 Usage and examples:
