@@ -8,6 +8,7 @@ and much more powerful. The provided functions are the same as
 in the CLI and parameter usage is also exactly the same.
 
 
+
 Usage and examples:
 http://www.filebot.net/forums/viewtopic.php?f=4&t=5
 
