@@ -19,7 +19,7 @@ if ((args.size() > 0 && (tryQuietly{ ut_dir }?.size() > 0 || tryQuietly{ ut_file
 
 // enable/disable features as specified via --def parameters
 def music     = tryQuietly{ music.toBoolean() }
-def subtitles = tryQuietly{ subtitles.toBoolean() ? ['en'] : subtitles.split(/[ ,|]+/).findAll{ it.length() >= 2 } }
+def subtitles = tryQuietly{ subtitles.split(/[ ,|]+/) }
 def artwork   = tryQuietly{ artwork.toBoolean() }
 def backdrops = tryQuietly{ backdrops.toBoolean() }
 def clean     = tryQuietly{ clean.toBoolean() }
@@ -206,7 +206,7 @@ groups.each{ group, files -> _log.finest("Group: $group => ${files*.name}") }
 // process each batch
 groups.each{ group, files ->
 	// fetch subtitles (but not for anime)
-	if (subtitles && !group.anime && files.findAll{ it.isVideo() }.size() > 0) {
+	if (group.anime == null && subtitles.size() > 0 && files.findAll{ it.isVideo() }.size() > 0) {
 		subtitles.each{ languageCode ->
 			def subtitleFiles = getMissingSubtitles(file:files, output:'srt', encoding:'UTF-8', lang:languageCode, strict:true) ?: []
 			files += subtitleFiles
