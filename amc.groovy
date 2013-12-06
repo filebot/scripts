@@ -19,7 +19,7 @@ if ((args.size() > 0 && (tryQuietly{ ut_dir }?.size() > 0 || tryQuietly{ ut_file
 
 // enable/disable features as specified via --def parameters
 def music     = tryQuietly{ music.toBoolean() }
-def subtitles = tryQuietly{ subtitles.toBoolean() ? ['en'] : subtitles.split(/[ ,|]+/).findAll{ it.length() >= 2 } }
+def subtitles = tryQuietly{ subtitles.split(/[ ,|]+/) as List }
 def artwork   = tryQuietly{ artwork.toBoolean() }
 def backdrops = tryQuietly{ backdrops.toBoolean() }
 def clean     = tryQuietly{ clean.toBoolean() }
@@ -133,7 +133,7 @@ if (excludeList) {
 input.each{ f -> _log.finest("Input: $f") }
 
 // artwork/nfo utility
-if (artwork || xbmc || plex) { include('fn:lib/htpc') }
+if (artwork || xbmc || plex) { include('lib/htpc') }
 
 // group episodes/movies and rename according to XBMC standards
 def groups = input.groupBy{ f ->
@@ -206,7 +206,7 @@ groups.each{ group, files -> _log.finest("Group: $group => ${files*.name}") }
 // process each batch
 groups.each{ group, files ->
 	// fetch subtitles (but not for anime)
-	if (subtitles && !group.anime && files.findAll{ it.isVideo() }.size() > 0) {
+	if (group.anime == null && subtitles != null && files.findAll{ it.isVideo() }.size() > 0) {
 		subtitles.each{ languageCode ->
 			def subtitleFiles = getMissingSubtitles(file:files, output:'srt', encoding:'UTF-8', lang:languageCode, strict:true) ?: []
 			files += subtitleFiles
@@ -298,12 +298,12 @@ if (plex) {
 // mark episodes as 'acquired'
 if (myepisodes) {
 	_log.info 'Update MyEpisodes'
-	executeScript('fn:update-mes', [login:myepisodes.join(':'), addshows:true], getRenameLog().values())
+	executeScript('update-mes', [login:myepisodes.join(':'), addshows:true], getRenameLog().values())
 }
 
 if (pushover) {
 	// include webservice utility
-	include('fn:lib/ws')
+	include('lib/ws')
 	
 	_log.info 'Sending Pushover notification'
 	Pushover(pushover).send("Finished processing ${tryQuietly { ut_title } ?: input*.dir.name.unique()} (${getRenameLog().size()} files).")
@@ -312,7 +312,7 @@ if (pushover) {
 // send status email
 if (gmail) {
 	// ant/mail utility
-	include('fn:lib/ant')
+	include('lib/ant')
 	
 	// send html mail
 	def renameLog = getRenameLog()
@@ -379,7 +379,7 @@ if (clean) {
 		cleanerInput = cleanerInput.findAll{ f -> f.exists() }
 		if (cleanerInput.size() > 0) {
 			_log.info 'Clean clutter files and empty folders'
-			executeScript('fn:cleaner', args.empty ? [root:true] : [root:false], cleanerInput)
+			executeScript('cleaner', args.empty ? [root:true] : [root:false], cleanerInput)
 		}
 	}
 }
