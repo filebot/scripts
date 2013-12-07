@@ -75,21 +75,33 @@ def resolveInput(f) {
 }
 
 // collect input fileset as specified by the given --def parameters
+def roots = []
 if (args.empty) {
 	// assume we're called with utorrent parameters (account for older and newer versions of uTorrents)
 	if (ut_kind == 'single' || (ut_kind != 'multi' && ut_dir && ut_file)) {
-		input += new File(ut_dir, ut_file) // single-file torrent
+		roots += new File(ut_dir, ut_file) // single-file torrent
 	} else {
-		input += resolveInput(ut_dir as File) // multi-file torrent
+		roots += new File(ut_dir) // multi-file torrent
 	}
 } else {
 	// assume we're called normally with arguments
-	input += args.findResults{ resolveInput(it) }
+	roots += args
+}
+
+// sanitize input
+roots = roots.findAll{ it?.exists() }.collect{ it.canonicalFile }.unique()
+
+def relativeInputPath = { f ->
+	def r = roots.find{ r -> f.path.startsWith(r.path) }
+	if (r != null) {
+		return f.path.substring(r.path.length() + 1)
+	}
+	return f.path
 }
 
 
 // flatten nested file structure
-input = input.flatten()
+input = roots.flatten{ f -> resolveInput(f) }
 
 // extract archives (zip, rar, etc) that contain at least one video file
 def extractedArchives = []
@@ -98,7 +110,7 @@ input = input.flatten{ f ->
 	if (f.isArchive() || f.hasExtension('001')) {
 		def extractDir = new File(f.dir, f.nameWithoutExtension)
 		def extractFiles = extract(file: f, output: new File(extractDir, f.dir.name), conflict: 'skip', filter: { it.isArchive() || it.isVideo() || it.isSubtitle() || (music && it.isAudio()) }, forceExtractAll: true) ?: []
-		
+
 		if (extractFiles.size() > 0) {
 			extractedArchives += f
 			tempFiles += extractDir
@@ -109,21 +121,21 @@ input = input.flatten{ f ->
 	return f
 }
 
-// sanitize input
-input = input.findAll{ it?.exists() }.collect{ it.canonicalFile }.unique()
-
 // process only media files
 input = input.findAll{ f -> (f.isVideo() && !tryQuietly{ f.hasExtension('iso') && !f.isDisk() }) || f.isSubtitle() || (f.isDirectory() && f.isDisk()) || (music && f.isAudio()) }
 
 // ignore clutter files
-input = input.findAll{ f -> !(f.path =~ /\b(?i:sample|trailer|extras|music.video|scrapbook|behind.the.scenes|extended.scenes|deleted.scenes|s\d{2}c\d{2}|mini.series)\b/ || (f.isFile() && f.length() < minFileSize)) }
+input = input.findAll{ f -> !(relativeInputPath(f) =~ /\b(?i:sample|trailer|extras|music.video|scrapbook|behind.the.scenes|extended.scenes|deleted.scenes|s\d{2}c\d{2}|mini.series)\b/) }
+
+// ignore files that don't conform with the size limits
+input = input.findAll{ f -> !(f.isFile() && f.length() < minFileSize) }
 
 // check and update exclude list (e.g. to make sure files are only processed once)
 if (excludeList) {
 	// check excludes from previous runs
 	def excludePathSet = excludeList.exists() ? excludeList.text.split('\n') as HashSet : []
 	input = input.findAll{ f -> !excludePathSet.contains(f.path) }
-	
+
 	// update excludes with input of this run
 	excludePathSet += input
 	excludePathSet.join('\n').saveAs(excludeList)
