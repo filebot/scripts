@@ -89,7 +89,7 @@ if (args.empty) {
 }
 
 // sanitize input
-roots = roots.findAll{ it?.exists() }.collect{ it.canonicalFile }.unique()
+roots = roots.collect{ it.canonicalFile }.findAll{ it.exists() && it.parentFile != null }.unique()
 
 def relativeInputPath = { f ->
 	def r = roots.find{ r -> f.path.startsWith(r.path) }
