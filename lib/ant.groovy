@@ -48,6 +48,27 @@ def sendGmail(param) {
 }
 
 
+/**
+ * Upload files via SCP/SFTP
+ *
+ * e.g.
+ * scp(username: 'rednoah', password: 'correcthorsebatterystaple', host: 'filebot.net', remotedir: '/remote/dir', dir: '/local/dir')
+ */
+def scp(param) {
+	// user[:password]@host:/directory/path
+	def todir = param.username + (param.password ? ':' + param.password : '') + '@' + param.host + ':' + param.remotedir
+	
+	// default values
+	def verbose = (param.verbose == null) ? 'no' : param.verbose as String
+	def includes = (param.includes == null) ? '**/*' : param.includes as String
+	
+	_guarded {
+		ant().scp(todir: todir, verbose: verbose, trust: 'yes', sftp: 'true') {
+			fileset(dir: param.dir, includes: includes)
+		}
+	}
+}
+
 def ant() {
 	return new AntBuilder()
 }
