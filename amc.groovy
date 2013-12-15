@@ -212,6 +212,9 @@ def groups = input.groupBy{ f ->
 	return [tvs: tvs, mov: mov, anime: null]
 }
 
+// group entries by unique tvs/mov descriptor
+groups = groups.groupBy{ group, files -> group.collectEntries{ type, query -> [type, query ? query.toString().ascii().normalizePunctuation().lower() : null] } }.collectEntries{ group, maps -> [group, maps.values().flatten()] }
+
 // log movie/series/anime detection results
 groups.each{ group, files -> _log.finest("Group: $group => ${files*.name}") }
 
