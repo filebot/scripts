@@ -213,7 +213,7 @@ def groups = input.groupBy{ f ->
 }
 
 // group entries by unique tvs/mov descriptor
-groups = groups.groupBy{ group, files -> group.collectEntries{ type, query -> [type, query.ascii().normalizePunctuation().lower()] } }.collectEntries { group, maps -> [group, maps.values().flatten()] }
+groups = groups.groupBy{ group, files -> group.collectEntries{ type, query -> [type, query ? query.toString().ascii().normalizePunctuation().lower() : null] } }.collectEntries{ group, maps -> [group, maps.values().flatten()] }
 
 // log movie/series/anime detection results
 groups.each{ group, files -> _log.finest("Group: $group => ${files*.name}") }
