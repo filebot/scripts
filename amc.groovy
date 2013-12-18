@@ -89,10 +89,10 @@ if (args.empty) {
 }
 
 // sanitize input
-roots = roots.findAll{ it?.exists() }.collect{ it.canonicalFile }.unique()
+roots = roots.findAll{ it?.exists() }.collect{ it.canonicalFile }.unique() // roots could be folders as well as files
 
 def relativeInputPath = { f ->
-	def r = roots.find{ r -> f.path.startsWith(r.path) }
+	def r = roots.find{ r -> f.path.startsWith(r.path) && r.isDirectory() && f.isFile() }
 	if (r != null) {
 		return f.path.substring(r.path.length() + 1)
 	}
