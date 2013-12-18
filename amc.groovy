@@ -37,6 +37,7 @@ def gmail = tryQuietly{ gmail.split(':', 2) }
 def pushover = tryQuietly{ pushover.toString() }
 
 // user-defined filters
+def label = tryQuietly{ ut_label } ?: ''
 def minFileSize = tryQuietly{ minFileSize.toLong() }; if (minFileSize == null) { minFileSize = 0 };
 
 // series/anime/movie format expressions
@@ -49,20 +50,24 @@ def format = [
 
 
 // force movie/series/anime logic
-def forceMovie(f) {
-	tryQuietly{ ut_label } =~ /^(?i:Movie|Couch.Potato)/ || f.dir.listPath().any{ it.name ==~ /\b(?i:Movies)\b/ }  || f.path =~ /(?<=tt)\\d{7}/ || tryQuietly{ f.metadata?.object?.class.name =~ /Movie/ }
+def forceMovie = { f ->
+	label =~ /^(?i:Movie|Couch.Potato)/ || f.dir.listPath().any{ it.name ==~ /(?i:Movies)/ }  || f.path =~ /(?<=tt)\\d{7}/ || tryQuietly{ f.metadata?.object?.class.name =~ /Movie/ }
 }
 
-def forceSeries(f) {
-	tryQuietly{ ut_label } =~ /^(?i:TV|Kids.Shows)/ || f.dir.listPath().any{ it.name ==~ /\b(?i:TV.Shows)\b/ } || parseEpisodeNumber(f.path) || parseDate(f.path) || f.path =~ /(?i:Season)\D?[0-9]{1,2}\D/ || tryQuietly{ f.metadata?.object?.class.name =~ /Episode/ }
+def forceSeries = { f ->
+	label =~ /^(?i:TV|Kids.Shows)/ || f.dir.listPath().any{ it.name ==~ /(?i:TV.Shows)/ } || parseEpisodeNumber(f.path) || parseDate(f.path) || f.path =~ /(?i:Season)\D?[0-9]{1,2}\D/ || tryQuietly{ f.metadata?.object?.class.name =~ /Episode/ }
 }
 
-def forceAnime(f) {
-	tryQuietly{ ut_label } =~ /^(?i:Anime)/ || f.dir.listPath().any{ it.name ==~ /\b(?i:Anime)\b/ } || (f.isVideo() && (f.name =~ "[\\(\\[]\\p{XDigit}{8}[\\]\\)]" || getMediaInfo(file:f, format:'''{media.AudioLanguageList} {media.TextCodecList}''').tokenize().containsAll(['Japanese', 'ASS'])))
+def forceAnime = { f ->
+	label =~ /^(?i:Anime)/ || f.dir.listPath().any{ it.name ==~ /(?i:Anime)/ } || (f.isVideo() && (f.name =~ "[\\(\\[]\\p{XDigit}{8}[\\]\\)]" || getMediaInfo(file:f, format:'''{media.AudioLanguageList} {media.TextCodecList}''').tokenize().containsAll(['Japanese', 'ASS'])))
 }
 
-def forceIgnore(f) {
-	tryQuietly{ ut_label } =~ /^(?i:ebook|other|ignore)/ || f.path =~ tryQuietly{ ignore }
+def forceAudio = { f ->
+	label =~ /^(?i:audio|music|music.video)/ || (f.isAudio() && !f.isVideo())
+}
+
+def forceIgnore = { f ->
+	label =~ /^(?i:ebook|other|ignore)/ || f.path =~ tryQuietly{ ignore }
 }
 
 
@@ -152,7 +157,7 @@ def groups = input.groupBy{ f ->
 	// skip auto-detection if possible
 	if (forceIgnore(f))
 		return []
-	if (f.isAudio() && !f.isVideo()) // PROCESS MUSIC FOLDER BY FOLDER
+	if (music && forceAudio(f)) // process audio only if music mode is enabled
 		return [music: f.dir.name]
 	if (forceMovie(f))
 		return [mov:   detectMovie(f, false)]
