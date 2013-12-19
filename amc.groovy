@@ -37,8 +37,11 @@ def gmail = tryQuietly{ gmail.split(':', 2) }
 def pushover = tryQuietly{ pushover.toString() }
 
 // user-defined filters
-def label = tryQuietly{ ut_label } ?: ''
+def label = tryQuietly{ ut_label } ?: null
+def ignore = tryQuietly{ ignore } ?: null
 def minFileSize = tryQuietly{ minFileSize.toLong() }; if (minFileSize == null) { minFileSize = 0 };
+def minLengthMS = tryQuietly{ minLengthMS.toLong() }; if (minLengthMS == null) { minLengthMS = 10 * 60 * 1000 };
+
 
 // series/anime/movie format expressions
 def format = [
@@ -67,7 +70,7 @@ def forceAudio = { f ->
 }
 
 def forceIgnore = { f ->
-	label =~ /^(?i:ebook|other|ignore)/ || f.path =~ tryQuietly{ ignore }
+	label =~ /^(?i:ebook|other|ignore)/ || f.path =~ ignore
 }
 
 
@@ -132,8 +135,8 @@ input = input.findAll{ f -> (f.isVideo() && !tryQuietly{ f.hasExtension('iso') &
 // ignore clutter files
 input = input.findAll{ f -> !(relativeInputPath(f) =~ /\b(?i:sample|trailer|extras|music.video|scrapbook|behind.the.scenes|extended.scenes|deleted.scenes|s\d{2}c\d{2}|mini.series)\b/) }
 
-// ignore files that don't conform with the size limits
-input = input.findAll{ f -> !(f.isFile() && f.length() < minFileSize) }
+// ignore files that don't conform with the file-size and video-length limits
+input = input.findAll{ f -> !(f.isFile() && ((minFileSize > 0 && f.length() < minFileSize) || (minLengthMS > 0 && tryQuietly{ getMediaInfo(file:f, format:'{media.Duration}').toLong() < minLengthMS }))) }
 
 // check and update exclude list (e.g. to make sure files are only processed once)
 if (excludeList) {
