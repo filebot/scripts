@@ -39,8 +39,8 @@ def pushover = tryQuietly{ pushover.toString() }
 // user-defined filters
 def label = tryQuietly{ ut_label } ?: null
 def ignore = tryQuietly{ ignore } ?: null
-def minFileSize = tryQuietly{ minFileSize.toLong() }; if (minFileSize == null) { minFileSize = 0 };
-def minLengthMS = tryQuietly{ minLengthMS.toLong() }; if (minLengthMS == null) { minLengthMS = 10 * 60 * 1000 };
+def minFileSize = tryQuietly{ minFileSize.toLong() }; if (minFileSize == null) { minFileSize = 100 * 1000L * 1000L };
+def minLengthMS = tryQuietly{ minLengthMS.toLong() }; if (minLengthMS == null) { minLengthMS = 10 * 60 * 1000L };
 
 
 // series/anime/movie format expressions
@@ -129,14 +129,17 @@ input = input.flatten{ f ->
 	return f
 }
 
+// keep original input around so we can print excluded files later
+def originalInputSet = input as LinkedHashSet
+
 // process only media files
 input = input.findAll{ f -> (f.isVideo() && !tryQuietly{ f.hasExtension('iso') && !f.isDisk() }) || f.isSubtitle() || (f.isDirectory() && f.isDisk()) || (music && f.isAudio()) }
 
 // ignore clutter files
-input = input.findAll{ f -> !(relativeInputPath(f) =~ /\b(?i:sample|trailer|extras|music.video|scrapbook|behind.the.scenes|extended.scenes|deleted.scenes|s\d{2}c\d{2}|mini.series)\b/) }
+input = input.findAll{ f -> !(relativeInputPath(f) =~ /(?<=\b|_)(?i:sample|trailer|extras|music.video|scrapbook|behind.the.scenes|extended.scenes|deleted.scenes|s\d{2}c\d{2}|mini.series|NCED|NCOP|(OP|ED)\p{Digit}\p{Alpha})(?=\b|_)/) }
 
-// ignore files that don't conform with the file-size and video-length limits
-input = input.findAll{ f -> !(f.isFile() && ((minFileSize > 0 && f.length() < minFileSize) || (minLengthMS > 0 && tryQuietly{ getMediaInfo(file:f, format:'{media.Duration}').toLong() < minLengthMS }))) }
+// ignore video files that don't conform with the file-size and video-length limits
+input = input.findAll{ f -> !(f.isVideo() && ((minFileSize > 0 && f.length() < minFileSize) || (minLengthMS > 0 && tryQuietly{ getMediaInfo(file:f, format:'{duration}').toLong() < minLengthMS }))) }
 
 // check and update exclude list (e.g. to make sure files are only processed once)
 if (excludeList) {
@@ -149,8 +152,9 @@ if (excludeList) {
 	excludePathSet.join('\n').saveAs(excludeList)
 }
 
-// print input fileset
-input.each{ f -> _log.finest("Input: $f") }
+// print exclude and input sets for logging
+input.each{ f -> _log.fine("Input: $f") }
+(originalInputSet - input).each{ f -> _log.finest("Exclude: $f") }
 
 // artwork/nfo utility
 if (artwork || xbmc || plex) { include('lib/htpc') }
