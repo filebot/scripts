@@ -1,0 +1,37 @@
+// filebot -script fn:miss /path/to/media
+
+def episodes = []
+def shows = []
+
+args.getFiles().each{ f ->
+	if (f.isVideo()) {
+		def episode = f.xattr?.metadata?.jsonToObject()
+		def show = any{ ['tvdb', episode.series, episode.series.seriesId] }{ ['anidb', episode.series, episode.series.animeId] }
+		
+		_log.finest "${show} | ${episode} | ${f}"
+		
+		if (episode != null && show != null) {
+			episodes << episode
+			shows << show
+		}
+	}
+}
+
+
+def episodeList = shows.collectMany{ s -> 
+	(s[0] == 'tvdb' ? TheTVDB : AniDB).fetchEpisodeList(s[1], null, Locale.ENGLISH)
+}
+
+// keep only normal episodes
+episodeList = episodeList.findAll{ e ->
+	e.episode != null && e.special == null
+}
+
+
+episodeList = episodeList as LinkedHashSet
+episodeList.removeAll(episodes)
+
+// print missing episodes
+episodeList.each{ e ->
+	println e
+}
