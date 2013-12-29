@@ -12,8 +12,9 @@ args.getFiles{ f -> f.hasExtension('pdf') }.each { f->
 	if (info.title) {
 		def dest = new File(f.parentFile, info.title.validateFileName() + '.pdf')
 		if (!f.equals(dest)) {
-			f.renameTo(dest)
-			println "[RENAME] [$f.name] to [$dest.name]"
+			if (f.renameTo(dest)) {
+				println "[RENAME] [$f.name] to [$dest.name]"
+			}
 		}
 	}
 }
