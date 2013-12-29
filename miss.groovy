@@ -19,7 +19,7 @@ args.getFiles().each{ f ->
 
 
 def episodeList = shows.collectMany{ s -> 
-	(s[0] == 'tvdb' ? TheTVDB : AniDB).fetchEpisodeList(s[1], null, Locale.ENGLISH)
+	(s[0] == 'tvdb' ? TheTVDB : AniDB).getEpisodeList(s[1])
 }
 
 // keep only normal episodes
