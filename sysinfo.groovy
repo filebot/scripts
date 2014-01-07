@@ -83,19 +83,6 @@ println String.format('%d-bit %s', com.sun.jna.Platform.is64Bit() ? 64 : 32, _sy
 println String.format('%s (%s)', _system['os.name'], _system['os.arch'])
 
 
-// print console arguments as passed in
-try {
-	if (_args.array.size() > 2) {
-		println '\n'
-		_args.array.eachWithIndex{ a, i ->
-			println "args[$i] = $a"
-		}
-		println ''
-	}
-} catch(Throwable error) {
-	// ignore
-}
-
 
 // check for updates
 try {
