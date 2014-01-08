@@ -20,7 +20,7 @@ if ((args.size() > 0 && (tryQuietly{ ut_dir }?.size() > 0 || tryQuietly{ ut_file
 // enable/disable features as specified via --def parameters
 def music     = tryQuietly{ music.toBoolean() }
 def subtitles = tryQuietly{ subtitles.split(/[ ,|]+/) as List }
-def artwork   = tryQuietly{ artwork.toBoolean() }
+def artwork   = tryQuietly{ artwork.toBoolean() && !'TEST'.equalsIgnoreCase(_args.action) }
 def backdrops = tryQuietly{ backdrops.toBoolean() }
 def clean     = tryQuietly{ clean.toBoolean() }
 def exec      = tryQuietly{ exec.toString() }
