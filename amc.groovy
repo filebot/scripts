@@ -169,12 +169,12 @@ def groups = input.groupBy{ f ->
 	if (forceMovie(f))
 		return [mov:   detectMovie(f, false)]
 	if (forceSeries(f))
-		return [tvs:   detectSeriesName(f) ?: detectSeriesName(f.dir.listFiles{ it.isVideo() })]
+		return [tvs:   detectSeriesName(f, true, false) ?: detectSeriesName(f.dir.listFiles{ it.isVideo() }, true, false)]
 	if (forceAnime(f))
-		return [anime: detectSeriesName(f) ?: detectSeriesName(f.dir.listFiles{ it.isVideo() })]
+		return [anime: detectSeriesName(f, false, true) ?: detectSeriesName(f.dir.listFiles{ it.isVideo() }, false, true)]
 	
 	
-	def tvs = detectSeriesName(f)
+	def tvs = detectSeriesName(f, true, false)
 	def mov = detectMovie(f, false)
 	_log.fine("$f.name [series: $tvs, movie: $mov]")
 	
@@ -251,7 +251,7 @@ groups.each{ group, files ->
 			dest.mapByFolder().each{ dir, fs ->
 				_log.finest "Fetching artwork for $dir from TheTVDB"
 				def sxe = fs.findResult{ eps -> parseEpisodeNumber(eps) }
-				def options = TheTVDB.search(detectSeriesName(fs), _args.locale)
+				def options = TheTVDB.search(detectSeriesName(fs, true, false), _args.locale)
 				if (options.isEmpty()) {
 					_log.warning "TV Series not found: $config.name"
 					return
