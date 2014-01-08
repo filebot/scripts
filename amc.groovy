@@ -131,6 +131,7 @@ input = input.flatten{ f ->
 
 // keep original input around so we can print excluded files later
 def originalInputSet = input as LinkedHashSet
+def videoFolderSet = input.findAll{ it.isVideo() }.findResults{ it.parentFile } as LinkedHashSet
 
 // process only media files
 input = input.findAll{ f -> (f.isVideo() && !tryQuietly{ f.hasExtension('iso') && !f.isDisk() }) || f.isSubtitle() || (f.isDirectory() && f.isDisk()) || (music && f.isAudio()) }
@@ -140,6 +141,9 @@ input = input.findAll{ f -> !(relativeInputPath(f) =~ /(?<=\b|_)(?i:sample|trail
 
 // ignore video files that don't conform with the file-size and video-length limits
 input = input.findAll{ f -> !(f.isVideo() && ((minFileSize > 0 && f.length() < minFileSize) || (minLengthMS > 0 && tryQuietly{ getMediaInfo(file:f, format:'{duration}').toLong() < minLengthMS }))) }
+
+// ignore subtitles files that are not stored in the same folder as the movie
+input = input.findAll{ f -> !(f.isSubtitle() && !videoFolderSet.contains(f.parentFile)) }
 
 // check and update exclude list (e.g. to make sure files are only processed once)
 if (excludeList) {
