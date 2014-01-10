@@ -52,19 +52,51 @@ def sendGmail(param) {
  * Upload files via SCP/SFTP
  *
  * e.g.
- * scp(username: 'rednoah', password: 'correcthorsebatterystaple', host: 'filebot.net', remotedir: '/remote/dir', dir: '/local/dir')
+ * scp(host: 'filebot.net', username: 'rednoah', password: 'correcthorsebatterystaple', file: '/local/file', remoteFile: '/remote/file')
+ * scp(host: 'filebot.net', username: 'rednoah', password: 'correcthorsebatterystaple', dir: '/local/dir', remoteDir: '/remote/dir')
  */
 def scp(param) {
-	// user[:password]@host:/directory/path
-	def todir = param.username + (param.password ? ':' + param.password : '') + '@' + param.host + ':' + param.remotedir
+	def param_scp = [:]
+	def param_fileset = [:]
 	
-	// default values
-	def verbose = (param.verbose == null) ? 'no' : param.verbose as String
-	def includes = (param.includes == null) ? '**/*' : param.includes as String
+	def remotePath = { f ->
+		if (f == null)
+			throw new IllegalArgumentException('Remote path not defined: ' + param)
+		
+		return param.username + (param.password ? ':' + param.password : '') + '@' + param.host + ':' + f.toString().replace('\\', '/')
+	}
+	
+	// user[:password]@host:/directory/path
+	if (param.file == null){
+		param_scp.remoteTodir = remotePath(param.remoteDir)
+		param_fileset.dir = param.dir as String
+		param_fileset.includes = (param.includes == null) ? '**/*' : param.includes as String
+	} else {
+		if (param.remoteFile == null) {
+			param_scp.remoteTodir = remotePath(param.remoteDir)
+			param_scp.file = param.file as String
+		} else {
+			param_scp.remoteTofile = remotePath(param.remoteFile)
+			param_scp.localFile = param.file as String
+		}
+	}
+	
+	if (param.keyfile != null) {
+		param_scp.keyfile = param.keyfile as String
+		param_scp.passphrase = (param.passphrase == null) ? '' : param.passphrase as String
+	}
+	
+	param_scp.verbose = (param.verbose == null) ? 'no' : param.verbose as String
+	param_scp.trust = 'yes'
+	param_scp.sftp = 'true'
 	
 	_guarded {
-		ant().scp(todir: todir, verbose: verbose, trust: 'yes', sftp: 'true') {
-			fileset(dir: param.dir, includes: includes)
+		if (param_fileset) {
+			ant().scp(param_scp) {
+				fileset(param_fileset)
+			}
+		} else {
+			ant().scp(param_scp)
 		}
 	}
 }
