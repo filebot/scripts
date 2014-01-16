@@ -117,7 +117,7 @@ def tempFiles = []
 input = input.flatten{ f ->
 	if (f.isArchive() || f.hasExtension('001')) {
 		def extractDir = new File(f.dir, f.nameWithoutExtension)
-		def extractFiles = extract(file: f, output: new File(extractDir, f.dir.name), conflict: 'skip', filter: { it.isArchive() || it.isVideo() || it.isSubtitle() || (music && it.isAudio()) }, forceExtractAll: true) ?: []
+		def extractFiles = extract(file: f, output: new File(extractDir, f.dir.name), conflict: 'skip', filter: { it.isArchive() || it.isVideo() || (music && it.isAudio()) }, forceExtractAll: true) ?: []
 
 		if (extractFiles.size() > 0) {
 			extractedArchives += f
