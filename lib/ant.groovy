@@ -6,10 +6,13 @@
  * sshexec(command: "ps", host: "filebot.sf.net", username: "rednoah", password: "correcthorsebatterystaple")
  */
 def sshexec(param) {
-	param << [trust: true] // auto-trust remote hosts
+	param << [trust: true] // always trust remote hosts
+	param << [outputproperty: 'result'] // output as String
 	
 	_guarded {
-		ant().sshexec(param)
+		def antBuilder = ant()
+		antBuilder.sshexec(param)
+		return antBuilder.project.properties.'result'
 	}
 }
 
@@ -23,7 +26,7 @@ def sshexec(param) {
 def sendmail(param) {
 	def sender    = param.remove('from')
 	def recipient = param.remove('to')
-	
+
 	_guarded {
 		ant().mail(param) {
 			from(address:sender)
@@ -43,7 +46,7 @@ def sendGmail(param) {
 	param << [mailhost:'smtp.gmail.com', mailport:'587', ssl:'no', enableStartTLS:'yes']
 	param << [user:param.username ? param.remove('username') + '@gmail.com' : param.user]
 	param << [from: param.from ?: param.user]
-	
+
 	sendmail(param)
 }
 
@@ -54,24 +57,26 @@ def sendGmail(param) {
  * e.g.
  * scp(host: 'filebot.net', username: 'rednoah', password: 'correcthorsebatterystaple', file: '/local/file', remoteFile: '/remote/file')
  * scp(host: 'filebot.net', username: 'rednoah', password: 'correcthorsebatterystaple', dir: '/local/dir', remoteDir: '/remote/dir')
+ * scp(host: 'filebot.net', username: 'rednoah', password: 'correcthorsebatterystaple', file: '/remote/file', localDir: '/local/dir')
+ * scp(host: 'filebot.net', username: 'rednoah', password: 'correcthorsebatterystaple', file: '/remote/file', localFile: '/local/file')
  */
 def scp(param) {
 	def param_scp = [:]
 	def param_fileset = [:]
-	
+
 	def remotePath = { f ->
 		if (f == null)
 			throw new IllegalArgumentException('Remote path not defined: ' + param)
-		
-		return param.username + (param.password ? ':' + param.password : '') + '@' + param.host + ':' + f.toString().replace('\\', '/')
+
+		return param.username + '@' + param.host + ':' + f.toString().replace('\\', '/')
 	}
-	
+
 	// user[:password]@host:/directory/path
 	if (param.file == null){
-		param_scp.remoteTodir = remotePath(param.remoteDir)
-		param_fileset.dir = param.dir as String
-		param_fileset.includes = (param.includes == null) ? '**/*' : param.includes as String
-	} else {
+			param_scp.remoteTodir = remotePath(param.remoteDir)
+			param_fileset.dir = param.dir as String
+			param_fileset.includes = (param.includes == null) ? '**/*' : param.includes as String
+	} else if (param.localDir == null && param.localFile == null) {
 		if (param.remoteFile == null) {
 			param_scp.remoteTodir = remotePath(param.remoteDir)
 			param_scp.file = param.file as String
@@ -79,22 +84,30 @@ def scp(param) {
 			param_scp.remoteTofile = remotePath(param.remoteFile)
 			param_scp.localFile = param.file as String
 		}
+	} else {
+		if (param.localFile == null) {
+			param_scp.localTodir = param.localDir as String
+			param_scp.file = remotePath(param.file)
+		} else {
+			param_scp.localTofile = param.localFile as String
+			param_scp.file = remotePath(param.file)
+		}
 	}
 	
-	if (param.keyfile != null) {
+	if (param.keyfile == null) {
+		param_scp.password = param.password as String 
+	} else {
 		param_scp.keyfile = param.keyfile as String
 		param_scp.passphrase = (param.passphrase == null) ? '' : param.passphrase as String
-	}
-	
+	} 
+
 	param_scp.verbose = (param.verbose == null) ? 'no' : param.verbose as String
 	param_scp.trust = 'yes'
 	param_scp.sftp = 'true'
 	
 	_guarded {
 		if (param_fileset) {
-			ant().scp(param_scp) {
-				fileset(param_fileset)
-			}
+			ant().scp(param_scp) { fileset(param_fileset) }
 		} else {
 			ant().scp(param_scp)
 		}
