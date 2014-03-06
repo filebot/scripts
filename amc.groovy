@@ -259,8 +259,8 @@ groups.each{ group, files ->
 					_log.warning "TV Series not found: $config.name"
 					return
 				}
-				def series = options.sortBySimilarity(config.name, { s -> s.name })
-				_log.finest "Fetching series artwork for $series to $dir"
+				def series = options.sortBySimilarity(config.name, { s -> s.name }).get(0)
+				_log.fine "Fetching series artwork for [$series] to [$dir]"
 				fetchSeriesArtworkAndNfo(config.seasonFolder ? dir.dir : dir, dir, series, sxe && sxe.season > 0 ? sxe.season : 1)
 			}
 		}
@@ -277,8 +277,7 @@ groups.each{ group, files ->
 				def movieFile = fs.findAll{ it.isVideo() }.sort{ it.length() }.reverse().findResult{ it }
 				if (movieFile != null) {
 					def movie = detectMovie(movieFile, false)
-					_log.finest "Fetching movie artwork for $movie to $dir"
-					println movie.imdbId
+					_log.fine "Fetching movie artwork for [$movie] to [$dir]"
 					fetchMovieArtworkAndNfo(dir, movie, movieFile, backdrops)
 				}
 			}
