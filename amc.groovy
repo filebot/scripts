@@ -253,15 +253,15 @@ groups.each{ group, files ->
 		def dest = rename(file: files, format: config.format, db: config.db)
 		if (dest && artwork) {
 			dest.mapByFolder().each{ dir, fs ->
-				_log.finest "Fetching artwork for $dir from TheTVDB"
 				def sxe = fs.findResult{ eps -> parseEpisodeNumber(eps) }
 				def options = TheTVDB.search(detectSeriesName(fs, true, false), _args.locale)
 				if (options.isEmpty()) {
 					_log.warning "TV Series not found: $config.name"
 					return
 				}
-				options = options.sortBySimilarity(config.name, { s -> s.name })
-				fetchSeriesArtworkAndNfo(config.seasonFolder ? dir.dir : dir, dir, options[0], sxe && sxe.season > 0 ? sxe.season : 1)
+				def series = options.sortBySimilarity(config.name, { s -> s.name })
+				_log.finest "Fetching series artwork for $series to $dir"
+				fetchSeriesArtworkAndNfo(config.seasonFolder ? dir.dir : dir, dir, series, sxe && sxe.season > 0 ? sxe.season : 1)
 			}
 		}
 		if (dest == null && failOnError) {
@@ -276,8 +276,10 @@ groups.each{ group, files ->
 			dest.mapByFolder().each{ dir, fs ->
 				def movieFile = fs.findAll{ it.isVideo() }.sort{ it.length() }.reverse().findResult{ it }
 				if (movieFile != null) {
-					_log.finest "Fetching artwork for $dir from TheMovieDB"
-					fetchMovieArtworkAndNfo(dir, detectMovie(movieFile), movieFile, backdrops)
+					def movie = detectMovie(movieFile, false)
+					_log.finest "Fetching movie artwork for $movie to $dir"
+					println movie.imdbId
+					fetchMovieArtworkAndNfo(dir, movie, movieFile, backdrops)
 				}
 			}
 		}
