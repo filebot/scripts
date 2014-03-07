@@ -30,6 +30,7 @@ def xbmc = tryQuietly{ xbmc.split(/[ ,|]+/) }
 def plex = tryQuietly{ plex.split(/[ ,|]+/) }
 
 // extra options, myepisodes updates and email notifications
+def extract = tryQuietly{ extract.toBoolean() }; if (extract == null) { extract = true }
 def deleteAfterExtract = tryQuietly{ deleteAfterExtract.toBoolean() }
 def excludeList = tryQuietly{ (excludeList as File).isAbsolute() ? (excludeList as File) : new File(_args.output, excludeList) }
 def myepisodes = tryQuietly{ myepisodes.split(':', 2) }
@@ -39,8 +40,8 @@ def pushover = tryQuietly{ pushover.toString() }
 // user-defined filters
 def label = tryQuietly{ ut_label } ?: null
 def ignore = tryQuietly{ ignore } ?: null
-def minFileSize = tryQuietly{ minFileSize.toLong() }; if (minFileSize == null) { minFileSize = 100 * 1000L * 1000L };
-def minLengthMS = tryQuietly{ minLengthMS.toLong() }; if (minLengthMS == null) { minLengthMS = 10 * 60 * 1000L };
+def minFileSize = tryQuietly{ minFileSize.toLong() }; if (minFileSize == null) { minFileSize = 100 * 1000L * 1000L }
+def minLengthMS = tryQuietly{ minLengthMS.toLong() }; if (minLengthMS == null) { minLengthMS = 10 * 60 * 1000L }
 
 
 // series/anime/movie format expressions
@@ -115,7 +116,7 @@ input = roots.flatten{ f -> resolveInput(f) }
 def extractedArchives = []
 def tempFiles = []
 input = input.flatten{ f ->
-	if (f.isArchive() || f.hasExtension('001')) {
+	if (extract && (f.isArchive() || f.hasExtension('001'))) {
 		def extractDir = new File(f.dir, f.nameWithoutExtension)
 		def extractFiles = extract(file: f, output: new File(extractDir, f.dir.name), conflict: 'auto', filter: { it.isArchive() || it.isVideo() || (music && it.isAudio()) }, forceExtractAll: true) ?: []
 
@@ -161,7 +162,7 @@ input.each{ f -> _log.fine("Input: $f") }
 (originalInputSet - input).each{ f -> _log.finest("Exclude: $f") }
 
 // artwork/nfo utility
-if (artwork || xbmc || plex) { include('fn:lib/htpc') }
+if (artwork || xbmc || plex) { include('lib/htpc') }
 
 // group episodes/movies and rename according to XBMC standards
 def groups = input.groupBy{ f ->
@@ -332,12 +333,12 @@ if (plex) {
 // mark episodes as 'acquired'
 if (myepisodes) {
 	_log.info 'Update MyEpisodes'
-	executeScript('fn:update-mes', [login:myepisodes.join(':'), addshows:true], getRenameLog().values())
+	executeScript('update-mes', [login:myepisodes.join(':'), addshows:true], getRenameLog().values())
 }
 
 if (pushover) {
 	// include webservice utility
-	include('fn:lib/ws')
+	include('lib/ws')
 	
 	_log.info 'Sending Pushover notification'
 	Pushover(pushover).send("Finished processing ${tryQuietly { ut_title } ?: input*.dir.name.unique()} (${getRenameLog().size()} files).")
@@ -346,7 +347,7 @@ if (pushover) {
 // send status email
 if (gmail) {
 	// ant/mail utility
-	include('fn:lib/ant')
+	include('lib/ant')
 	
 	// send html mail
 	def renameLog = getRenameLog()
@@ -413,7 +414,7 @@ if (clean) {
 		cleanerInput = cleanerInput.findAll{ f -> f.exists() }
 		if (cleanerInput.size() > 0) {
 			_log.info 'Clean clutter files and empty folders'
-			executeScript('fn:cleaner', args.empty ? [root:true] : [root:false], cleanerInput)
+			executeScript('cleaner', args.empty ? [root:true] : [root:false], cleanerInput)
 		}
 	}
 }
