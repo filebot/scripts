@@ -131,6 +131,9 @@ def fetchSeriesArtworkAndNfo(seriesDir, seasonDir, series, season, override = fa
 		if (seasonDir != seriesDir) {
 			fetchSeriesFanart(seasonDir['landscape.jpg'], series, 'seasonthumb', season, override, locale)
 		}
+		
+		// folder image (resuse series poster if possible)
+		tryQuietly{ seriesDir['poster.jpg'].copyAs(seriesDir['folder.jpg']) }
 	}
 }
 
@@ -282,5 +285,8 @@ def fetchMovieArtworkAndNfo(movieDir, movie, movieFile = null, fetchAll = false,
 		if (fetchAll) {
 			fetchAllMovieArtwork(movieDir['backdrops'], movieInfo, 'backdrops', override, locale)
 		}
+		
+		// folder image (reuse movie poster if possible)
+		tryQuietly{ movieDir['poster.jpg'].copyAs(movieDir['folder.jpg']) }
 	}
 }
