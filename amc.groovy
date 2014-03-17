@@ -39,7 +39,7 @@ def pushover = tryQuietly{ pushover.toString() }
 // user-defined filters
 def label = tryQuietly{ ut_label } ?: null
 def ignore = tryQuietly{ ignore } ?: null
-def minFileSize = tryQuietly{ minFileSize.toLong() }; if (minFileSize == null) { minFileSize = 100 * 1000L * 1000L }
+def minFileSize = tryQuietly{ minFileSize.toLong() }; if (minFileSize == null) { minFileSize = 50 * 1000L * 1000L }
 def minLengthMS = tryQuietly{ minLengthMS.toLong() }; if (minLengthMS == null) { minLengthMS = 10 * 60 * 1000L }
 
 
