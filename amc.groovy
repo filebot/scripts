@@ -310,12 +310,16 @@ if (exec) {
 	}
 }
 
+// messages used for xbmc / plex / pushover notifications
+def getNotificationTitle = { "FileBot finished processing ${getRenameLog().size()} files" }
+def getNotificationMessage = { tryQuietly{ ut_title } ?: input.collect{ relativeInputPath(it) as File }*.getRoot()*.getNameWithoutExtension().unique().sort{ it.toLowerCase() }.collect{ "• $it" }.join('\n') }
+
 // make XMBC scan for new content and display notification message
 if (xbmc) {
 	xbmc.each{ host ->
 		_log.info "Notify XBMC: $host"
 		_guarded{
-			showNotification(host, 9090, 'FileBot', "Finished processing ${tryQuietly { ut_title } ?: input*.dir.name.unique()} (${getRenameLog().size()} files).", 'http://www.filebot.net/images/icon.png')
+			showNotification(host, 9090, getNotificationTitle(), getNotificationMessage(), 'http://www.filebot.net/images/icon.png')
 			scanVideoLibrary(host, 9090)
 		}
 	}
@@ -340,7 +344,7 @@ if (pushover) {
 	include('lib/ws')
 	
 	_log.info 'Sending Pushover notification'
-	Pushover(pushover).send("Finished processing ${tryQuietly { ut_title } ?: input*.dir.name.unique()} (${getRenameLog().size()} files).")
+	Pushover(pushover).send(getNotificationMessage(), [title: getNotificationTitle()])
 }
 
 // send status email
