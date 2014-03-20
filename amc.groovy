@@ -3,7 +3,7 @@ def input = []
 def failOnError = _args.conflict == 'fail'
 
 // print input parameters
-_args.bindings?.each{ _log.fine("Parameter: $it.key = $it.value") }
+_args.bindings?.each{ _log.fine('Parameter: ' + [it.key, it.key =~ /pushover|gmail|mailto|myepisodes/ ? '*****' : it.value].join(' = ')) }
 args.each{ _log.fine("Argument: $it") }
 args.findAll{ !it.exists() }.each{ throw new Exception("File not found: $it") }
 
@@ -344,7 +344,7 @@ if (pushover) {
 	include('lib/ws')
 	
 	_log.info 'Sending Pushover notification'
-	Pushover(pushover).send(getNotificationMessage(), [title: getNotificationTitle()])
+	Pushover(pushover).send(getNotificationTitle(), getNotificationMessage())
 }
 
 // send status email
