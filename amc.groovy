@@ -402,8 +402,9 @@ def getReportMessage = {
 }
 
 // store processing report
-def reportsFolder = new File(net.sourceforge.filebot.Settings.applicationFolder, 'reports')
-getReportMessage().saveAs(new File(reportsFolder, "AMC ${new Date().format('''- yyyy-MM-dd - hh'h'mm'm'ss's' -''')} ${getReportSubject().take(100)}.html".validateFileName()))
+def reportFolder = new File(net.sourceforge.filebot.Settings.applicationFolder, 'reports')
+def reportFile = getReportMessage().saveAs(new File(reportFolder, "AMC ${new Date().format('''- yyyy-MM-dd - hh'h'mm'm'ss's' -''')} ${getReportSubject().take(100)}.html".validateFileName()))
+_log.finest("Saving report as ${reportFile}")
 
 // send pushbullet report
 if (pushbullet) {
