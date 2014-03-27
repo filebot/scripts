@@ -3,8 +3,8 @@ def input = []
 def failOnError = _args.conflict == 'fail'
 
 // print input parameters
-_args.bindings?.each{ _log.fine('Parameter: ' + [it.key, it.key =~ /pushover|pushbullet|gmail|mailto|myepisodes/ ? '*****' : it.value].join(' = ')) }
-args.each{ _log.fine("Argument: $it") }
+_args.bindings?.each{ _log.finer('Parameter: ' + [it.key, it.key =~ /pushover|pushbullet|gmail|mailto|myepisodes/ ? '*****' : it.value].join(' = ')) }
+args.each{ _log.finer("Argument: $it") }
 args.findAll{ !it.exists() }.each{ throw new Exception("File not found: $it") }
 
 // check user-defined pre-condition
@@ -164,7 +164,7 @@ if (excludeList) {
 }
 
 // print exclude and input sets for logging
-input.each{ f -> _log.fine("Input: $f") }
+input.each{ f -> _log.finer("Input: $f") }
 (originalInputSet - input).each{ f -> _log.finest("Exclude: $f") }
 
 
@@ -355,7 +355,7 @@ def getReportSubject = { tryQuietly { ut_title } ?: input.collect{ relativeInput
 def getReportTitle = { '[FileBot] ' + getReportSubject() }
 def getReportMessage = { 
 	def renameLog = getRenameLog()
-	return '<!DOCTYPE html>\n' + XML {
+	'''<!DOCTYPE html>\n''' + XML {
 		html {
 			head {
 				meta(charset:'UTF-8')
