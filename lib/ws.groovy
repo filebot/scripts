@@ -84,7 +84,7 @@ Content-Disposition: form-data; name="type"
 
 file
 ------------------------------a1134e1059ac
-Content-Disposition: form-data; name="file"; filename="${title}"
+Content-Disposition: form-data; name="file"; filename="${title}.html"
 Content-Type: text/html; charset=utf-8
 
 ${message}
