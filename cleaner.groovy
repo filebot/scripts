@@ -10,7 +10,7 @@ def isClutter(f) {
 	if (f.path =~ "(?i)\\b($ignore)\\b") return false
 	
 	// black list
-	def exts    = tryQuietly{ exts }            ?: /jpg|jpeg|png|gif|nfo|xml|htm|html|log|srt|sub|idx|md5|sfv|txt|rtf|url|db|dna|log/
+	def exts    = tryQuietly{ exts }            ?: /jpg|jpeg|png|gif|nfo|xml|htm|html|log|srt|sub|idx|md5|sfv|txt|rtf|url|db|dna|log|tgmd|json|data/
 	def terms   = tryQuietly{ terms }           ?: /sample|trailer|extras|deleted.scenes|music.video|scrapbook/
 	def maxsize = tryQuietly{ maxsize as Long } ?: 100 * 1024 * 1024
 	
