@@ -351,7 +351,7 @@ if (pushover) {
 
 
 // messages used for email / pushbullet reports
-def getReportSubject = { tryQuietly { ut_title } ?: input.collect{ relativeInputPath(it) as File }*.getRoot()*.getNameWithoutExtension().unique().sort{ it.toLowerCase() }.join(', ') }
+def getReportSubject = { tryQuietly { ut_title } ?: input.collect{ relativeInputPath(it) as File }*.getRoot()*.getNameWithoutExtension()*.trim().unique().sort{ it.toLowerCase() }.join(', ') }
 def getReportTitle = { '[FileBot] ' + getReportSubject() }
 def getReportMessage = { 
 	def renameLog = getRenameLog()
@@ -402,7 +402,7 @@ def getReportMessage = {
 }
 
 // store processing report
-def reportFolder = new File(net.sourceforge.filebot.Settings.applicationFolder, 'reports')
+def reportFolder = new File(net.sourceforge.filebot.Settings.applicationFolder, 'reports').getCanonicalFile()
 def reportFile = getReportMessage().saveAs(new File(reportFolder, "AMC ${new Date().format('''[yyyy-MM-dd HH'h'mm'm']''')} ${getReportSubject().take(50).trim()}.html".validateFileName()))
 _log.finest("Saving report as ${reportFile}")
 
