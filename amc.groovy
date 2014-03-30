@@ -30,6 +30,8 @@ def xbmc = tryQuietly{ xbmc.split(/[ ,|]+/) }
 def plex = tryQuietly{ plex.split(/[ ,|]+/) }
 
 // extra options, myepisodes updates and email notifications
+def storeReport = tryQuietly{ storeReport.toBoolean() }
+def skipExtract = tryQuietly{ skipExtract.toBoolean() }
 def deleteAfterExtract = tryQuietly{ deleteAfterExtract.toBoolean() }
 def excludeList = tryQuietly{ (excludeList as File).isAbsolute() ? (excludeList as File) : new File(_args.output, excludeList) }
 def myepisodes = tryQuietly{ myepisodes.split(':', 2) }
@@ -122,7 +124,7 @@ input = roots.flatten{ f -> resolveInput(f) }
 def extractedArchives = []
 def tempFiles = []
 input = input.flatten{ f ->
-	if (f.isArchive() || f.hasExtension('001')) {
+	if (!skipExtract && (f.isArchive() || f.hasExtension('001'))) {
 		def extractDir = new File(f.dir, f.nameWithoutExtension)
 		def extractFiles = extract(file: f, output: new File(extractDir, f.dir.name), conflict: 'auto', filter: { it.isArchive() || it.isVideo() || (music && it.isAudio()) }, forceExtractAll: true) ?: []
 
@@ -402,9 +404,11 @@ def getReportMessage = {
 }
 
 // store processing report
-def reportFolder = new File(net.sourceforge.filebot.Settings.applicationFolder, 'reports').getCanonicalFile()
-def reportFile = getReportMessage().saveAs(new File(reportFolder, "AMC ${new Date().format('''[yyyy-MM-dd HH'h'mm'm']''')} ${getReportSubject().take(50).trim()}.html".validateFileName()))
-_log.finest("Saving report as ${reportFile}")
+if (storeReport) {
+	def reportFolder = new File(net.sourceforge.filebot.Settings.applicationFolder, 'reports').getCanonicalFile()
+	def reportFile = getReportMessage().saveAs(new File(reportFolder, "AMC ${new Date().format('''[yyyy-MM-dd HH'h'mm'm']''')} ${getReportSubject().take(50).trim()}.html".validateFileName()))
+	_log.finest("Saving report as ${reportFile}")
+}
 
 // send pushbullet report
 if (pushbullet) {
