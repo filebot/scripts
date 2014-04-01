@@ -1,11 +1,15 @@
-// filebot -script fn:artwork.tmdb /path/to/movies/
-def override = _args.conflict == 'override'
-
-/*
+/**
  * Fetch movie artwork. The movie is determined using the parent folders name.
+ * 
+ * Usage: filebot -script fn:artwork.tmdb /path/to/movies/
  */
 
-// artwork/nfo helpers
+import net.sourceforge.filebot.media.*
+
+
+def override = _args.conflict == 'override'
+
+
 include('lib/htpc')
 
 
@@ -27,7 +31,7 @@ args.eachMediaFolder{ dir ->
 		options = options.sortBySimilarity(query, { it.name })
 	} else {
 		// auto-detection
-		options = net.sourceforge.filebot.media.MediaDetection.detectMovie(videos[0], null, TheMovieDB, _args.locale, true)
+		options = MediaDetection.detectMovie(videos[0], null, TheMovieDB, _args.locale, true)
 	}
 	
 	if (options.isEmpty()) {
