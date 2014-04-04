@@ -1,9 +1,11 @@
 // filebot -script fn:suball <options> <folder>
 
 
-def accept(File f) {
+def lastModifiedLimit = tryQuietly{ System.currentTimeMillis() - (maxAgeDays.toLong() * 24 * 60 * 60 * 1000) }
+
+def accept = { f ->
 	// ignore files that are too old
-	if (f.lastModified() < System.currentTimeMillis() - tryQuietly{ maxAgeDays.toLong() * 24 * 60 * 60 * 1000 })
+	if (lastModifiedLimit != null && f.lastModified() < lastModifiedLimit)
 		return false
 	
 	// ignore files that already have subtitles
