@@ -21,6 +21,7 @@ if ((args.size() > 0 && (tryQuietly{ ut_dir }?.size() > 0 || tryQuietly{ ut_file
 }
 
 // enable/disable features as specified via --def parameters
+def unsorted  = tryQuietly{ unsorted.toBoolean() }
 def music     = tryQuietly{ music.toBoolean() }
 def subtitles = tryQuietly{ subtitles.split(/[ ,|]+/) as List }
 def artwork   = tryQuietly{ artwork.toBoolean() && !'TEST'.equalsIgnoreCase(_args.action) }
@@ -306,10 +307,6 @@ groups.each{ group, files ->
 	}
 }
 
-// skip notifications if nothing was renamed anyway
-if (getRenameLog().isEmpty()) {
-	return
-}
 
 // run program on newly processed files
 if (exec) {
@@ -319,6 +316,7 @@ if (exec) {
 		execute(command)
 	}
 }
+
 
 // messages used for xbmc / plex / pushover notifications
 def getNotificationTitle = { "FileBot finished processing ${getRenameLog().size()} files" }
@@ -441,6 +439,19 @@ if (deleteAfterExtract) {
 		}
 	}
 }
+
+
+if (unsorted) {
+	def action = StandardRenameAction.forName(_args.action)
+	(input - getRenameLog().values()).each{ original ->
+		def destination = new File(_args.output, getMediaInfo(file:original, format:'''Unsorted/{fn}.{ext}'''))
+		_log.info("[$action] Rename [$original] to [$destination]")
+		_guarded{
+			action.rename(original, destination)
+		}
+	}
+}
+
 
 // clean empty folders, clutter files, etc after move
 if (clean) {
