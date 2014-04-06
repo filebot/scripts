@@ -9,7 +9,7 @@ def accept = { f ->
 		return false
 	
 	// ignore files that already have subtitles
-	if (getMediaInfo(file:f, format:'''{media.TextCodecList}''').isEmpty())
+	if (getMediaInfo(file:f, format:'''{media.TextCodecList}''').length() > 0)
 		return false
 	
 	return true
