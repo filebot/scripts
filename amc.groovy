@@ -443,7 +443,7 @@ if (deleteAfterExtract) {
 
 if (unsorted) {
 	def action = StandardRenameAction.forName(_args.action)
-	(input - getRenameLog().values()).each{ original ->
+	(input - getRenameLog().keySet()).each{ original ->
 		def destination = new File(_args.output, getMediaInfo(file:original, format:'''Unsorted/{fn}.{ext}'''))
 		_log.info("[$action] Rename [$original] to [$destination]")
 		_guarded{
