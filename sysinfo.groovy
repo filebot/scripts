@@ -83,17 +83,17 @@ try {
 println 'Groovy Engine: ' + groovy.lang.GroovySystem.version
 
 // Java(TM) SE Runtime Environment 1.6.0_30 (headless)
-println Settings.getJavaRuntimeIdentifier()
+println 'JRE: ' + Settings.getJavaRuntimeIdentifier()
 
 // 32-bit Java HotSpot(TM) Client VM
-println String.format('%d-bit %s', com.sun.jna.Platform.is64Bit() ? 64 : 32, _system['java.vm.name'])
+println String.format('JVM: %d-bit %s', com.sun.jna.Platform.is64Bit() ? 64 : 32, _system['java.vm.name'])
 
 // Windows 7 (x86)
-println String.format('%s (%s)', _system['os.name'], _system['os.arch'])
+println String.format('OS: %s (%s)', _system['os.name'], _system['os.arch'])
 
 // print uname -a if available
 try {
-	println(['uname', '-a'].execute().text.trim())
+	println String.format('uname: %s', ['uname', '-a'].execute().text.trim())
 } catch(Throwable error) {
 	// ignore
 }
@@ -101,7 +101,7 @@ try {
 
 // check for updates
 try {
-	def update = new XmlSlurper().parse('http://filebot.net/update.xml')
+	def update = new XmlSlurper().parse('http://app.filebot.net/update.xml')
 	def latestRev = update.revision.text() as int
 	def latestApp  = update.name.text()
 
