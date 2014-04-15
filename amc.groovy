@@ -6,7 +6,7 @@ def input = []
 def failOnError = _args.conflict == 'fail'
 
 // print input parameters
-_args.bindings?.each{ _log.finer('Parameter: ' + [it.key, it.key =~ /pushover|pushbullet|gmail|mailto|myepisodes/ ? '*****' : it.value].join(' = ')) }
+_def.each{ n, v -> _log.finer('Parameter: ' + [n, n =~ /pushover|pushbullet|gmail|mailto|myepisodes/ ? '*****' : v].join(' = ')) }
 args.each{ _log.finer("Argument: $it") }
 args.findAll{ !it.exists() }.each{ throw new Exception("File not found: $it") }
 
