@@ -7,7 +7,7 @@ args.getFiles{ f -> f.hasExtension('pdf') }.each { f->
 	def info = document.getDocumentInformation()
 	
 	// @see http://pdfbox.apache.org/cookbook/workingwithmetadata.html	
-	_log.finest "[$f.name] [$info.title] $info.dictionary"
+	log.finest "[$f.name] [$info.title] $info.dictionary"
 	
 	if (info.title) {
 		def dest = new File(f.parentFile, info.title.validateFileName() + '.pdf')

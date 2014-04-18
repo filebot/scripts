@@ -1,14 +1,5 @@
 // filebot -script fn:sysinfo
 
-
-import net.sourceforge.filebot.*
-import net.sourceforge.filebot.media.*
-import net.sourceforge.filebot.mediainfo.*
-import net.sourceforge.filebot.archive.*
-import net.sourceforge.filebot.web.*
-import net.sourceforge.filebot.gio.*
-
-
 // FileBot 2.62 (r993)
 println Settings.getApplicationIdentifier()
 
@@ -31,7 +22,7 @@ try {
 // 7-Zip-JBinding: OK
 try {
 	print '7-Zip-JBinding: '
-	SevenZipLoader.requireNativeLibraries() // load 7-Zip-JBinding native libs
+	net.sourceforge.filebot.archive.SevenZipLoader.requireNativeLibraries() // load 7-Zip-JBinding native libs
 	println 'OK'
 } catch(Throwable error) {
 	println error
@@ -40,7 +31,7 @@ try {
 // chromaprint-tools
 try {
 	print 'chromaprint-tools: '
-	def fpcalc = System.getProperty('net.sourceforge.filebot.AcoustID.fpcalc', 'fpcalc') //TODO use new AcoustID(null).getChromaprintCommand() instead
+	def fpcalc = AcoustID.getChromaprintCommand()
 	def version = [fpcalc, '-version'].execute().text.trim() ?: 'fpcalc -version failed'
 	println "$version ($fpcalc)"
 } catch(Throwable error) {
@@ -72,7 +63,7 @@ try {
 try {
 	if (Settings.useGVFS()) {
 		print 'GVFS: '
-		assert GVFS.defaultVFS != null
+		assert net.sourceforge.filebot.gio.GVFS.defaultVFS != null
 		println 'OK'
 	}
 } catch(Throwable error) {

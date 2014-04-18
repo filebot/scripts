@@ -40,7 +40,7 @@ args.eachMediaFolder {
 	
 	videos = videos.findAll{ 
 		if (!accept(it)) {
-			_log.finest 'Exclude: ' + it
+			log.finest 'Exclude: ' + it
 			return false
 		}
 		return true

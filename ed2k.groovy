@@ -7,8 +7,6 @@
  * ed2k://|file|<filename, without spaces. unimportant>|<file size in bytes>|<ed2k hash>|/
  */
 
-import net.sourceforge.filebot.hash.*
-
 args.getFiles{ it.isVideo() }.each{ f ->
 	def n = f.nameWithoutExtension.space('_') + '.' + f.extension
 	def l = f.length()

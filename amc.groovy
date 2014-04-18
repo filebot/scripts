@@ -1,13 +1,11 @@
 // filebot -script "fn:amc" --output "X:/media" --action copy --conflict override --def subtitles=en music=y artwork=y "ut_dir=%D" "ut_file=%F" "ut_kind=%K" "ut_title=%N" "ut_label=%L" "ut_state=%S"
 
-import net.sourceforge.filebot.*
-
 def input = []
 def failOnError = _args.conflict == 'fail'
 
 // print input parameters
-_def.each{ n, v -> _log.finer('Parameter: ' + [n, n =~ /pushover|pushbullet|gmail|mailto|myepisodes/ ? '*****' : v].join(' = ')) }
-args.each{ _log.finer("Argument: $it") }
+_def.each{ n, v -> log.finer('Parameter: ' + [n, n =~ /pushover|pushbullet|gmail|mailto|myepisodes/ ? '*****' : v].join(' = ')) }
+args.each{ log.finer("Argument: $it") }
 args.findAll{ !it.exists() }.each{ throw new Exception("File not found: $it") }
 
 // check user-defined pre-condition
@@ -163,15 +161,11 @@ if (excludeList) {
 	// check excludes from previous runs
 	def excludePathSet = excludeList.exists() ? excludeList.text.split('\n') as HashSet : []
 	input = input.findAll{ f -> !excludePathSet.contains(f.path) }
-
-	// update excludes with input of this run
-	excludePathSet += input
-	excludePathSet.join('\n').saveAs(excludeList)
 }
 
 // print exclude and input sets for logging
-input.each{ f -> _log.finer("Input: $f") }
-(originalInputSet - input).each{ f -> _log.finest("Exclude: $f") }
+input.each{ f -> log.finer("Input: $f") }
+(originalInputSet - input).each{ f -> log.finest("Exclude: $f") }
 
 
 // group episodes/movies and rename according to XBMC standards
@@ -191,7 +185,7 @@ def groups = input.groupBy{ f ->
 	
 	def tvs = detectSeriesName(f, true, false)
 	def mov = detectMovie(f, false)
-	_log.fine("$f.name [series: $tvs, movie: $mov]")
+	log.fine("$f.name [series: $tvs, movie: $mov]")
 	
 	// DECIDE EPISODE VS MOVIE (IF NOT CLEAR)
 	if (tvs && mov) {
@@ -218,10 +212,10 @@ def groups = input.groupBy{ f ->
 		
 		// S00E00 | 2012.07.21 | One Piece 217 | Firefly - Serenity | [Taken 1, Taken 2, Taken 3, Taken 4, ..., Taken 10]
 		if ((parseEpisodeNumber(fn, true) || parseDate(fn) || ([dn, fn].find{ it =~ sn && matchMovie(it, true) == null } && (parseEpisodeNumber(stripReleaseInfo(fn.after(sn), false), false) || fn.after(sn) =~ /\D\d{1,2}\D{1,3}\d{1,2}\D/) && matchMovie(fn, true) == null) || (fn.after(sn) ==~ /.{0,3} - .+/ && matchMovie(fn, true) == null) || f.dir.listFiles{ it.isVideo() && (dn =~ sn || norm(it.name) =~ sn) && it.name =~ /\d{1,3}/}.findResults{ it.name.matchAll(/\d{1,3}/) as Set }.unique().size() >= 10 || mov.year < 1900) && !( (mov.year >= 1950 && f.listPath().reverse().take(3).find{ it.name =~ mov.year }) || (mn =~ sn && [dn, fn].find{ it =~ /(19|20)\d{2}/ }) ) ) {
-			_log.fine("Exclude Movie: $mov")
+			log.fine("Exclude Movie: $mov")
 			mov = null
 		} else if ((similarity(mn, fn) >= 0.8 || [dn, fn].find{ it.findAll( ~/\d{4}/ ).findAll{ y -> [mov.year-1, mov.year, mov.year+1].contains(y.toInteger()) }.size() > 0 } != null) || ([dn, fn].find{ it =~ mn && !(it.after(mn) =~ /\b\d{1,3}\b/) && (similarity(it, mn) > 0.2 + similarity(it, sn)) } != null) || (detectMovie(f, false) && [dn, fn].find{ it =~ /(19|20)\d{2}|(?i:CD)[1-9]/ } != null)) {
-			_log.fine("Exclude Series: $tvs")
+			log.fine("Exclude Series: $tvs")
 			tvs = null
 		}
 	}
@@ -231,7 +225,7 @@ def groups = input.groupBy{ f ->
 		if (failOnError) {
 			throw new Exception("Media detection failed")
 		} else {
-			_log.fine("Unable to differentiate: [$f.name] => [$tvs] VS [$mov]")
+			log.fine("Unable to differentiate: [$f.name] => [$tvs] VS [$mov]")
 			return [tvs: null, mov: null, anime: null]
 		}
 	}
@@ -243,7 +237,7 @@ def groups = input.groupBy{ f ->
 groups = groups.groupBy{ group, files -> group.collectEntries{ type, query -> [type, query ? query.toString().ascii().normalizePunctuation().lower() : null] } }.collectEntries{ group, maps -> [group, maps.values().flatten()] }
 
 // log movie/series/anime detection results
-groups.each{ group, files -> _log.finest("Group: $group => ${files*.name}") }
+groups.each{ group, files -> log.finest("Group: $group => ${files*.name}") }
 
 // process each batch
 groups.each{ group, files ->
@@ -267,11 +261,11 @@ groups.each{ group, files ->
 				def sxe = fs.findResult{ eps -> parseEpisodeNumber(eps) }
 				def options = TheTVDB.search(detectSeriesName(fs, true, false), _args.locale)
 				if (options.isEmpty()) {
-					_log.warning "TV Series not found: $config.name"
+					log.warning "TV Series not found: $config.name"
 					return
 				}
 				def series = options.sortBySimilarity(config.name, { s -> s.name }).get(0)
-				_log.fine "Fetching series artwork for [$series] to [$dir]"
+				log.fine "Fetching series artwork for [$series] to [$dir]"
 				fetchSeriesArtworkAndNfo(config.seasonFolder ? dir.dir : dir, dir, series, sxe && sxe.season > 0 ? sxe.season : 1)
 			}
 		}
@@ -288,7 +282,7 @@ groups.each{ group, files ->
 				def movieFile = fs.findAll{ it.isVideo() }.sort{ it.length() }.reverse().findResult{ it }
 				if (movieFile != null) {
 					def movie = detectMovie(movieFile, false)
-					_log.fine "Fetching movie artwork for [$movie] to [$dir]"
+					log.fine "Fetching movie artwork for [$movie] to [$dir]"
 					fetchMovieArtworkAndNfo(dir, movie, movieFile, backdrops)
 				}
 			}
@@ -312,7 +306,7 @@ groups.each{ group, files ->
 if (exec) {
 	getRenameLog().each{ from, to ->
 		def command = getMediaInfo(format: exec, file: to)
-		_log.finest("Execute: $command")
+		log.finest("Execute: $command")
 		execute(command)
 	}
 }
@@ -325,8 +319,8 @@ def getNotificationMessage = { tryQuietly{ ut_title } ?: input.collect{ relative
 // make XMBC scan for new content and display notification message
 if (xbmc) {
 	xbmc.each{ host ->
-		_log.info "Notify XBMC: $host"
-		_guarded{
+		log.info "Notify XBMC: $host"
+		tryLogCatch{
 			showNotification(host, 9090, getNotificationTitle(), getNotificationMessage(), 'http://www.filebot.net/images/icon.png')
 			scanVideoLibrary(host, 9090)
 		}
@@ -336,19 +330,19 @@ if (xbmc) {
 // make Plex scan for new content
 if (plex) {
 	plex.each{
-		_log.info "Notify Plex: $it"
+		log.info "Notify Plex: $it"
 		refreshPlexLibrary(it)
 	}
 }
 
 // mark episodes as 'acquired'
 if (myepisodes) {
-	_log.info 'Update MyEpisodes'
+	log.info 'Update MyEpisodes'
 	executeScript('update-mes', [login:myepisodes.join(':'), addshows:true], getRenameLog().values())
 }
 
 if (pushover) {
-	_log.info 'Sending Pushover notification'
+	log.info 'Sending Pushover notification'
 	Pushover(pushover).send(getNotificationTitle(), getNotificationMessage())
 }
 
@@ -408,12 +402,12 @@ def getReportMessage = {
 if (storeReport) {
 	def reportFolder = new File(Settings.getApplicationFolder(), 'reports').getCanonicalFile()
 	def reportFile = getReportMessage().saveAs(new File(reportFolder, "AMC ${new Date().format('''[yyyy-MM-dd HH'h'mm'm']''')} ${getReportSubject().take(50).trim()}.html".validateFileName()))
-	_log.finest("Saving report as ${reportFile}")
+	log.finest("Saving report as ${reportFile}")
 }
 
 // send pushbullet report
 if (pushbullet) {
-	_log.info 'Sending PushBullet report'
+	log.info 'Sending PushBullet report'
 	PushBullet(pushbullet).sendHtml(getReportTitle(), getReportMessage())
 }
 
@@ -431,10 +425,10 @@ if (gmail) {
 
 if (deleteAfterExtract) {
 	extractedArchives.each{ a ->
-		_log.finest("Delete archive $a")
+		log.finest("Delete archive $a")
 		a.delete()
 		a.dir.listFiles().toList().findAll{ v -> v.name.startsWith(a.nameWithoutExtension) && v.extension ==~ /r\d+/ }.each{ v ->
-			_log.finest("Delete archive volume $v")
+			log.finest("Delete archive volume $v")
 			v.delete()
 		}
 	}
@@ -445,8 +439,8 @@ if (unsorted) {
 	def action = StandardRenameAction.forName(_args.action)
 	(input - getRenameLog().keySet()).each{ original ->
 		def destination = new File(_args.output, getMediaInfo(file:original, format:'''Unsorted/{fn}.{ext}'''))
-		_log.info("[$action] Rename [$original] to [$destination]")
-		_guarded{
+		log.info("[$action] Rename [$original] to [$destination]")
+		tryLogCatch{
 			action.rename(original, destination)
 		}
 	}
@@ -456,15 +450,15 @@ if (unsorted) {
 // clean empty folders, clutter files, etc after move
 if (clean) {
 	if (['COPY', 'HARDLINK'].find{ it.equalsIgnoreCase(_args.action) } && tempFiles.size() > 0) {
-		_log.info 'Clean temporary extracted files'
+		log.info 'Clean temporary extracted files'
 		// delete extracted files
 		tempFiles.findAll{ it.isFile() }.sort().each{
-			_log.finest "Delete $it"
+			log.finest "Delete $it"
 			it.delete()
 		}
 		// delete remaining empty folders
 		tempFiles.findAll{ it.isDirectory() }.sort().reverse().each{
-			_log.finest "Delete $it"
+			log.finest "Delete $it"
 			if (it.getFiles().isEmpty()) it.deleteDir()
 		}
 	}
@@ -474,8 +468,16 @@ if (clean) {
 		def cleanerInput = !args.empty ? args : ut_kind == 'multi' && ut_dir ? [ut_dir as File] : []
 		cleanerInput = cleanerInput.findAll{ f -> f.exists() }
 		if (cleanerInput.size() > 0) {
-			_log.info 'Clean clutter files and empty folders'
+			log.info 'Clean clutter files and empty folders'
 			executeScript('cleaner', args.empty ? [root:true] : [root:false], cleanerInput)
 		}
 	}
+}
+
+
+// update excludes with input of this run
+if (excludeList) {	
+	def excludePathSet = excludeList.exists() ? excludeList.text.split('\n') as HashSet : []
+	excludePathSet += input
+	excludePathSet.join('\n').saveAs(excludeList)
 }

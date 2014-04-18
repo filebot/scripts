@@ -1,9 +1,5 @@
 // filebot -script fn:revert <file or folder>
 
-
-import net.sourceforge.filebot.*
-
-
 def accept(from, to) {
 	args.find{ to.absolutePath.startsWith(it.absolutePath) } && to.exists()
 }

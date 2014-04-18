@@ -4,7 +4,6 @@
  ****************************************************************************/
 import org.jsoup.Jsoup
 import org.jsoup.Connection.Method
-import net.sourceforge.filebot.Cache
 
 def MyEpisodes(username, password) {
 	return new MyEpisodesScraper(username:username, password:password)

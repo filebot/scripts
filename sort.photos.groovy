@@ -17,7 +17,7 @@ args.getFiles{ f -> f.hasExtension('jpg') }.each { f ->
 	def maker = exifIFD0.getString(ExifIFD0Directory.TAG_MAKE)
 	def model = exifIFD0.getString(ExifIFD0Directory.TAG_MODEL)
 	
-	_log.finest "$maker $model $date"
+	log.finest "$maker $model $date"
 	
 	if (maker && model && date) {
 		def dest = new File(f.parentFile, "$maker $model $date" + '.' + f.extension.lower())

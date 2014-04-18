@@ -17,7 +17,7 @@ args.eachMediaFolder{ dir ->
 	}
 	
 	def videos = dir.listFiles{ it.isVideo() }
-	def query = _args.query ?: detectSeriesName(videos, true, false, _args.locale)
+	def query = _args.query ?: detectSeriesName(videos)
 	def sxe = videos.findResult{ parseEpisodeNumber(it) }
 	
 	if (query == null) {

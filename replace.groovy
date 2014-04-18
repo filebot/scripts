@@ -1,7 +1,5 @@
 // filebot -script fn:replace --action copy --filter "[.]srt$" --def "e=[.](eng|english)" "r=.en"
 
-import net.sourceforge.filebot.*
-
 // parameters
 def action = StandardRenameAction.forName(_args.action)
 def accept = { f -> _args.filter ? f.path =~ _args.filter : true }

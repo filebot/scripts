@@ -8,7 +8,7 @@ args.getFiles().each{ f ->
 		def episode = f.xattr?.metadata?.jsonToObject()
 		def show = any{ ['tvdb', episode.series, episode.series.seriesId] }{ ['anidb', episode.series, episode.series.animeId] }
 		
-		_log.finest "${show} | ${episode} | ${f}"
+		log.finest "${show} | ${episode} | ${f}"
 		
 		if (episode != null && show != null) {
 			episodes << episode
