@@ -6,16 +6,16 @@ def failOnError = _args.conflict == 'fail'
 // print input parameters
 _def.each{ n, v -> log.finer('Parameter: ' + [n, n =~ /pushover|pushbullet|gmail|mailto|myepisodes/ ? '*****' : v].join(' = ')) }
 args.each{ log.finer("Argument: $it") }
-args.findAll{ !it.exists() }.each{ throw new Exception("File not found: $it") }
+args.findAll{ !it.exists() }.each{ die("File not found: $it") }
 
 // check user-defined pre-condition
 if (tryQuietly{ !(ut_state ==~ ut_state_allow) }) {
-	throw new Exception("Invalid state: ut_state = $ut_state (expected $ut_state_allow)")
+	die("Invalid state: ut_state = $ut_state (expected $ut_state_allow)")
 }
 
 // check ut mode vs standalone mode
 if ((args.size() > 0 && (tryQuietly{ ut_dir }?.size() > 0 || tryQuietly{ ut_file }?.size() > 0)) || (args.size() == 0 && (tryQuietly{ ut_dir } == null && tryQuietly{ ut_file } == null))) {
-	throw new Exception("Conflicting arguments: pass in either file arguments or ut_dir/ut_file parameters but not both")
+	die("Conflicting arguments: pass in either file arguments or ut_dir/ut_file parameters but not both")
 }
 
 // enable/disable features as specified via --def parameters
@@ -223,7 +223,7 @@ def groups = input.groupBy{ f ->
 	// CHECK CONFLICT
 	if (((mov && tvs) || (!mov && !tvs))) {
 		if (failOnError) {
-			throw new Exception("Media detection failed")
+			die("Media detection failed")
 		} else {
 			log.fine("Unable to differentiate: [$f.name] => [$tvs] VS [$mov]")
 			return [tvs: null, mov: null, anime: null]
@@ -246,6 +246,7 @@ groups.each{ group, files ->
 		subtitles.each{ languageCode ->
 			def subtitleFiles = getMissingSubtitles(file:files, lang:languageCode, strict:true, output:'srt', encoding:'UTF-8', format:'MATCH_VIDEO_ADD_LANGUAGE_TAG') ?: []
 			files += subtitleFiles
+			input += subtitleFiles // make sure subtitles are added to the exclude list and other post processing operations
 			tempFiles += subtitleFiles // if downloaded for temporarily extraced files delete later
 		}
 	}
@@ -270,7 +271,7 @@ groups.each{ group, files ->
 			}
 		}
 		if (dest == null && failOnError) {
-			throw new Exception("Failed to rename series: $config.name")
+			die("Failed to rename series: $config.name")
 		}
 	}
 	
@@ -288,7 +289,7 @@ groups.each{ group, files ->
 			}
 		}
 		if (dest == null && failOnError) {
-			throw new Exception("Failed to rename movie: $group.mov")
+			die("Failed to rename movie: $group.mov")
 		}
 	}
 	
@@ -296,11 +297,32 @@ groups.each{ group, files ->
 	else if (group.music) {
 		def dest = rename(file:files, format:format.music, db:'AcoustID')
 		if (dest == null && failOnError) {
-			throw new Exception("Failed to rename music: $group.music")
+			die("Failed to rename music: $group.music")
 		}
 	}
 }
 
+
+// ---------- POST PROCESSING ---------- //
+
+
+// deal with remaining files that cannot be sorted automatically
+if (unsorted) {
+	def unsortedFiles = (input - getRenameLog().keySet())
+	if (unsortedFiles.size() > 0) {
+		log.info "Processing ${unsortedFiles.size()} unsorted files"
+		def history = [:]
+		def action = StandardRenameAction.forName(_args.action)
+		unsortedFiles.each{ original ->
+			def destination = new File(_args.output, getMediaInfo(file:original, format:'''Unsorted/{fn}.{ext}'''))
+			log.info "[$action] Rename [$original] to [$destination]"
+			tryLogCatch{
+				history[original] = action.rename(original, destination)
+			}
+		}
+		HistorySpooler.getInstance().append(history) 
+	}
+}
 
 // run program on newly processed files
 if (exec) {
@@ -310,6 +332,59 @@ if (exec) {
 		execute(command)
 	}
 }
+
+// clean up temporary files that may be left behind after extraction
+if (deleteAfterExtract) {
+	extractedArchives.each{ a ->
+		log.finest("Delete archive $a")
+		a.delete()
+		a.dir.listFiles().toList().findAll{ v -> v.name.startsWith(a.nameWithoutExtension) && v.extension ==~ /r\d+/ }.each{ v ->
+			log.finest("Delete archive volume $v")
+			v.delete()
+		}
+	}
+}
+
+// clean empty folders, clutter files, etc after move
+if (clean) {
+	if (['COPY', 'HARDLINK'].find{ it.equalsIgnoreCase(_args.action) } && tempFiles.size() > 0) {
+		log.info 'Clean temporary extracted files'
+		// delete extracted files
+		tempFiles.findAll{ it.isFile() }.sort().each{
+			log.finest "Delete $it"
+			it.delete()
+		}
+		// delete remaining empty folders
+		tempFiles.findAll{ it.isDirectory() }.sort().reverse().each{
+			log.finest "Delete $it"
+			if (it.getFiles().isEmpty()) it.deleteDir()
+		}
+	}
+	
+	// deleting remaining files only makes sense after moving files
+	if ('MOVE'.equalsIgnoreCase(_args.action)) {
+		def cleanerInput = !args.empty ? args : ut_kind == 'multi' && ut_dir ? [ut_dir as File] : []
+		cleanerInput = cleanerInput.findAll{ f -> f.exists() }
+		if (cleanerInput.size() > 0) {
+			log.info 'Clean clutter files and empty folders'
+			executeScript('cleaner', args.empty ? [root:true] : [root:false], cleanerInput)
+		}
+	}
+}
+
+
+// update excludes with input of this run
+if (excludeList) {	
+	def excludePathSet = excludeList.exists() ? excludeList.text.split('\n') as HashSet : []
+	excludePathSet += input
+	excludePathSet.join('\n').saveAs(excludeList)
+}
+
+
+// ---------- REPORTING ---------- //
+
+
+if (getRenameLog().size() == 0) die("Finished without processing any files")
 
 
 // messages used for xbmc / plex / pushover notifications
@@ -345,7 +420,6 @@ if (pushover) {
 	log.info 'Sending Pushover notification'
 	Pushover(pushover).send(getNotificationTitle(), getNotificationMessage())
 }
-
 
 // messages used for email / pushbullet reports
 def getReportSubject = { tryQuietly { ut_title } ?: input.collect{ relativeInputPath(it) as File }*.getRoot()*.getNameWithoutExtension()*.trim().unique().sort{ it.toLowerCase() }.join(', ') }
@@ -420,64 +494,4 @@ if (gmail) {
 		to: tryQuietly{ mailto } ?: gmail[0] + '@gmail.com', // mail to self by default
 		user: gmail[0], password: gmail[1]
 	)
-}
-
-
-if (deleteAfterExtract) {
-	extractedArchives.each{ a ->
-		log.finest("Delete archive $a")
-		a.delete()
-		a.dir.listFiles().toList().findAll{ v -> v.name.startsWith(a.nameWithoutExtension) && v.extension ==~ /r\d+/ }.each{ v ->
-			log.finest("Delete archive volume $v")
-			v.delete()
-		}
-	}
-}
-
-
-if (unsorted) {
-	def action = StandardRenameAction.forName(_args.action)
-	(input - getRenameLog().keySet()).each{ original ->
-		def destination = new File(_args.output, getMediaInfo(file:original, format:'''Unsorted/{fn}.{ext}'''))
-		log.info("[$action] Rename [$original] to [$destination]")
-		tryLogCatch{
-			action.rename(original, destination)
-		}
-	}
-}
-
-
-// clean empty folders, clutter files, etc after move
-if (clean) {
-	if (['COPY', 'HARDLINK'].find{ it.equalsIgnoreCase(_args.action) } && tempFiles.size() > 0) {
-		log.info 'Clean temporary extracted files'
-		// delete extracted files
-		tempFiles.findAll{ it.isFile() }.sort().each{
-			log.finest "Delete $it"
-			it.delete()
-		}
-		// delete remaining empty folders
-		tempFiles.findAll{ it.isDirectory() }.sort().reverse().each{
-			log.finest "Delete $it"
-			if (it.getFiles().isEmpty()) it.deleteDir()
-		}
-	}
-	
-	// deleting remaining files only makes sense after moving files
-	if ('MOVE'.equalsIgnoreCase(_args.action)) {
-		def cleanerInput = !args.empty ? args : ut_kind == 'multi' && ut_dir ? [ut_dir as File] : []
-		cleanerInput = cleanerInput.findAll{ f -> f.exists() }
-		if (cleanerInput.size() > 0) {
-			log.info 'Clean clutter files and empty folders'
-			executeScript('cleaner', args.empty ? [root:true] : [root:false], cleanerInput)
-		}
-	}
-}
-
-
-// update excludes with input of this run
-if (excludeList) {	
-	def excludePathSet = excludeList.exists() ? excludeList.text.split('\n') as HashSet : []
-	excludePathSet += input
-	excludePathSet.join('\n').saveAs(excludeList)
 }

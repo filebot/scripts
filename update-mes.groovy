@@ -71,7 +71,7 @@ class MyEpisodesScraper {
 		
 		if (html.select('#frmLogin')) {
 			session.clear()
-			throw new Exception('Login failed')
+			die('Login failed')
 		}
 		
 		return html

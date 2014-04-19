@@ -5,5 +5,5 @@
  */
 args.getFiles().findAll { it.isVerification() }.each {
 	if (!check(file:it))
-		throw new Exception("*ERROR*")
+		die("*ERROR*")
 }
