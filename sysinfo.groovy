@@ -22,7 +22,7 @@ try {
 // 7-Zip-JBinding: OK
 try {
 	print '7-Zip-JBinding: '
-	net.sourceforge.filebot.archive.SevenZipLoader.requireNativeLibraries() // load 7-Zip-JBinding native libs
+	net.filebot.archive.SevenZipLoader.requireNativeLibraries() // load 7-Zip-JBinding native libs
 	println 'OK'
 } catch(Throwable error) {
 	println error
@@ -63,7 +63,7 @@ try {
 try {
 	if (Settings.useGVFS()) {
 		print 'GVFS: '
-		assert net.sourceforge.filebot.gio.GVFS.defaultVFS != null
+		assert net.filebot.gio.GVFS.defaultVFS != null
 		println 'OK'
 	}
 } catch(Throwable error) {
