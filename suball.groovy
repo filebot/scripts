@@ -36,11 +36,11 @@ def accept = { f ->
  * Get subtitles for all your media files  
  */
 args.eachMediaFolder {
-	def input = it.listFiles{ it.isVideo() }
-	def selected = input.findAll{ accept(it) }
+	def input = it.listFiles{ f -> f.isVideo() }
+	def selected = input.findAll{ f -> accept(f) }
 	
 	// print excludes
-	(input - selected).each{ log.finest "Exclude ${it}" }
+	(input - selected).each{ f -> log.finest "Exclude: $f" }
 	
 	if (selected.size() > 0) {
 		getMissingSubtitles(file: selected)
