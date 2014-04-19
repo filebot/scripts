@@ -40,7 +40,7 @@ args.eachMediaFolder {
 	def selected = input.findAll{ accept(it) }
 	
 	// print excludes
-	(input - selected).each{ println it	}
+	(input - selected).each{ log.finest "Exclude ${it}" }
 	
 	if (selected.size() > 0) {
 		getMissingSubtitles(file: selected)
