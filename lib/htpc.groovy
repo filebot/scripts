@@ -129,9 +129,7 @@ def fetchSeriesArtworkAndNfo(seriesDir, seasonDir, series, season, override = fa
 		}
 
 		// folder image (resuse series poster if possible)
-		def posterFile = seriesDir.resolve('poster.jpg')
-		def folderFile = seriesDir.resolve('folder.jpg')
-		if (posterFile.exists() && !folderFile.exists()) posterFile.copyAs(folderFile)
+		copyIfPossible(seriesDir.resolve('poster.jpg'), seriesDir.resolve('folder.jpg'))
 	}
 }
 
@@ -257,7 +255,7 @@ def fetchMovieNfo(outputFile, movieInfo, movieFile, override) {
 
 def fetchMovieArtworkAndNfo(movieDir, movie, movieFile = null, fetchAll = false, override = false, locale = _args.locale) {
 	tryLogCatch {
-		def movieInfo = TheMovieDB.getMovieInfo(movie, locale)
+		def movieInfo = TheMovieDB.getMovieInfo(movie, locale, true)
 
 		// fetch nfo
 		fetchMovieNfo(movieDir.resolve('movie.nfo'), movieInfo, movieFile, override)
@@ -283,8 +281,12 @@ def fetchMovieArtworkAndNfo(movieDir, movie, movieFile = null, fetchAll = false,
 		}
 
 		// folder image (reuse movie poster if possible)
-		def posterFile = seriesDir.resolve('poster.jpg')
-		def folderFile = seriesDir.resolve('folder.jpg')
-		if (posterFile.exists() && !folderFile.exists()) posterFile.copyAs(folderFile)
+		copyIfPossible(movieDir.resolve('poster.jpg'), movieDir.resolve('folder.jpg'))
+	}
+}
+
+def copyIfPossible(File src, File dst) {
+	if (src.exists() && !dst.exists()) {
+		src.copyAs(dst)
 	}
 }
