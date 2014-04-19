@@ -1,7 +1,7 @@
 // filebot -script fn:suball <options> <folder>
 
 
-def lastModifiedLimit = tryQuietly{ System.currentTimeMillis() - (maxAgeDays.toLong() * 24 * 60 * 60 * 1000) }
+def creationDateLimit = tryQuietly{ now.time - (maxAgeDays.toLong() * 24 * 60 * 60 * 1000) }
 def minFileSize = tryQuietly{ minFileSize.toLong() }; if (minFileSize == null) { minFileSize = 50 * 1000L * 1000L }
 def minLengthMS = tryQuietly{ minLengthMS.toLong() }; if (minLengthMS == null) { minLengthMS = 10 * 60 * 1000L }
 def ignore = tryQuietly{ ignore } ?: null
@@ -13,7 +13,7 @@ def accept = { f ->
 		return false
 		
 	// ignore files that are too old
-	if (lastModifiedLimit != null && f.lastModified() < lastModifiedLimit)
+	if (creationDateLimit != null && f.creationDate < creationDateLimit)
 		return false
 	
 	// ignore files that are too small	
