@@ -12,7 +12,7 @@ args.getFiles{ f -> f.xattr.size() > 0 }.each{ f ->
 			if (f.xattr[newk] == null) {
 				// UPDATE 
 				println "\t\tIMPORT xattr $k => $newk"
-				f.xattr[newk] = v
+				f.xattr[newk] = v.replace("net.sourceforge.filebot", "net.filebot")
 			}
 		}
 	}
