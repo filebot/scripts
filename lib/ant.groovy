@@ -9,7 +9,7 @@ def sshexec(param) {
 	param << [trust: true] // always trust remote hosts
 	param << [outputproperty: 'result'] // output as String
 	
-	_guarded {
+	tryLogCatch {
 		def antBuilder = ant()
 		antBuilder.sshexec(param)
 		return antBuilder.project.properties.'result'
@@ -27,7 +27,7 @@ def sendmail(param) {
 	def sender    = param.remove('from')
 	def recipient = param.remove('to')
 
-	_guarded {
+	tryLogCatch {
 		ant().mail(param) {
 			from(address:sender)
 			to(address:recipient)
@@ -105,7 +105,7 @@ def scp(param) {
 	param_scp.trust = 'yes'
 	param_scp.sftp = 'true'
 	
-	_guarded {
+	tryLogCatch {
 		if (param_fileset) {
 			ant().scp(param_scp) { fileset(param_fileset) }
 		} else {

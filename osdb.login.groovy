@@ -11,8 +11,6 @@ setLogin('osdb.user', osdbUser, osdbPwd)
 
 /* --------------------------------------------------------------------- */
 
-import net.sourceforge.filebot.*
-
 if (osdbUser) {
 	console.print('Testing OpenSubtitles... ')
 	WebServices.OpenSubtitles.setUser(osdbUser, osdbPwd)

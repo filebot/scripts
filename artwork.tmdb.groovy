@@ -4,9 +4,6 @@
  * Usage: filebot -script fn:artwork.tmdb /path/to/movies/
  */
 
-import net.sourceforge.filebot.media.*
-
-
 def override = _args.conflict == 'override'
 
 

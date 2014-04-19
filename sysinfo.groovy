@@ -1,14 +1,5 @@
 // filebot -script fn:sysinfo
 
-
-import net.sourceforge.filebot.*
-import net.sourceforge.filebot.media.*
-import net.sourceforge.filebot.mediainfo.*
-import net.sourceforge.filebot.archive.*
-import net.sourceforge.filebot.web.*
-import net.sourceforge.filebot.gio.*
-
-
 // FileBot 2.62 (r993)
 println Settings.getApplicationIdentifier()
 
@@ -31,7 +22,7 @@ try {
 // 7-Zip-JBinding: OK
 try {
 	print '7-Zip-JBinding: '
-	SevenZipLoader.requireNativeLibraries() // load 7-Zip-JBinding native libs
+	net.filebot.archive.SevenZipLoader.requireNativeLibraries() // load 7-Zip-JBinding native libs
 	println 'OK'
 } catch(Throwable error) {
 	println error
@@ -40,7 +31,7 @@ try {
 // chromaprint-tools
 try {
 	print 'chromaprint-tools: '
-	def fpcalc = System.getProperty('net.sourceforge.filebot.AcoustID.fpcalc', 'fpcalc') //TODO use new AcoustID(null).getChromaprintCommand() instead
+	def fpcalc = AcoustID.getChromaprintCommand()
 	def version = [fpcalc, '-version'].execute().text.trim() ?: 'fpcalc -version failed'
 	println "$version ($fpcalc)"
 } catch(Throwable error) {
@@ -72,7 +63,7 @@ try {
 try {
 	if (Settings.useGVFS()) {
 		print 'GVFS: '
-		assert GVFS.defaultVFS != null
+		assert net.filebot.gio.GVFS.defaultVFS != null
 		println 'OK'
 	}
 } catch(Throwable error) {
@@ -83,17 +74,17 @@ try {
 println 'Groovy Engine: ' + groovy.lang.GroovySystem.version
 
 // Java(TM) SE Runtime Environment 1.6.0_30 (headless)
-println Settings.getJavaRuntimeIdentifier()
+println 'JRE: ' + Settings.getJavaRuntimeIdentifier()
 
 // 32-bit Java HotSpot(TM) Client VM
-println String.format('%d-bit %s', com.sun.jna.Platform.is64Bit() ? 64 : 32, _system['java.vm.name'])
+println String.format('JVM: %d-bit %s', com.sun.jna.Platform.is64Bit() ? 64 : 32, _system['java.vm.name'])
 
 // Windows 7 (x86)
-println String.format('%s (%s)', _system['os.name'], _system['os.arch'])
+println String.format('OS: %s (%s)', _system['os.name'], _system['os.arch'])
 
 // print uname -a if available
 try {
-	println(['uname', '-a'].execute().text.trim())
+	println String.format('uname: %s', ['uname', '-a'].execute().text.trim())
 } catch(Throwable error) {
 	// ignore
 }
@@ -101,7 +92,7 @@ try {
 
 // check for updates
 try {
-	def update = new XmlSlurper().parse('http://filebot.net/update.xml')
+	def update = new XmlSlurper().parse('http://app.filebot.net/update.xml')
 	def latestRev = update.revision.text() as int
 	def latestApp  = update.name.text()
 

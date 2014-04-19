@@ -10,7 +10,7 @@ def stage2 = rename(file:stage1.sort(), db:'TheTVDB', order:'airdate', filter:'e
 
 
 // print output statistics
-_log.info "\n-------------------- abs2sxe --------------------\n"
+log.info "\n-------------------- abs2sxe --------------------\n"
 
 def renameMap = getRenameLog()
 stage0.each{ f0 ->
