@@ -311,16 +311,9 @@ if (unsorted) {
 	def unsortedFiles = (input - getRenameLog().keySet())
 	if (unsortedFiles.size() > 0) {
 		log.info "Processing ${unsortedFiles.size()} unsorted files"
-		def history = [:]
-		def action = StandardRenameAction.forName(_args.action)
-		unsortedFiles.each{ original ->
-			def destination = new File(_args.output, getMediaInfo(file:original, format:'''Unsorted/{fn}.{ext}'''))
-			log.info "[$action] Rename [$original] to [$destination]"
-			tryLogCatch{
-				history[original] = action.rename(original, destination)
-			}
-		}
-		HistorySpooler.getInstance().append(history) 
+		rename(map: unsortedFiles.collectEntries{ original ->
+			[original, new File(_args.output, getMediaInfo(file:original, format:'''Unsorted/{fn}.{ext}'''))]
+		})
 	}
 }
 
