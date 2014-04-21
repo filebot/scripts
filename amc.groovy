@@ -365,13 +365,9 @@ if (excludeList) {
 if (getRenameLog().size() == 0) die("Finished without processing any files")
 
 
-// exclude subtitles from reporting to reduce clutter
-if (input.find{ !it.isSubtitle() }) input = input.findAll{ !it.isSubtitle() }
-
-
 // messages used for xbmc / plex / pushover notifications
-def getNotificationTitle = { "FileBot finished processing ${getRenameLog().size()} files" }
-def getNotificationMessage = { tryQuietly{ ut_title } ?: input.collect{ relativeInputPath(it) as File }*.getRoot()*.getNameWithoutExtension().unique().sort{ it.toLowerCase() }.collect{ "• $it" }.join('\n') }
+def getNotificationTitle = { "FileBot finished processing ${getRenameLog().size()} files" }.memoize()
+def getNotificationMessage = { prefix = '• ', postfix = '\n' -> tryQuietly{ ut_title } ?: (input.any{ !it.isSubtitle() } ? input.findAll{ !it.isSubtitle() } : input).collect{ relativeInputPath(it) as File }*.getRoot()*.getNameWithoutExtension().unique().sort{ it.toLowerCase() }.collect{ prefix + it + postfix }.join('').trim() }.memoize()
 
 // make XMBC scan for new content and display notification message
 if (xbmc) {
@@ -404,7 +400,7 @@ if (pushover) {
 }
 
 // messages used for email / pushbullet reports
-def getReportSubject = { tryQuietly { ut_title } ?: input.collect{ relativeInputPath(it) as File }*.getRoot()*.getNameWithoutExtension()*.trim().unique().sort{ it.toLowerCase() }.join(', ') }
+def getReportSubject = { getNotificationMessage('', ', ') }
 def getReportTitle = { '[FileBot] ' + getReportSubject() }
 def getReportMessage = { 
 	def renameLog = getRenameLog()
