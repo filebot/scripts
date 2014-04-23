@@ -1,25 +1,14 @@
-// filebot -script fn:replace --action copy --filter "[.]srt$" --def "e=[.](eng|english)" "r=.en"
+// filebot -script fn:replace --action test --filter "[.]srt$" --def "e=[.](eng|english)" "r=.en"
 
-// parameters
+
 def action = StandardRenameAction.forName(_args.action)
 def accept = { f -> _args.filter ? f.path =~ _args.filter : true }
+def pattern = Pattern.compile(e, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE)
 
-// rename
-args.getFiles{ accept(it)  }.each{
-	if (it.path =~ e) {
-		def nfile = new File(it.path.replaceAll(e, r))
-		
-		// override files only when --conflict override is set
-		if (!it.equals(nfile)) {
-			if (nfile.exists() && _args.conflict == 'override' && action != StandardRenameAction.TEST) {
-				nfile.delete() // resolve conflict
-			}
-			
-			if (!nfile.exists()) {
-				println action.rename(it, nfile)
-			} else {
-				println "Skipped $nfile"
-			}
-		}
-	}
+def renamePlan = [:]
+
+args.getFiles{ f -> accept(f) && pattern.matcher(f.path).find() }.each{ f ->
+	renamePlan[f] = pattern.matcher(f.path).replaceAll(r) as File
 }
+
+rename(map:renamePlan)

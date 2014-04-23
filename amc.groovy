@@ -50,9 +50,9 @@ def minLengthMS = tryQuietly{ minLengthMS.toLong() }; if (minLengthMS == null) {
 
 // series/anime/movie format expressions
 def format = [
-	tvs:   tryQuietly{ seriesFormat } ?: '''TV Shows/{n}/{episode.special ? "Special" : "Season "+s.pad(2)}/{n} - {episode.special ? "S00E"+special.pad(2) : s00e00} - {t.replaceAll(/[`´‘’ʻ]/, "'").removeAll(/[!?.]+$/).replacePart(', Part $1')}{".$lang"}''',
-	anime: tryQuietly{ animeFormat  } ?: '''Anime/{n}/{n} - {sxe} - {t.replaceAll(/[`´‘’ʻ]/, "'").removeAll(/[!?.]+$/).replacePart(', Part $1')}''',
-	mov:   tryQuietly{ movieFormat  } ?: '''Movies/{n} ({y})/{n} ({y}){" CD$pi"}{".$lang"}''',
+	tvs:   tryQuietly{ seriesFormat } ?: '''TV Shows/{n}/{episode.special ? 'Special' : 'Season '+s.pad(2)}/{n} - {episode.special ? 'S00E'+special.pad(2) : s00e00} - {t.replaceAll(/[`´‘’ʻ]/, /'/).removeAll(/[!?.]+$/).replacePart(', Part $1')}{'.'+lang}''',
+	anime: tryQuietly{ animeFormat  } ?: '''Anime/{n}/{n} - {sxe} - {t.replaceAll(/[`´‘’ʻ]/, /'/).removeAll(/[!?.]+$/).replacePart(', Part $1')}''',
+	mov:   tryQuietly{ movieFormat  } ?: '''Movies/{n} ({y})/{n} ({y}){' CD'+pi}{'.'+lang}''',
 	music: tryQuietly{ musicFormat  } ?: '''Music/{n}/{album+'/'}{pi.pad(2)+'. '}{artist} - {t}'''
 ]
 
@@ -195,21 +195,6 @@ def groups = input.groupBy{ f ->
 		def sn = norm(tvs)
 		def mn = norm(mov.name)
 		
-		/**
-		println '--- EPISODE FILTER (POS) ---'
-		println parseEpisodeNumber(fn, true) || parseDate(fn)
-		println ([dn, fn].find{ it =~ sn && matchMovie(it) == null } && (parseEpisodeNumber(stripReleaseInfo(fn.after(sn), false), false) || fn.after(sn) =~ /\D\d{1,2}\D{1,3}\d{1,2}\D/) && matchMovie(fn, true) == null)
-		println (fn.after(sn) ==~ /.{0,3} - .+/ && matchMovie(fn, true) == null)
-		println f.dir.listFiles{ it.isVideo() && (dn =~ sn || norm(it.name) =~ sn) && it.name =~ /\d{1,3}/}.findResults{ it.name.matchAll(/\d{1,3}/) as Set }.unique().size() >= 10
-		println '--- EPISODE FILTER (NEG) ---'
-		println (mov.year >= 1950 && f.listPath().reverse().take(3).find{ it.name =~ mov.year })
-		println (mn =~ sn && [dn, fn].find{ it =~ /(19|20)\d{2}/ })
-		println '--- MOVIE FILTER (POS) ---'
-		println (mn.getSimilarity(fn) >= 0.8 || [dn, fn].find{ it.findAll( ~/\d{4}/ ).findAll{ y -> [mov.year-1, mov.year, mov.year+1].contains(y.toInteger()) }.size() > 0 } != null)
-		println ([dn, fn].find{ it =~ mn && !(it.after(mn) =~ /\b\d{1,3}\b/) && (it.getSimilarity(mn) > 0.2 + it.getSimilarity(sn)) } != null)
-		println (detectMovie(f, true) && [dn, fn].find{ it =~ /(19|20)\d{2}/ } != null)
-		**/
-		
 		// S00E00 | 2012.07.21 | One Piece 217 | Firefly - Serenity | [Taken 1, Taken 2, Taken 3, Taken 4, ..., Taken 10]
 		if ((parseEpisodeNumber(fn, true) || parseDate(fn) || ([dn, fn].find{ it =~ sn && matchMovie(it) == null } && (parseEpisodeNumber(stripReleaseInfo(fn.after(sn), false), false) || fn.after(sn) =~ /\D\d{1,2}\D{1,3}\d{1,2}\D/) && matchMovie(fn, true) == null) || (fn.after(sn) ==~ /.{0,3} - .+/ && matchMovie(fn, true) == null) || f.dir.listFiles{ it.isVideo() && (dn =~ sn || norm(it.name) =~ sn) && it.name =~ /\d{1,3}/}.findResults{ it.name.matchAll(/\d{1,3}/) as Set }.unique().size() >= 10 || mov.year < 1900) && !( (mov.year >= 1950 && f.listPath().reverse().take(3).find{ it.name =~ mov.year }) || (mn =~ sn && [dn, fn].find{ it =~ /(19|20)\d{2}/ }) ) ) {
 			log.fine("Exclude Movie: $mov")
@@ -254,11 +239,12 @@ groups.each{ group, files ->
 	// EPISODE MODE
 	if ((group.tvs || group.anime) && !group.mov) {
 		// choose series / anime config
-		def config = group.tvs ? [name:group.tvs,   format:format.tvs,   db:'TheTVDB', seasonFolder:true ]
-		                       : [name:group.anime, format:format.anime, db:'AniDB',   seasonFolder:false]
+		def config = group.tvs ? [name:group.tvs,   format:format.tvs,   db:'TheTVDB']
+		                       : [name:group.anime, format:format.anime, db:'AniDB']
 		def dest = rename(file: files, format: config.format, db: config.db)
 		if (dest && artwork) {
 			dest.mapByFolder().each{ dir, fs ->
+				def hasSeasonFolder = (config.format =~ /(?i)Season/)
 				def sxe = fs.findResult{ eps -> parseEpisodeNumber(eps) }
 				def options = TheTVDB.search(detectSeriesName(fs, true, false), _args.locale)
 				if (options.isEmpty()) {
@@ -267,7 +253,7 @@ groups.each{ group, files ->
 				}
 				def series = options.sortBySimilarity(config.name, { s -> s.name }).get(0)
 				log.fine "Fetching series artwork for [$series] to [$dir]"
-				fetchSeriesArtworkAndNfo(config.seasonFolder ? dir.dir : dir, dir, series, sxe && sxe.season > 0 ? sxe.season : 1)
+				fetchSeriesArtworkAndNfo(hasSeasonFolder ? dir.dir : dir, dir, series, sxe && sxe.season > 0 ? sxe.season : 1)
 			}
 		}
 		if (dest == null && failOnError) {
@@ -311,16 +297,9 @@ if (unsorted) {
 	def unsortedFiles = (input - getRenameLog().keySet())
 	if (unsortedFiles.size() > 0) {
 		log.info "Processing ${unsortedFiles.size()} unsorted files"
-		def history = [:]
-		def action = StandardRenameAction.forName(_args.action)
-		unsortedFiles.each{ original ->
-			def destination = new File(_args.output, getMediaInfo(file:original, format:'''Unsorted/{fn}.{ext}'''))
-			log.info "[$action] Rename [$original] to [$destination]"
-			tryLogCatch{
-				history[original] = action.rename(original, destination)
-			}
-		}
-		HistorySpooler.getInstance().append(history) 
+		rename(map: unsortedFiles.collectEntries{ original ->
+			[original, new File(_args.output, getMediaInfo(file:original, format:'''Unsorted/{fn}.{ext}'''))]
+		})
 	}
 }
 
@@ -388,8 +367,8 @@ if (getRenameLog().size() == 0) die("Finished without processing any files")
 
 
 // messages used for xbmc / plex / pushover notifications
-def getNotificationTitle = { "FileBot finished processing ${getRenameLog().size()} files" }
-def getNotificationMessage = { tryQuietly{ ut_title } ?: input.collect{ relativeInputPath(it) as File }*.getRoot()*.getNameWithoutExtension().unique().sort{ it.toLowerCase() }.collect{ "• $it" }.join('\n') }
+def getNotificationTitle = { "FileBot finished processing ${getRenameLog().size()} files" }.memoize()
+def getNotificationMessage = { prefix = '• ', postfix = '\n' -> tryQuietly{ ut_title } ?: (input.any{ !it.isSubtitle() } ? input.findAll{ !it.isSubtitle() } : input).collect{ relativeInputPath(it) as File }*.getRoot()*.getNameWithoutExtension().unique().sort{ it.toLowerCase() }.collect{ prefix + it + postfix }.join('').trim() }.memoize()
 
 // make XMBC scan for new content and display notification message
 if (xbmc) {
@@ -422,7 +401,7 @@ if (pushover) {
 }
 
 // messages used for email / pushbullet reports
-def getReportSubject = { tryQuietly { ut_title } ?: input.collect{ relativeInputPath(it) as File }*.getRoot()*.getNameWithoutExtension()*.trim().unique().sort{ it.toLowerCase() }.join(', ') }
+def getReportSubject = { getNotificationMessage('', ', ') }
 def getReportTitle = { '[FileBot] ' + getReportSubject() }
 def getReportMessage = { 
 	def renameLog = getRenameLog()

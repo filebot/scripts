@@ -1,7 +1,7 @@
 // filebot -script fn:watcher /path/to/folder/ --output /output/folder/ --format <expression>
 
 // watch folders and print files that were added/modified
-def watchman = args.watch { changes ->
+def watchman = args[0].watch { changes ->
 	// extract all
 	if (_args.extract)
 		changes += extract(file:changes.findAll{ it.isArchive() }, output:'.')
