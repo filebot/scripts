@@ -75,7 +75,7 @@ def forceAudio = { f ->
 }
 
 def forceIgnore = { f ->
-	label =~ /^(?i:ebook|other|ignore)/ || f.path =~ ignore
+	label =~ /^(?i:ebook|other|ignore)/ || f.path.findMatch(ignore) != null
 }
 
 
