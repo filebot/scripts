@@ -183,10 +183,10 @@ def groups = input.groupBy{ f ->
 		return [music: f.dir.name]
 	if (forceMovie(f))
 		return [mov:   detectMovie(f, false)]
-	if (forceSeries(f))
-		return [tvs:   detectSeriesName(f, true, false) ?: detectSeriesName(f.dir.listFiles{ it.isVideo() }, true, false)]
 	if (forceAnime(f))
 		return [anime: detectSeriesName(f, false, true) ?: detectSeriesName(f.dir.listFiles{ it.isVideo() }, false, true)]
+	if (forceSeries(f))
+		return [tvs:   detectSeriesName(f, true, false) ?: detectSeriesName(f.dir.listFiles{ it.isVideo() }, true, false)]
 	
 	
 	def tvs = detectSeriesName(f, true, false)
