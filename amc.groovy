@@ -384,8 +384,8 @@ if (getRenameLog().size() == 0) die("Finished without processing any files")
 
 
 // messages used for xbmc / plex / pushover notifications
-def getNotificationTitle = { "FileBot finished processing ${getRenameLog().size()} files" }.memoize()
-def getNotificationMessage = { prefix = '• ', postfix = '\n' -> tryQuietly{ ut_title } ?: (input.any{ !it.isSubtitle() } ? input.findAll{ !it.isSubtitle() } : input).collect{ relativeInputPath(it) as File }*.getRoot()*.getNameWithoutExtension().unique().sort{ it.toLowerCase() }.collect{ prefix + it + postfix }.join('').trim() }.memoize()
+def getNotificationTitle = { "FileBot finished processing ${getRenameLog().values().findAll{ !it.isSubtitle() }.size()} files" }.memoize()
+def getNotificationMessage = { prefix = '• ', postfix = '\n' -> tryQuietly{ ut_title } ?: (input.any{ !it.isSubtitle() } ? input.findAll{ !it.isSubtitle() } : input).collect{ relativeInputPath(it) as File }*.getRoot()*.getNameWithoutExtension().unique().sort{ it.toLowerCase() }.collect{ prefix + it }.join(postfix).trim() }.memoize()
 
 // make XMBC scan for new content and display notification message
 if (xbmc) {
