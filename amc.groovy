@@ -23,7 +23,7 @@ def unsorted  = tryQuietly{ unsorted.toBoolean() }
 def music     = tryQuietly{ music.toBoolean() }
 def subtitles = tryQuietly{ subtitles.split(/[ ,|]+/) as List }
 def artwork   = tryQuietly{ artwork.toBoolean() && !'TEST'.equalsIgnoreCase(_args.action) }
-def backdrops = tryQuietly{ backdrops.toBoolean() }
+def extras    = tryQuietly{ extras.toBoolean() }
 def clean     = tryQuietly{ clean.toBoolean() }
 def exec      = tryQuietly{ exec.toString() }
 
@@ -287,7 +287,7 @@ groups.each{ group, files ->
 				if (movieFile != null) {
 					def movie = detectMovie(movieFile, false)
 					log.fine "Fetching movie artwork for [$movie] to [$dir]"
-					fetchMovieArtworkAndNfo(dir, movie, movieFile, backdrops)
+					fetchMovieArtworkAndNfo(dir, movie, movieFile, extras)
 				}
 			}
 		}
