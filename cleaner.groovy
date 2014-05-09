@@ -32,10 +32,10 @@ def clean(f) {
 
 
 // memoize media folder status for performance
-def hasMediaFiles = { dir -> dir.getFiles().find{ (it.isVideo() || it.isAudio()) && !isClutter(it) } }.memoize()
+def hasMediaFiles = { dir -> dir.isDirectory() && dir.getFiles().find{ (it.isVideo() || it.isAudio()) && !isClutter(it) } }.memoize()
 
 // delete clutter files in orphaned media folders
 args.getFiles{ isClutter(it) && !hasMediaFiles(it.dir) }.each { clean(it) }
 
 // delete empty folders but exclude given args
-args.getFolders().sort().reverse().each { if (it.listFiles().length == 0) { if (deleteRootFolder || !args.contains(it)) clean(it) } }
+args.getFolders().sort().reverse().each { if (it.isDirectory() && it.listFiles()?.length == 0) { if (deleteRootFolder || !args.contains(it)) clean(it) } }
