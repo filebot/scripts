@@ -23,7 +23,7 @@ def unsorted  = tryQuietly{ unsorted.toBoolean() }
 def music     = tryQuietly{ music.toBoolean() }
 def subtitles = tryQuietly{ subtitles.split(/[ ,|]+/) as List }
 def artwork   = tryQuietly{ artwork.toBoolean() && !'TEST'.equalsIgnoreCase(_args.action) }
-def backdrops = tryQuietly{ backdrops.toBoolean() }
+def extras    = tryQuietly{ extras.toBoolean() }
 def clean     = tryQuietly{ clean.toBoolean() }
 def exec      = tryQuietly{ exec.toString() }
 
@@ -59,11 +59,11 @@ def format = [
 
 // force movie/series/anime logic
 def forceMovie = { f ->
-	label =~ /^(?i:Movie|Couch.Potato)/ || f.dir.listPath().any{ it.name ==~ /(?i:Movies)/ }  || f.path =~ /(?<=tt)\\d{7}/ || tryQuietly{ f.metadata?.object?.class.name =~ /Movie/ }
+	label =~ /^(?i:Movie|Couch.Potato)/ || f.dir.listPath().any{ it.name ==~ /(?i:Movies)/ }  || f.path =~ /(?<=tt)\\d{7}/
 }
 
 def forceSeries = { f ->
-	label =~ /^(?i:TV|Kids.Shows)/ || f.dir.listPath().any{ it.name ==~ /(?i:TV.Shows)/ } || parseEpisodeNumber(f.path) || parseDate(f.path) || f.path =~ /(?i:Season)\D?[0-9]{1,2}\D/ || tryQuietly{ f.metadata?.object?.class.name =~ /Episode/ }
+	label =~ /^(?i:TV|Kids.Shows)/ || f.dir.listPath().any{ it.name ==~ /(?i:TV.Shows)/ } || parseEpisodeNumber(f.path) || parseDate(f.path) || f.path =~ /(?i:Season)\D?[0-9]{1,2}\D/
 }
 
 def forceAnime = { f ->
@@ -75,7 +75,7 @@ def forceAudio = { f ->
 }
 
 def forceIgnore = { f ->
-	label =~ /^(?i:ebook|other|ignore)/ || f.path.findMatch(ignore) != null
+	label =~ /^(?i:games|ebook|other|ignore|seeding)/ || f.path.findMatch(ignore) != null
 }
 
 
@@ -115,7 +115,7 @@ def relativeInputPath = { f ->
 	if (r != null) {
 		return f.path.substring(r.path.length() + 1)
 	}
-	return f.path
+	return f.name
 }
 
 
@@ -287,7 +287,7 @@ groups.each{ group, files ->
 				if (movieFile != null) {
 					def movie = detectMovie(movieFile, false)
 					log.fine "Fetching movie artwork for [$movie] to [$dir]"
-					fetchMovieArtworkAndNfo(dir, movie, movieFile, backdrops)
+					fetchMovieArtworkAndNfo(dir, movie, movieFile, extras)
 				}
 			}
 		}
@@ -308,7 +308,6 @@ groups.each{ group, files ->
 
 // ---------- POST PROCESSING ---------- //
 
-
 // deal with remaining files that cannot be sorted automatically
 if (unsorted) {
 	def unsortedFiles = (input - getRenameLog().keySet())
@@ -328,6 +327,134 @@ if (exec) {
 		execute(command)
 	}
 }
+
+// update excludes with input of this run
+if (excludeList) {	
+	def excludePathSet = excludeList.exists() ? excludeList.text.split('\n') as HashSet : []
+	excludePathSet += input
+	excludePathSet.join('\n').saveAs(excludeList)
+}
+
+
+// ---------- REPORTING ---------- //
+
+
+if (getRenameLog().size() > 0) {
+	
+	// messages used for xbmc / plex / pushover notifications
+	def getNotificationTitle = { "FileBot finished processing ${getRenameLog().values().findAll{ !it.isSubtitle() }.size()} files" }.memoize()
+	def getNotificationMessage = { prefix = '• ', postfix = '\n' -> tryQuietly{ ut_title } ?: (input.any{ !it.isSubtitle() } ? input.findAll{ !it.isSubtitle() } : input).collect{ relativeInputPath(it) as File }*.getRoot()*.getNameWithoutExtension().unique().sort{ it.toLowerCase() }.collect{ prefix + it }.join(postfix).trim() }.memoize()
+	
+	// make XMBC scan for new content and display notification message
+	if (xbmc) {
+		xbmc.each{ host ->
+			log.info "Notify XBMC: $host"
+			tryLogCatch{
+				showNotification(host, 9090, getNotificationTitle(), getNotificationMessage(), 'http://www.filebot.net/images/icon.png')
+				scanVideoLibrary(host, 9090)
+			}
+		}
+	}
+	
+	// make Plex scan for new content
+	if (plex) {
+		plex.each{
+			log.info "Notify Plex: $it"
+			refreshPlexLibrary(it)
+		}
+	}
+	
+	// mark episodes as 'acquired'
+	if (myepisodes) {
+		log.info 'Update MyEpisodes'
+		executeScript('update-mes', [login:myepisodes.join(':'), addshows:true], getRenameLog().values())
+	}
+	
+	if (pushover) {
+		log.info 'Sending Pushover notification'
+		Pushover(pushover).send(getNotificationTitle(), getNotificationMessage())
+	}
+	
+	// messages used for email / pushbullet reports
+	def getReportSubject = { getNotificationMessage('', ', ') }
+	def getReportTitle = { '[FileBot] ' + getReportSubject() }
+	def getReportMessage = { 
+		def renameLog = getRenameLog()
+		'''<!DOCTYPE html>\n''' + XML {
+			html {
+				head {
+					meta(charset:'UTF-8')
+					style('''
+						p{font-family:Arial,Helvetica,sans-serif}
+						p b{color:#07a}
+						hr{border-style:dashed;border-width:1px 0 0 0;border-color:lightgray}
+						small{color:#d3d3d3;font-size:xx-small;font-weight:normal;font-family:Arial,Helvetica,sans-serif}
+						table a:link{color:#666;font-weight:bold;text-decoration:none}
+						table a:visited{color:#999;font-weight:bold;text-decoration:none}
+						table a:active,table a:hover{color:#bd5a35;text-decoration:underline}
+						table{font-family:Arial,Helvetica,sans-serif;color:#666;background:#eaebec;margin:15px;border:#ccc 1px solid;border-radius:3px;box-shadow:0 1px 2px #d1d1d1}
+						table th{padding:15px;border-top:1px solid #fafafa;border-bottom:1px solid #e0e0e0;background:#ededed}
+						table th{text-align:center;padding-left:20px}
+						table tr:first-child th:first-child{border-top-left-radius:3px}
+						table tr:first-child th:last-child{border-top-right-radius:3px}
+						table tr{text-align:left;padding-left:20px}
+						table td:first-child{text-align:left;padding-left:20px;border-left:0}
+						table td{padding:15px;border-top:1px solid #fff;border-bottom:1px solid #e0e0e0;border-left:1px solid #e0e0e0;background:#fafafa;white-space:nowrap}
+						table tr.even td{background:#f6f6f6}
+						table tr:last-child td{border-bottom:0}
+						table tr:last-child td:first-child{border-bottom-left-radius:3px}
+						table tr:last-child td:last-child{border-bottom-right-radius:3px}
+						table tr:hover td{background:#f2f2f2}
+					''')
+					title(getReportTitle())
+				}
+				body {
+					p {
+						mkp.yield("FileBot finished processing ")
+						b(getReportSubject())
+						mkp.yield(" (${renameLog.size()} files).")
+					}
+					hr(); table {
+						tr { th('Original Name'); th('New Name'); th('New Location') }
+						renameLog.each{ from, to ->
+							tr { [from.name, to.name, to.parent].each{ cell -> td(cell) } }
+						}
+					}
+					hr(); small("// Generated by ${Settings.getApplicationIdentifier()} on ${InetAddress.localHost.hostName} at ${now.dateTimeString}")
+				}
+			}
+		}
+	}
+	
+	// store processing report
+	if (storeReport) {
+		def reportFolder = new File(Settings.getApplicationFolder(), 'reports').getCanonicalFile()
+		def reportFile = getReportMessage().saveAs(new File(reportFolder, "AMC ${now.format('''[yyyy-MM-dd HH'h'mm'm']''')} ${getReportSubject().take(50).trim()}.html".validateFileName()))
+		log.finest("Saving report as ${reportFile}")
+	}
+	
+	// send pushbullet report
+	if (pushbullet) {
+		log.info 'Sending PushBullet report'
+		PushBullet(pushbullet).sendHtml(getReportTitle(), getReportMessage())
+	}
+	
+	// send email report
+	if (gmail) {
+		sendGmail(
+			subject: getReportTitle(),
+			message: getReportMessage(), 
+			messagemimetype: 'text/html',
+			to: tryQuietly{ mailto } ?: gmail[0] + '@gmail.com', // mail to self by default
+			user: gmail[0], password: gmail[1]
+		)
+	}
+	
+}
+
+
+// ---------- CLEAN UP ---------- //
+
 
 // clean up temporary files that may be left behind after extraction
 if (deleteAfterExtract) {
@@ -369,125 +496,4 @@ if (clean) {
 }
 
 
-// update excludes with input of this run
-if (excludeList) {	
-	def excludePathSet = excludeList.exists() ? excludeList.text.split('\n') as HashSet : []
-	excludePathSet += input
-	excludePathSet.join('\n').saveAs(excludeList)
-}
-
-
-// ---------- REPORTING ---------- //
-
-
 if (getRenameLog().size() == 0) die("Finished without processing any files")
-
-
-// messages used for xbmc / plex / pushover notifications
-def getNotificationTitle = { "FileBot finished processing ${getRenameLog().values().findAll{ !it.isSubtitle() }.size()} files" }.memoize()
-def getNotificationMessage = { prefix = '• ', postfix = '\n' -> tryQuietly{ ut_title } ?: (input.any{ !it.isSubtitle() } ? input.findAll{ !it.isSubtitle() } : input).collect{ relativeInputPath(it) as File }*.getRoot()*.getNameWithoutExtension().unique().sort{ it.toLowerCase() }.collect{ prefix + it }.join(postfix).trim() }.memoize()
-
-// make XMBC scan for new content and display notification message
-if (xbmc) {
-	xbmc.each{ host ->
-		log.info "Notify XBMC: $host"
-		tryLogCatch{
-			showNotification(host, 9090, getNotificationTitle(), getNotificationMessage(), 'http://www.filebot.net/images/icon.png')
-			scanVideoLibrary(host, 9090)
-		}
-	}
-}
-
-// make Plex scan for new content
-if (plex) {
-	plex.each{
-		log.info "Notify Plex: $it"
-		refreshPlexLibrary(it)
-	}
-}
-
-// mark episodes as 'acquired'
-if (myepisodes) {
-	log.info 'Update MyEpisodes'
-	executeScript('update-mes', [login:myepisodes.join(':'), addshows:true], getRenameLog().values())
-}
-
-if (pushover) {
-	log.info 'Sending Pushover notification'
-	Pushover(pushover).send(getNotificationTitle(), getNotificationMessage())
-}
-
-// messages used for email / pushbullet reports
-def getReportSubject = { getNotificationMessage('', ', ') }
-def getReportTitle = { '[FileBot] ' + getReportSubject() }
-def getReportMessage = { 
-	def renameLog = getRenameLog()
-	'''<!DOCTYPE html>\n''' + XML {
-		html {
-			head {
-				meta(charset:'UTF-8')
-				style('''
-					p{font-family:Arial,Helvetica,sans-serif}
-					p b{color:#07a}
-					hr{border-style:dashed;border-width:1px 0 0 0;border-color:lightgray}
-					small{color:#d3d3d3;font-size:xx-small;font-weight:normal;font-family:Arial,Helvetica,sans-serif}
-					table a:link{color:#666;font-weight:bold;text-decoration:none}
-					table a:visited{color:#999;font-weight:bold;text-decoration:none}
-					table a:active,table a:hover{color:#bd5a35;text-decoration:underline}
-					table{font-family:Arial,Helvetica,sans-serif;color:#666;background:#eaebec;margin:15px;border:#ccc 1px solid;border-radius:3px;box-shadow:0 1px 2px #d1d1d1}
-					table th{padding:15px;border-top:1px solid #fafafa;border-bottom:1px solid #e0e0e0;background:#ededed}
-					table th{text-align:center;padding-left:20px}
-					table tr:first-child th:first-child{border-top-left-radius:3px}
-					table tr:first-child th:last-child{border-top-right-radius:3px}
-					table tr{text-align:left;padding-left:20px}
-					table td:first-child{text-align:left;padding-left:20px;border-left:0}
-					table td{padding:15px;border-top:1px solid #fff;border-bottom:1px solid #e0e0e0;border-left:1px solid #e0e0e0;background:#fafafa;white-space:nowrap}
-					table tr.even td{background:#f6f6f6}
-					table tr:last-child td{border-bottom:0}
-					table tr:last-child td:first-child{border-bottom-left-radius:3px}
-					table tr:last-child td:last-child{border-bottom-right-radius:3px}
-					table tr:hover td{background:#f2f2f2}
-				''')
-				title(getReportTitle())
-			}
-			body {
-				p {
-					mkp.yield("FileBot finished processing ")
-					b(getReportSubject())
-					mkp.yield(" (${renameLog.size()} files).")
-				}
-				hr(); table {
-					tr { th('Original Name'); th('New Name'); th('New Location') }
-					renameLog.each{ from, to ->
-						tr { [from.name, to.name, to.parent].each{ cell -> td(cell) } }
-					}
-				}
-				hr(); small("// Generated by ${Settings.getApplicationIdentifier()} on ${InetAddress.localHost.hostName} at ${now.dateTimeString}")
-			}
-		}
-	}
-}
-
-// store processing report
-if (storeReport) {
-	def reportFolder = new File(Settings.getApplicationFolder(), 'reports').getCanonicalFile()
-	def reportFile = getReportMessage().saveAs(new File(reportFolder, "AMC ${now.format('''[yyyy-MM-dd HH'h'mm'm']''')} ${getReportSubject().take(50).trim()}.html".validateFileName()))
-	log.finest("Saving report as ${reportFile}")
-}
-
-// send pushbullet report
-if (pushbullet) {
-	log.info 'Sending PushBullet report'
-	PushBullet(pushbullet).sendHtml(getReportTitle(), getReportMessage())
-}
-
-// send email report
-if (gmail) {
-	sendGmail(
-		subject: getReportTitle(),
-		message: getReportMessage(), 
-		messagemimetype: 'text/html',
-		to: tryQuietly{ mailto } ?: gmail[0] + '@gmail.com', // mail to self by default
-		user: gmail[0], password: gmail[1]
-	)
-}

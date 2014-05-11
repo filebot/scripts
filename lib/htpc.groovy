@@ -256,7 +256,7 @@ def fetchMovieNfo(outputFile, movieInfo, movieFile, override) {
 	.saveAs(outputFile)
 }
 
-def fetchMovieArtworkAndNfo(movieDir, movie, movieFile = null, fetchAll = false, override = false, locale = _args.locale) {
+def fetchMovieArtworkAndNfo(movieDir, movie, movieFile = null, extras = false, override = false, locale = _args.locale) {
 	tryLogCatch {
 		def movieInfo = TheMovieDB.getMovieInfo(movie, locale, true)
 
@@ -264,10 +264,12 @@ def fetchMovieArtworkAndNfo(movieDir, movie, movieFile = null, fetchAll = false,
 		fetchMovieNfo(movieDir.resolve('movie.nfo'), movieInfo, movieFile, override)
 
 		// generate url files
-		[[db:'imdb', id:movieInfo.imdbId, url:'http://www.imdb.com/title/tt' + (movieInfo.imdbId ?: 0).pad(7)], [db:'tmdb', id:movieInfo.id, url:"http://www.themoviedb.org/movie/${movieInfo.id}"]].each{
-			if (it.id > 0) {
-				def content = "[InternetShortcut]\nURL=${it.url}\n"
-				content.saveAs(movieDir.resolve("${it.db}.url"))
+		if (extras) {
+			[[db:'imdb', id:movieInfo.imdbId, url:'http://www.imdb.com/title/tt' + (movieInfo.imdbId ?: 0).pad(7)], [db:'tmdb', id:movieInfo.id, url:"http://www.themoviedb.org/movie/${movieInfo.id}"]].each{
+				if (it.id > 0) {
+					def content = "[InternetShortcut]\nURL=${it.url}\n"
+					content.saveAs(movieDir.resolve("${it.db}.url"))
+				}
 			}
 		}
 
@@ -279,7 +281,7 @@ def fetchMovieArtworkAndNfo(movieDir, movie, movieFile = null, fetchAll = false,
 		fetchMovieFanart(movieDir.resolve('logo.png'), movieInfo, 'movielogo', null, override, locale)
 		['bluray', 'dvd', null].findResult { diskType -> fetchMovieFanart(movieDir.resolve('disc.png'), movieInfo, 'moviedisc', diskType, override, locale) }
 
-		if (fetchAll) {
+		if (extras) {
 			fetchAllMovieArtwork(movieDir.resolve('backdrops'), movieInfo, 'backdrops', override, locale)
 		}
 
