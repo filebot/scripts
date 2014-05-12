@@ -85,6 +85,13 @@ if (pushover || pushbullet ) { include('lib/web') }
 if (gmail) { include('lib/ant') }
 
 
+// define and load exclude list (e.g. to make sure files are only processed once)
+def excludePathSet = [] as TreeSet
+if (excludeList?.exists()) {
+	excludePathSet += excludeList.text.split('\n') as List
+}
+
+
 // specify how to resolve input folders, e.g. grab files from all folders except disk folders
 def resolveInput(f) {
 	if (f.isDirectory() && !f.isDisk())
@@ -110,17 +117,11 @@ if (args.empty) {
 // sanitize input
 roots = roots.findAll{ it?.exists() }.collect{ it.canonicalFile }.unique() // roots could be folders as well as files
 
-def relativeInputPath = { f ->
-	def r = roots.find{ r -> f.path.startsWith(r.path) && r.isDirectory() && f.isFile() }
-	if (r != null) {
-		return f.path.substring(r.path.length() + 1)
-	}
-	return f.name
-}
-
-
 // flatten nested file structure
 input = roots.flatten{ f -> resolveInput(f) }
+
+// ignore archives that are on the exclude path list
+input = input.findAll{ f -> !excludePathSet.contains(f.path) }
 
 // extract archives (zip, rar, etc) that contain at least one video file
 def extractedArchives = []
@@ -140,6 +141,27 @@ input = input.flatten{ f ->
 	return f
 }
 
+
+// ignore files that are on the exclude path list
+input = input.findAll{ f -> !excludePathSet.contains(f.path) }
+
+// update exclude list with all input that will be processed during this run
+if (excludeList) {
+	excludePathSet += [extractedArchives, input].flatten().path
+	excludePathSet.join('\n').saveAs(excludeList)
+}
+
+
+// helper function to work with the structure relative path rather than the whole absolute path
+def relativeInputPath = { f ->
+	def r = roots.find{ r -> f.path.startsWith(r.path) && r.isDirectory() && f.isFile() }
+	if (r != null) {
+		return f.path.substring(r.path.length() + 1)
+	}
+	return f.name
+}
+
+
 // keep original input around so we can print excluded files later
 def originalInputSet = input as LinkedHashSet
 def videoFolderSet = input.findAll{ it.isVideo() }.findResults{ it.parentFile } as LinkedHashSet
@@ -156,12 +178,6 @@ input = input.findAll{ f -> !(f.isVideo() && ((minFileSize > 0 && f.length() < m
 // ignore subtitles files that are not stored in the same folder as the movie
 input = input.findAll{ f -> !(f.isSubtitle() && !videoFolderSet.contains(f.parentFile)) }
 
-// check and update exclude list (e.g. to make sure files are only processed once)
-if (excludeList) {
-	// check excludes from previous runs
-	def excludePathSet = excludeList.exists() ? excludeList.text.split('\n') as HashSet : []
-	input = input.findAll{ f -> !excludePathSet.contains(f.path) }
-}
 
 // print exclude and input sets for logging
 input.each{ f -> log.finer("Input: $f") }
@@ -326,13 +342,6 @@ if (exec) {
 		log.finest("Execute: $command")
 		execute(command)
 	}
-}
-
-// update excludes with input of this run
-if (excludeList) {	
-	def excludePathSet = excludeList.exists() ? excludeList.text.split('\n') as HashSet : []
-	excludePathSet += input
-	excludePathSet.join('\n').saveAs(excludeList)
 }
 
 
