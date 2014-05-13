@@ -170,7 +170,7 @@ def videoFolderSet = input.findAll{ it.isVideo() }.findResults{ it.parentFile } 
 input = input.findAll{ f -> (f.isVideo() && !tryQuietly{ f.hasExtension('iso') && !f.isDisk() }) || f.isSubtitle() || (f.isDirectory() && f.isDisk()) || (music && f.isAudio()) }
 
 // ignore clutter files
-input = input.findAll{ f -> !(relativeInputPath(f) =~ /(?<=\b|_)(?i:sample|trailer|extras|music.video|scrapbook|behind.the.scenes|extended.scenes|deleted.scenes|s\d{2}c\d{2}|mini.series|NCED|NCOP|(OP|ED)\p{Digit}\p{Alpha})(?=\b|_)/) }
+input = input.findAll{ f -> !(relativeInputPath(f) =~ /(?<=\b|_)(?i:sample|trailer|extras|music.video|scrapbook|behind.the.scenes|extended.scenes|deleted.scenes|s\d{2}c\d{2}|mini.series|NCED|NCOP|(OP|ED)\p{Digit}\p{Alpha}|Formula.1.\d{4})(?=\b|_)/) }
 
 // ignore video files that don't conform with the file-size and video-length limits
 input = input.findAll{ f -> !(f.isVideo() && ((minFileSize > 0 && f.length() < minFileSize) || (minLengthMS > 0 && tryQuietly{ getMediaInfo(file:f, format:'{duration}').toLong() < minLengthMS }))) }
