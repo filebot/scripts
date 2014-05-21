@@ -1,22 +1,14 @@
 // filebot -script "fn:amc" --output "X:/media" --action copy --conflict override --def subtitles=en music=y artwork=y "ut_dir=%D" "ut_file=%F" "ut_kind=%K" "ut_title=%N" "ut_label=%L" "ut_state=%S"
 
-def input = []
-def failOnError = _args.conflict == 'fail'
 
-// print input parameters
-_def.each{ n, v -> log.finer('Parameter: ' + [n, n =~ /pushover|pushbullet|gmail|mailto|myepisodes/ ? '*****' : v].join(' = ')) }
+// log input parameters
+_def.each{ n, v -> log.finer('Parameter: ' + [n, n =~ /pushover|pushbullet|mail|myepisodes/ ? '*****' : v].join(' = ')) }
 args.each{ log.finer("Argument: $it") }
-args.findAll{ !it.exists() }.each{ fail("File not found: $it") }
 
-// check user-defined pre-condition
-if (tryQuietly{ !(ut_state ==~ ut_state_allow) }) {
-	fail("Invalid state: ut_state = $ut_state (expected $ut_state_allow)")
-}
 
-// check ut mode vs standalone mode
-if ((args.size() > 0 && (tryQuietly{ ut_dir }?.size() > 0 || tryQuietly{ ut_file }?.size() > 0)) || (args.size() == 0 && (tryQuietly{ ut_dir } == null && tryQuietly{ ut_file } == null))) {
-	fail("Conflicting arguments: pass in either file arguments or ut_dir/ut_file parameters but not both")
-}
+// initialize variables
+def input = []
+def failOnError = (_args.conflict == 'fail')
 
 // enable/disable features as specified via --def parameters
 def unsorted  = tryQuietly{ unsorted.toBoolean() }
@@ -37,10 +29,9 @@ def skipExtract = tryQuietly{ skipExtract.toBoolean() }
 def deleteAfterExtract = tryQuietly{ deleteAfterExtract.toBoolean() }
 def excludeList = tryQuietly{ (excludeList as File).isAbsolute() ? (excludeList as File) : new File(_args.output, excludeList) }
 def myepisodes = tryQuietly{ myepisodes.split(':', 2) }
-// Note: These aren't 'defed' so they are visible in functions
-gmail = tryQuietly{ gmail.split(':', 2) }
-mailhost = tryQuietly{ mailhost.split(':', 4) }
-reportError = tryQuietly{ reportError.toBoolean() }
+def gmail = tryQuietly{ gmail.split(':', 2) }
+def mail = tryQuietly{ mail.split(':', 3) }
+def reportError = tryQuietly{ reportError.toBoolean() }
 def pushover = tryQuietly{ pushover.toString() }
 def pushbullet = tryQuietly{ pushbullet.toString() }
 
@@ -49,7 +40,6 @@ def label = tryQuietly{ ut_label } ?: null
 def ignore = tryQuietly{ ignore } ?: null
 def minFileSize = tryQuietly{ minFileSize.toLong() }; if (minFileSize == null) { minFileSize = 50 * 1000L * 1000L }
 def minLengthMS = tryQuietly{ minLengthMS.toLong() }; if (minLengthMS == null) { minLengthMS = 10 * 60 * 1000L }
-
 
 // series/anime/movie format expressions
 def format = [
@@ -82,10 +72,61 @@ def forceIgnore = { f ->
 }
 
 
+
 // include artwork/nfo, pushover/pushbullet and ant utilities as required
 if (artwork || xbmc || plex) { include('lib/htpc') }
 if (pushover || pushbullet ) { include('lib/web') }
-if (gmail || mailhost) { include('lib/ant') }
+if (gmail || mail) { include('lib/ant') }
+
+
+
+// error reporting functions
+def sendEmailReport = { title, message, messagetype ->
+	if (gmail) {
+		sendGmail(
+			subject: title,
+			message: message,
+			messagemimetype: messagetype,
+			to: tryQuietly{ mailto } ?: gmail[0] + '@gmail.com', // mail to self by default
+			user: gmail[0],
+			password: gmail[1]
+		)
+	}
+	if (mail) {
+		sendmail(
+			mailhost: mail[0],
+			mailport: mail[1],
+			from: mail[2],
+			to: mailto,
+			subject: title,
+			message: message,
+			messagemimetype: messagetype
+		)
+	}
+}
+
+def fail = { message ->
+	if (reportError) {
+		sendEmailReport('[FileBot] Failure', message, 'text/plain')
+	}
+	die(message)
+}
+
+
+
+// sanity checks
+args.findAll{ !it.exists() }.each{ fail("File not found: $it") }
+
+// check user-defined pre-condition
+if (tryQuietly{ !(ut_state ==~ ut_state_allow) }) {
+	fail("Invalid state: ut_state = $ut_state (expected $ut_state_allow)")
+}
+
+// check ut mode vs standalone mode
+if ((args.size() > 0 && (tryQuietly{ ut_dir }?.size() > 0 || tryQuietly{ ut_file }?.size() > 0)) || (args.size() == 0 && (tryQuietly{ ut_dir } == null && tryQuietly{ ut_file } == null))) {
+	fail("Conflicting arguments: pass in either file arguments or ut_dir/ut_file parameters but not both")
+}
+
 
 
 // define and load exclude list (e.g. to make sure files are only processed once)
@@ -451,7 +492,10 @@ if (getRenameLog().size() > 0) {
 		PushBullet(pushbullet).sendHtml(getReportTitle(), getReportMessage())
 	}
 	
-  sendEmailReport(getReportTitle(), getReportMessage(), 'text/html')
+	// send email report
+	if (gmail || mail){
+		sendEmailReport(getReportTitle(), getReportMessage(), 'text/html')
+	}
 }
 
 
@@ -499,39 +543,3 @@ if (clean) {
 
 
 if (getRenameLog().size() == 0) fail("Finished without processing any files")
-
-
-
-/*
- * Helper Methods
- */
-
-def fail(message) {
-  if (reportError) {
-    sendEmailReport("Filebot Error", message, "text/plain")
-  }
-  die(message)
-}
-
-def sendEmailReport(title, message, messagetype) {
-	if (gmail) {
-		sendGmail(
-			subject: title,
-			message: message,
-			messagemimetype: messagetype,
-			to: tryQuietly{ mailto } ?: gmail[0] + '@gmail.com', // mail to self by default
-			user: gmail[0], password: gmail[1]
-		)
-	}
-	if (mailhost) {
-		sendmail(
-			mailhost: mailhost[0],
-			mailport: mailhost[1],
-			to: mailhost[2],
-			from: mailhost[3],
-			subject: title,
-			message: message,
-			messagemimetype: messagetype
-		)
-	}
-}
