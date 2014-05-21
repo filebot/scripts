@@ -31,9 +31,9 @@ def excludeList = tryQuietly{ (excludeList as File).isAbsolute() ? (excludeList 
 def myepisodes = tryQuietly{ myepisodes.split(':', 2) }
 def gmail = tryQuietly{ gmail.split(':', 2) }
 def mail = tryQuietly{ mail.split(':', 3) }
-def reportError = tryQuietly{ reportError.toBoolean() }
 def pushover = tryQuietly{ pushover.toString() }
 def pushbullet = tryQuietly{ pushbullet.toString() }
+def reportError = tryQuietly{ reportError.toBoolean() }
 
 // user-defined filters
 def label = tryQuietly{ ut_label } ?: null
