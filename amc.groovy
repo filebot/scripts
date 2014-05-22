@@ -1,22 +1,14 @@
 // filebot -script "fn:amc" --output "X:/media" --action copy --conflict override --def subtitles=en music=y artwork=y "ut_dir=%D" "ut_file=%F" "ut_kind=%K" "ut_title=%N" "ut_label=%L" "ut_state=%S"
 
-def input = []
-def failOnError = _args.conflict == 'fail'
 
-// print input parameters
-_def.each{ n, v -> log.finer('Parameter: ' + [n, n =~ /pushover|pushbullet|gmail|mailto|myepisodes/ ? '*****' : v].join(' = ')) }
+// log input parameters
+_def.each{ n, v -> log.finer('Parameter: ' + [n, n =~ /pushover|pushbullet|mail|myepisodes/ ? '*****' : v].join(' = ')) }
 args.each{ log.finer("Argument: $it") }
-args.findAll{ !it.exists() }.each{ die("File not found: $it") }
 
-// check user-defined pre-condition
-if (tryQuietly{ !(ut_state ==~ ut_state_allow) }) {
-	die("Invalid state: ut_state = $ut_state (expected $ut_state_allow)")
-}
 
-// check ut mode vs standalone mode
-if ((args.size() > 0 && (tryQuietly{ ut_dir }?.size() > 0 || tryQuietly{ ut_file }?.size() > 0)) || (args.size() == 0 && (tryQuietly{ ut_dir } == null && tryQuietly{ ut_file } == null))) {
-	die("Conflicting arguments: pass in either file arguments or ut_dir/ut_file parameters but not both")
-}
+// initialize variables
+def input = []
+def failOnError = (_args.conflict == 'fail')
 
 // enable/disable features as specified via --def parameters
 def unsorted  = tryQuietly{ unsorted.toBoolean() }
@@ -38,15 +30,16 @@ def deleteAfterExtract = tryQuietly{ deleteAfterExtract.toBoolean() }
 def excludeList = tryQuietly{ (excludeList as File).isAbsolute() ? (excludeList as File) : new File(_args.output, excludeList) }
 def myepisodes = tryQuietly{ myepisodes.split(':', 2) }
 def gmail = tryQuietly{ gmail.split(':', 2) }
+def mail = tryQuietly{ mail.split(':', 3) }
 def pushover = tryQuietly{ pushover.toString() }
 def pushbullet = tryQuietly{ pushbullet.toString() }
+def reportError = tryQuietly{ reportError.toBoolean() }
 
 // user-defined filters
 def label = tryQuietly{ ut_label } ?: null
 def ignore = tryQuietly{ ignore } ?: null
 def minFileSize = tryQuietly{ minFileSize.toLong() }; if (minFileSize == null) { minFileSize = 50 * 1000L * 1000L }
 def minLengthMS = tryQuietly{ minLengthMS.toLong() }; if (minLengthMS == null) { minLengthMS = 10 * 60 * 1000L }
-
 
 // series/anime/movie format expressions
 def format = [
@@ -79,10 +72,61 @@ def forceIgnore = { f ->
 }
 
 
+
 // include artwork/nfo, pushover/pushbullet and ant utilities as required
 if (artwork || xbmc || plex) { include('lib/htpc') }
 if (pushover || pushbullet ) { include('lib/web') }
-if (gmail) { include('lib/ant') }
+if (gmail || mail) { include('lib/ant') }
+
+
+
+// error reporting functions
+def sendEmailReport = { title, message, messagetype ->
+	if (gmail) {
+		sendGmail(
+			subject: title,
+			message: message,
+			messagemimetype: messagetype,
+			to: tryQuietly{ mailto } ?: gmail[0] + '@gmail.com', // mail to self by default
+			user: gmail[0],
+			password: gmail[1]
+		)
+	}
+	if (mail) {
+		sendmail(
+			mailhost: mail[0],
+			mailport: mail[1],
+			from: mail[2],
+			to: mailto,
+			subject: title,
+			message: message,
+			messagemimetype: messagetype
+		)
+	}
+}
+
+def fail = { message ->
+	if (reportError) {
+		sendEmailReport('[FileBot] Failure', message, 'text/plain')
+	}
+	die(message)
+}
+
+
+
+// sanity checks
+args.findAll{ !it.exists() }.each{ fail("File not found: $it") }
+
+// check user-defined pre-condition
+if (tryQuietly{ !(ut_state ==~ ut_state_allow) }) {
+	fail("Invalid state: ut_state = $ut_state (expected $ut_state_allow)")
+}
+
+// check ut mode vs standalone mode
+if ((args.size() > 0 && (tryQuietly{ ut_dir }?.size() > 0 || tryQuietly{ ut_file }?.size() > 0)) || (args.size() == 0 && (tryQuietly{ ut_dir } == null && tryQuietly{ ut_file } == null))) {
+	fail("Conflicting arguments: pass in either file arguments or ut_dir/ut_file parameters but not both")
+}
+
 
 
 // define and load exclude list (e.g. to make sure files are only processed once)
@@ -241,7 +285,7 @@ def groups = input.groupBy{ f ->
 	// CHECK CONFLICT
 	if (((mov && tvs) || (!mov && !tvs))) {
 		if (failOnError) {
-			die("Media detection failed")
+			fail("Media detection failed")
 		} else {
 			log.fine("Unable to differentiate: [$f.name] => [$tvs] VS [$mov]")
 			return [tvs: null, mov: null, anime: null]
@@ -290,7 +334,7 @@ groups.each{ group, files ->
 			}
 		}
 		if (dest == null && failOnError) {
-			die("Failed to rename series: $config.name")
+			fail("Failed to rename series: $config.name")
 		}
 	}
 	
@@ -308,7 +352,7 @@ groups.each{ group, files ->
 			}
 		}
 		if (dest == null && failOnError) {
-			die("Failed to rename movie: $group.mov")
+			fail("Failed to rename movie: $group.mov")
 		}
 	}
 	
@@ -316,7 +360,7 @@ groups.each{ group, files ->
 	else if (group.music) {
 		def dest = rename(file:files, format:format.music, db:'AcoustID')
 		if (dest == null && failOnError) {
-			die("Failed to rename music: $group.music")
+			fail("Failed to rename music: $group.music")
 		}
 	}
 }
@@ -449,16 +493,9 @@ if (getRenameLog().size() > 0) {
 	}
 	
 	// send email report
-	if (gmail) {
-		sendGmail(
-			subject: getReportTitle(),
-			message: getReportMessage(), 
-			messagemimetype: 'text/html',
-			to: tryQuietly{ mailto } ?: gmail[0] + '@gmail.com', // mail to self by default
-			user: gmail[0], password: gmail[1]
-		)
+	if (gmail || mail){
+		sendEmailReport(getReportTitle(), getReportMessage(), 'text/html')
 	}
-	
 }
 
 
@@ -505,4 +542,4 @@ if (clean) {
 }
 
 
-if (getRenameLog().size() == 0) die("Finished without processing any files")
+if (getRenameLog().size() == 0) fail("Finished without processing any files")
