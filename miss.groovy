@@ -1,4 +1,4 @@
-// filebot -script fn:miss /path/to/media
+// filebot -script fn:miss /path/to/media --log off
 
 def episodes = []
 def shows = []
