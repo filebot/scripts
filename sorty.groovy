@@ -1,7 +1,7 @@
 // PERSONALIZED SETTINGS
-def episodeDir    = '''/in/TV'''
+def episodeDir    = '''/in/TV''' as File
 def episodeFormat = '''/out/TV/{n}/{"Season ${s.pad(2)}"}/{n} - {s00e00} - {t}'''
-def movieDir      = '''/in/Movies'''
+def movieDir      = '''/in/Movies''' as File
 def movieFormat   = '''/out/Movies/{n} ({y})/{n} ({y}){" CD$pi"}'''
 
 // XBMC ON LOCAL MACHINE 
