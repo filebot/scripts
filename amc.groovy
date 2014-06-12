@@ -323,12 +323,13 @@ groups.each{ group, files ->
 			dest.mapByFolder().each{ dir, fs ->
 				def hasSeasonFolder = (config.format =~ /(?i)Season/)
 				def sxe = fs.findResult{ eps -> parseEpisodeNumber(eps) }
-				def options = TheTVDB.search(detectSeriesName(fs, true, false), _args.locale)
+				def seriesName = detectSeriesName(fs, true, false)
+				def options = TheTVDB.search(seriesName, _args.locale)
 				if (options.isEmpty()) {
 					log.warning "TV Series not found: $config.name"
 					return
 				}
-				def series = options.sortBySimilarity(config.name, { s -> s.name }).get(0)
+				def series = options.sortBySimilarity(seriesName, { s -> s.name }).get(0)
 				log.fine "Fetching series artwork for [$series] to [$dir]"
 				fetchSeriesArtworkAndNfo(hasSeasonFolder ? dir.dir : dir, dir, series, sxe && sxe.season > 0 ? sxe.season : 1)
 			}
