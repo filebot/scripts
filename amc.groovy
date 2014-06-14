@@ -13,7 +13,7 @@ def failOnError = (_args.conflict == 'fail')
 // enable/disable features as specified via --def parameters
 def unsorted  = tryQuietly{ unsorted.toBoolean() }
 def music     = tryQuietly{ music.toBoolean() }
-def subtitles = tryQuietly{ subtitles.split(/[ ,|]+/) as List }
+def subtitles = tryQuietly{ subtitles.split(/\W+/) as List }
 def artwork   = tryQuietly{ artwork.toBoolean() && !'TEST'.equalsIgnoreCase(_args.action) }
 def extras    = tryQuietly{ extras.toBoolean() }
 def clean     = tryQuietly{ clean.toBoolean() }
@@ -306,7 +306,7 @@ groups.each{ group, files ->
 	// fetch subtitles (but not for anime)
 	if (group.anime == null && subtitles != null && files.findAll{ it.isVideo() }.size() > 0) {
 		subtitles.each{ languageCode ->
-			def subtitleFiles = getMissingSubtitles(file:files, lang:languageCode, strict:true, output:'srt', encoding:'UTF-8', format:'MATCH_VIDEO_ADD_LANGUAGE_TAG') ?: []
+			def subtitleFiles = getMissingSubtitles(file:files, lang:languageCode, strict:true, output:'srt', encoding:'UTF-8', db: 'OpenSubtitles', format:'MATCH_VIDEO_ADD_LANGUAGE_TAG') ?: []
 			files += subtitleFiles
 			input += subtitleFiles // make sure subtitles are added to the exclude list and other post processing operations
 			tempFiles += subtitleFiles // if downloaded for temporarily extraced files delete later
