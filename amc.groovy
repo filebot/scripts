@@ -56,7 +56,7 @@ def forceMovie = { f ->
 }
 
 def forceSeries = { f ->
-	label =~ /^(?i:TV|Kids.Shows)/ || f.dir.listPath().any{ it.name ==~ /(?i:TV.Shows)/ } || parseEpisodeNumber(f.path) || parseDate(f.path) || f.path =~ /(?i:Season\D?[0-9]{1,2}\D|(19|20)\d{2}.S\d{2})/
+	label =~ /^(?i:TV|Kids.Shows)/ || f.dir.listPath().any{ it.name ==~ /(?i:TV.Shows)/ } || parseEpisodeNumber(f.path) || parseDate(f.path) || f.path =~ /(?i:EP[0-9]{2,3}|Season\D?[0-9]{1,2}\D|(19|20)\d{2}.S\d{2})/
 }
 
 def forceAnime = { f ->
@@ -226,6 +226,10 @@ input = input.findAll{ f -> !(f.isSubtitle() && !videoFolderSet.contains(f.paren
 // print exclude and input sets for logging
 input.each{ f -> log.finer("Input: $f") }
 (originalInputSet - input).each{ f -> log.finest("Exclude: $f") }
+
+// early abort if there is nothing to do
+if (input.size() == 0) die("No files selected for processing")
+
 
 
 // group episodes/movies and rename according to XBMC standards
