@@ -227,6 +227,10 @@ input = input.findAll{ f -> !(f.isSubtitle() && !videoFolderSet.contains(f.paren
 input.each{ f -> log.finer("Input: $f") }
 (originalInputSet - input).each{ f -> log.finest("Exclude: $f") }
 
+// early abort if there is nothing to do
+if (input.size() == 0) die("No files selected for processing")
+
+
 
 // group episodes/movies and rename according to XBMC standards
 def groups = input.groupBy{ f ->
