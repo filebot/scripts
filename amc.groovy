@@ -56,7 +56,7 @@ def forceMovie = { f ->
 }
 
 def forceSeries = { f ->
-	label =~ /^(?i:TV|Kids.Shows)/ || f.dir.listPath().any{ it.name ==~ /(?i:TV.Shows)/ } || parseEpisodeNumber(f.path) || parseDate(f.path) || f.path =~ /(?i:EP[0-9]{2,3}|Season\D?[0-9]{1,2}\D|(19|20)\d{2}.S\d{2})/
+	label =~ /^(?i:TV|Kids.Shows)/ || f.dir.listPath().any{ it.name ==~ /(?i:TV.Shows)/ } || parseEpisodeNumber(f.path) || parseDate(f.path) || f.path =~ /(?i:tvs-|tvp-|EP[0-9]{2,3}|Season\D?[0-9]{1,2}\D|(19|20)\d{2}.S\d{2})/
 }
 
 def forceAnime = { f ->
