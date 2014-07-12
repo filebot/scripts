@@ -56,7 +56,7 @@ def forceMovie = { f ->
 }
 
 def forceSeries = { f ->
-	label =~ /^(?i:TV|Kids.Shows)/ || f.dir.listPath().any{ it.name ==~ /(?i:TV.Shows)/ } || parseEpisodeNumber(f.path) || parseDate(f.path) || f.path =~ /(?i:EP[0-9]{2,3}|Season\D?[0-9]{1,2}\D|(19|20)\d{2}.S\d{2})/
+	label =~ /^(?i:TV|Kids.Shows)/ || f.dir.listPath().any{ it.name ==~ /(?i:TV.Shows)/ } || parseEpisodeNumber(f.path) || parseDate(f.path) || f.path =~ /(?i:tvs-|tvp-|EP[0-9]{2,3}|Season\D?[0-9]{1,2}\D|(19|20)\d{2}.S\d{2})/
 }
 
 def forceAnime = { f ->
@@ -138,7 +138,9 @@ if (excludeList?.exists()) {
 
 // specify how to resolve input folders, e.g. grab files from all folders except disk folders
 def resolveInput(f) {
-	if (f.isDirectory() && !f.isDisk())
+	if (f.isHidden())
+		return null
+	else if (f.isDirectory() && !f.isDisk())
 		return f.listFiles().toList().findResults{ resolveInput(it) }
 	else
 		return f
