@@ -350,7 +350,7 @@ groups.each{ group, files ->
 		def dest = rename(file:files, format:format.mov, db:'TheMovieDB')
 		if (dest && artwork) {
 			dest.mapByFolder().each{ dir, fs ->
-				def movieFile = fs.findAll{ it.isVideo() }.sort{ it.length() }.reverse().findResult{ it }
+				def movieFile = fs.findAll{ it.isVideo() || it.isDisk() }.sort{ it.length() }.reverse().findResult{ it }
 				if (movieFile != null) {
 					def movie = detectMovie(movieFile, false)
 					log.fine "Fetching movie artwork for [$movie] to [$dir]"
