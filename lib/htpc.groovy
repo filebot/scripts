@@ -194,7 +194,7 @@ def fetchMovieFanart(outputFile, movieInfo, type, diskType, override, locale) {
 
 def fetchMovieNfo(outputFile, movieInfo, movieFile, override) {
 	def i = movieInfo
-	def mi = tryLogCatch{ movieFile ? MediaInfo.snapshot(movieFile) : null }
+	def mi = tryLogCatch{ movieFile?.isFile() ? MediaInfo.snapshot(movieFile) : null }
 	XML {
 		movie {
 			title(i.name)
