@@ -79,6 +79,9 @@ println 'JRE: ' + Settings.getJavaRuntimeIdentifier()
 // 32-bit Java HotSpot(TM) Client VM
 println String.format('JVM: %d-bit %s', com.sun.jna.Platform.is64Bit() ? 64 : 32, _system['java.vm.name'])
 
+// CPU/MEM: 4 Core / 1 GB Max Memory / 15 MB Used Memory
+println String.format('CPU/MEM: %s Core / %s Max Memory / %s Used Memory', Runtime.runtime.availableProcessors(), org.apache.commons.io.FileUtils.byteCountToDisplaySize(Runtime.runtime.maxMemory()), org.apache.commons.io.FileUtils.byteCountToDisplaySize(Runtime.runtime.totalMemory() - Runtime.runtime.freeMemory()))
+
 // Windows 7 (x86)
 println String.format('OS: %s (%s)', _system['os.name'], _system['os.arch'])
 
