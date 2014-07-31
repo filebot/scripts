@@ -16,13 +16,19 @@ def isClutter(f) {
 	def maxsize = tryQuietly{ maxsize as Long } ?: 100 * 1024 * 1024
 	
 	// file is either too small to have meaning, or to large to be considered clutter
-	if (f.length() < minsize)
-		return true
-	if (f.length() > maxsize)
-		return false
+	def fsize = f.length()
 
 	// path contains blacklisted terms or extension is blacklisted
-	return f.extension ==~ "(?i)($exts)" || f.path =~ "(?i)\\b($terms)\\b")
+	if (f.extension ==~ "(?i)($exts)" && fsize < maxsize)
+		return true
+
+	if (f.path =~ "(?i)\\b($terms)\\b" && fsize < maxsize)
+		return true
+
+	if ((f.isVideo() || f.isAudio()) && fsize < minsize)
+		return true
+
+	return false
 }
 
 
