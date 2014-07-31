@@ -12,10 +12,11 @@ def isClutter(f) {
 	// black list
 	def exts    = tryQuietly{ exts }            ?: /jpg|jpeg|png|gif|nfo|xml|htm|html|log|srt|sub|idx|md5|sfv|txt|rtf|url|db|dna|log|tgmd|json|data/
 	def terms   = tryQuietly{ terms }           ?: /sample|trailer|extras|deleted.scenes|music.video|scrapbook|DS_Store/
+	def minsize = tryQuietly{ minsize as Long } ?:  20 * 1024 * 1024
 	def maxsize = tryQuietly{ maxsize as Long } ?: 100 * 1024 * 1024
 	
 	// path contains blacklisted terms or extension is blacklisted
-	return (f.extension ==~ "(?i)($exts)" || f.path =~ "(?i)\\b($terms)\\b") && f.length() < maxsize
+	return ((f.extension ==~ "(?i)($exts)" && f.length() > minsize) || f.path =~ "(?i)\\b($terms)\\b") && f.length() < maxsize
 }
 
 
