@@ -2,7 +2,10 @@
 
 
 def escapeShell(String arg) {
-    return '"' + arg.replaceAll(/["`^\\"]/, /\\$0/) + '"'
+	if (com.sun.jna.Platform.isWindows())
+		return '"' + arg.replaceAll(/["`^\\]/,  { '\\' + it }) + '"'
+	else
+		return '"' + arg.replaceAll(/["`^\\$]/, { '\\' + it }) + '"'
 }
 
 
