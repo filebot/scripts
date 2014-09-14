@@ -5,7 +5,7 @@ def shows = []
 
 args.getFiles().each{ f ->
 	if (f.isVideo()) {
-		def episode = f.xattr?.metadata?.jsonToObject()
+		def episode = f.xattr['net.filebot.metadata']?.jsonToObject()
 		def show = any{ ['tvdb', episode.series, episode.series.seriesId] }{ ['anidb', episode.series, episode.series.animeId] }
 		
 		log.finest "${show} | ${episode} | ${f}"
