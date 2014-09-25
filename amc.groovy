@@ -433,7 +433,9 @@ if (getRenameLog().size() > 0) {
 	
 	if (pushover) {
 		log.info 'Sending Pushover notification'
-		Pushover(pushover).send(getNotificationTitle(), getNotificationMessage())
+		tryLogCatch {
+			Pushover(pushover).send(getNotificationTitle(), getNotificationMessage())
+		}
 	}
 	
 	// messages used for email / pushbullet reports
@@ -497,7 +499,9 @@ if (getRenameLog().size() > 0) {
 	// send pushbullet report
 	if (pushbullet) {
 		log.info 'Sending PushBullet report'
-		PushBullet(pushbullet).sendHtml(getReportTitle(), getReportMessage())
+		tryLogCatch {
+			PushBullet(pushbullet).sendHtml(getReportTitle(), getReportMessage())
+		}
 	}
 	
 	// send email report
