@@ -43,10 +43,6 @@ args.getFiles().findAll{ it.isVideo() && parseEpisodeNumber(it) && detectSeriesN
 import org.jsoup.Jsoup
 import org.jsoup.Connection.Method
 
-def MyEpisodes(username, password) {
-	return 
-}
-
 class MyEpisodesScraper {
 	def username
 	def password
@@ -71,7 +67,7 @@ class MyEpisodesScraper {
 		
 		if (html.select('#frmLogin')) {
 			session.clear()
-			die('Login failed')
+			throw new Exception('Login failed')
 		}
 		
 		return html
