@@ -419,16 +419,20 @@ if (getRenameLog().size() > 0) {
 	
 	// make Plex scan for new content
 	if (plex) {
-		plex.each{
-			log.info "Notify Plex: $it"
-			refreshPlexLibrary(it)
+		plex.each{ host ->
+			log.info "Notify Plex: $host"
+			tryLogCatch {
+				refreshPlexLibrary(host)
+			}
 		}
 	}
 	
 	// mark episodes as 'acquired'
 	if (myepisodes) {
 		log.info 'Update MyEpisodes'
-		executeScript('update-mes', [login:myepisodes.join(':'), addshows:true], getRenameLog().values())
+		tryLogCatch {
+			executeScript('update-mes', [login:myepisodes.join(':'), addshows:true], getRenameLog().values())
+		}
 	}
 	
 	if (pushover) {
