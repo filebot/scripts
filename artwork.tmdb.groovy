@@ -47,7 +47,7 @@ args.eachMediaFolder{ dir ->
 	
 	println "$dir => $movie"
 	try {
-		fetchMovieArtworkAndNfo(dir, movie, dir.getFiles{ it.isVideo() }.sort{ it.length() }.reverse().findResult{ it }, true, override, _args.locale)
+		fetchMovieArtworkAndNfo(dir, movie, dir.getFiles{ it.isVideo() }.sort{ it.length() }.reverse().findResult{ it }, true, override, _args.locale ?: Locale.ENGLISH)
 	} catch(e) {
 		println "${e.class.simpleName}: ${e.message}"
 	}

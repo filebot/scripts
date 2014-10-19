@@ -99,7 +99,7 @@ def fetchSeriesNfo(outputFile, seriesInfo, override, locale) {
 	.saveAs(outputFile)
 }
 
-def fetchSeriesArtworkAndNfo(seriesDir, seasonDir, series, season, override = false, locale = _args.locale) {
+def fetchSeriesArtworkAndNfo(seriesDir, seasonDir, series, season, override = false, locale = Locale.ENGLISH) {
 	tryLogCatch {
 		// fetch nfo
 		def seriesInfo = TheTVDB.getSeriesInfo(series, locale)
@@ -256,7 +256,7 @@ def fetchMovieNfo(outputFile, movieInfo, movieFile, override) {
 	.saveAs(outputFile)
 }
 
-def fetchMovieArtworkAndNfo(movieDir, movie, movieFile = null, extras = false, override = false, locale = _args.locale) {
+def fetchMovieArtworkAndNfo(movieDir, movie, movieFile = null, extras = false, override = false, locale = Locale.ENGLISH) {
 	tryLogCatch {
 		def movieInfo = TheMovieDB.getMovieInfo(movie, locale, true)
 
