@@ -22,4 +22,24 @@ args.getFiles{ f -> f.xattr.size() > 0 }.each{ f ->
 		f.xattr.clear()
 		println '*** CLEARED ***'
 	}
+
+	// import xattr metadata into Mac OS X Finder tags (UAYOR)
+	if (_args.action == 'import') {
+		def xkey = 'com.apple.metadata:_kMDItemUserTags'
+		def info = getMediaInfo(file: f, format:'''{if (movie) 'Movie'};{if (movie) collection};{if (episode) 'Episode'};{if (episode) n};{any{movie.year}{episode.airdate.year}};{source};{vf};{sdhd};{genres.join(';')}''')
+		def tags = info.split(';')*.trim().findAll{ it.length() > 0 }
+
+		def plist = '''<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n''' + XML{
+			plist(version:'1.0') {
+				array {
+					tags.each{
+						string(it)
+					}
+				}
+			}
+		}
+
+		println "*** Write tag plist to xattr [$xkey]: $tags ***"
+		f.xattr[xkey] = plist
+	}
 }
