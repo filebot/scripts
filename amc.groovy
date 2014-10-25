@@ -87,7 +87,7 @@ def sendEmailReport = { title, message, messagetype ->
 			subject: title,
 			message: message,
 			messagemimetype: messagetype,
-			to: tryQuietly{ mailto } ?: gmail[0] + '@gmail.com', // mail to self by default
+			to: any{ mailto } { gmail[0] + '@gmail.com' }, // mail to self by default
 			user: gmail[0],
 			password: gmail[1]
 		)
@@ -504,13 +504,15 @@ if (getRenameLog().size() > 0) {
 	if (pushbullet) {
 		log.info 'Sending PushBullet report'
 		tryLogCatch {
-			PushBullet(pushbullet).sendHtml(getReportTitle(), getReportMessage())
+			PushBullet(pushbullet).sendFile(getNotificationTitle(), getReportMessage(), 'text/html', getNotificationMessage(), tryQuietly{ mailto })
 		}
 	}
 	
 	// send email report
-	if (gmail || mail){
-		sendEmailReport(getReportTitle(), getReportMessage(), 'text/html')
+	if (gmail || mail) {
+		tryLogCatch {
+			sendEmailReport(getReportTitle(), getReportMessage(), 'text/html')
+		}
 	}
 }
 

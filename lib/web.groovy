@@ -56,43 +56,49 @@ class PushoverClient {
  * PushBullet
  * 				https://www.pushbullet.com
  ****************************************************************************/
-def PushBullet(apikey, devices = null) {
-	new PushBulletClient(apikey:apikey, devices:devices)
+def PushBullet(apikey) {
+	new PushBulletClient(apikey:apikey)
 }
 
 class PushBulletClient {
 	def apikey
-	def devices
 
-	def url_devices = new URL('https://api.pushbullet.com/api/devices')
-	def url_pushes = new URL('https://api.pushbullet.com/api/pushes')
+	def endpoint_pushes = new URL('https://api.pushbullet.com/v2/pushes')
+	def endpoint_upload = new URL('https://api.pushbullet.com/v2/upload-request')
 
-	def sendHtml = { title, message ->
-		def auth = "${apikey}".getBytes().encodeBase64().toString()
-		def header = [requestProperties: [Authorization: "Basic ${auth}" as String]]
+	def sendFile = { file_name, file_content, file_type, body = null, email = null ->
+		def requestProperties = [Authorization: 'Basic '+apikey.getBytes().encodeBase64()]
+		
+		// prepare upload
+		def uploadRequestData = [file_name: file_name, file_type: file_type]
+		def response = new JsonSlurper().parseText(endpoint_upload.post(uploadRequestData, requestProperties).text)
+		
+		// build multipart/form-data -- the most horrible data format that we will never get rid off :(
+		def MBD = '--'		// random -- before the boundry, or after, or not at all (there goes 4 hours of my life)
+		def EOL = '\r\n'	// CR+NL required per spec?! I shit you not!
 
-		def response = new groovy.json.JsonSlurper().parse(url_devices, header)
-		def targets = response.devices.findAll{ devices == null || it.extras.nickname =~ devices }.findResults{ it.iden }
+		def multiPartFormBoundary = '----------NCC-1701-E'
+		def multiPartFormType = 'multipart/form-data; boundary='+multiPartFormBoundary
+		def multiPartFormData = new ByteArrayOutputStream()
 
-		targets.each{ device_iden ->
-			def contentType = 'multipart/form-data; boundary=----------------------------a1134e1059ac'
-			def multiPartFormData = """------------------------------a1134e1059ac
-Content-Disposition: form-data; name="device_iden"
-
-${device_iden}
-------------------------------a1134e1059ac
-Content-Disposition: form-data; name="type"
-
-file
-------------------------------a1134e1059ac
-Content-Disposition: form-data; name="file"; filename="${title}.html"
-Content-Type: text/html; charset=utf-8
-
-${message}
-------------------------------a1134e1059ac--
-""".getBytes("UTF-8")
-
-			url_pushes.post(multiPartFormData, contentType, header.requestProperties)
+		multiPartFormData.withWriter('UTF-8') { out ->
+			response.data.each{ key, value -> 
+				out << MBD << multiPartFormBoundary << EOL
+				out << 'Content-Disposition: form-data; name="' << key << '"' << EOL << EOL
+				out << value << EOL
+			}
+			out << MBD << multiPartFormBoundary << EOL
+			out << 'Content-Disposition: form-data; name="file"; filename="' << file_name << '"' << EOL
+			out << 'Content-Type: ' << file_type << EOL << EOL
+			out << file_content << EOL
+			out << MBD << multiPartFormBoundary << MBD << EOL
 		}
+
+		// do upload to Amazon S3
+		new URL(response.upload_url).post(multiPartFormData.toByteArray(), multiPartFormType, null)
+
+		// push file link
+		def pushFileData = [type: 'file', file_url: response.file_url, file_name: file_name, file_type: file_type, body: body, email: email]
+		endpoint_pushes.post(pushFileData, requestProperties)
 	}
 }
