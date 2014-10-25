@@ -95,7 +95,7 @@ class PushBulletClient {
 		}
 
 		// do upload to Amazon S3
-		new URL(response.upload_url).post(multiPartFormData.toByteArray(), multiPartFormType, null)
+		new URL(response.upload_url).post(multiPartFormData.toByteArray(), multiPartFormType, ['Content-Encoding':'gzip'])
 
 		// push file link
 		def pushFileData = [type: 'file', file_url: response.file_url, file_name: file_name, file_type: file_type, body: body, email: email]
