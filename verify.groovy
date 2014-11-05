@@ -1,8 +1,6 @@
 // filebot -script fn:verify /path/to/files
 
 import java.util.concurrent.*
-import java.nio.channels.*
-import java.util.zip.*
 import net.filebot.hash.*
 
 
@@ -30,7 +28,7 @@ executor.invokeAll(files.collect{ f ->
 				log.severe "Failed to set xattr $xattrkey for [$f]"
 				System.exit(-1)
 			}
-		} else if (attr_hash == calc_hash) {
+		} else if (attr_hash != calc_hash) {
 			log.severe "$xattrkey mismatch (expected $attr_hash, actual: $calc_hash) for [$f]"
 			System.exit(-1)
 		}
