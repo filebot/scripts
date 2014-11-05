@@ -7,7 +7,7 @@ import net.filebot.hash.*
 def hashType = HashType.SFV
 def xattrkey = 'CRC32'
 
-def files = args.getFiles{ it.isVideo() }
+def files = args.getFiles{ it.isVideo() || it.isAudio() }
 
 def threadPoolSize = Runtime.getRuntime().availableProcessors()
 def executor = Executors.newFixedThreadPool(threadPoolSize)
@@ -25,12 +25,10 @@ executor.invokeAll(files.collect{ f ->
 
 			// verify that xattr has been set correctly
 			if (f.xattr[xattrkey] != calc_hash) {
-				log.severe "Failed to set xattr $xattrkey for [$f]"
-				System.exit(-1)
+				die "Failed to set xattr $xattrkey for [$f]"
 			}
 		} else if (attr_hash != calc_hash) {
-			log.severe "$xattrkey mismatch (expected $attr_hash, actual: $calc_hash) for [$f]"
-			System.exit(-1)
+			die "$xattrkey mismatch (expected $attr_hash, actual: $calc_hash) for [$f]"
 		}
 	}
 })*.get()
