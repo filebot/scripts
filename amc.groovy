@@ -133,6 +133,7 @@ if ((tryQuietly{ ut_dir } == '/') || (args.size() > 0 && (tryQuietly{ ut_dir }?.
 def excludePathSet = [] as HashSet
 if (excludeList?.exists()) {
 	excludeList.eachLine('UTF-8'){ excludePathSet += it }
+	log.finest "Using excludes from ${excludeList} (${excludePathSet.size()})"
 }
 
 
