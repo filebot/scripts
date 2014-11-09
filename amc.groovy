@@ -130,9 +130,9 @@ if ((tryQuietly{ ut_dir } == '/') || (args.size() > 0 && (tryQuietly{ ut_dir }?.
 
 
 // define and load exclude list (e.g. to make sure files are only processed once)
-def excludePathSet = [] as TreeSet
+def excludePathSet = [] as HashSet
 if (excludeList?.exists()) {
-	excludePathSet += excludeList.text.split('\n') as List
+	excludeList.eachLine('UTF-8'){ excludePathSet += it }
 }
 
 
@@ -193,8 +193,10 @@ input = input.findAll{ f -> !excludePathSet.contains(f.path) }
 
 // update exclude list with all input that will be processed during this run
 if (excludeList) {
-	excludePathSet += [extractedArchives, input].flatten().path
-	excludePathSet.join('\n').saveAs(excludeList)
+	excludeList.withWriterAppend('UTF-8') { out ->
+		extractedArchives.path.each{ out.println(it) }
+		input.path.each{ out.println(it) }
+	}
 }
 
 
