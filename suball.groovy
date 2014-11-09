@@ -1,7 +1,8 @@
-// filebot -script fn:suball <options> <folder>
+// filebot -script fn:suball /path/to/media -non-strict --def maxAgeDays=7
 
 
-def creationDateLimit = tryQuietly{ now.time - (maxAgeDays.toLong() * 24 * 60 * 60 * 1000) }
+def minAgeTimeStamp = tryQuietly{ now.time - (minAgeDays.toDouble() * 24 * 60 * 60 * 1000).toLong() }
+def maxAgeTimeStamp = tryQuietly{ now.time - (maxAgeDays.toDouble() * 24 * 60 * 60 * 1000).toLong() }
 def minFileSize = tryQuietly{ minFileSize.toLong() }; if (minFileSize == null) { minFileSize = 50 * 1000L * 1000L }
 def minLengthMS = tryQuietly{ minLengthMS.toLong() }; if (minLengthMS == null) { minLengthMS = 10 * 60 * 1000L }
 def ignore = tryQuietly{ ignore } ?: null
@@ -11,9 +12,13 @@ def accept = { f ->
 	// ignore files that match the give ignore pattern
 	if (f.path =~ ignore)
 		return false
-		
+
+	// ignore files that are too young
+	if (minAgeTimeStamp != null && f.creationDate > minAgeTimeStamp)
+		return false
+
 	// ignore files that are too old
-	if (creationDateLimit != null && f.creationDate < creationDateLimit)
+	if (maxAgeTimeStamp != null && f.creationDate < maxAgeTimeStamp)
 		return false
 	
 	// ignore files that are too small	
