@@ -213,7 +213,6 @@ def relativeInputPath = { f ->
 
 // keep original input around so we can print excluded files later
 def originalInputSet = input as LinkedHashSet
-def videoFolderSet = input.findAll{ it.isVideo() }.findResults{ it.parentFile } as LinkedHashSet
 
 // process only media files
 input = input.findAll{ f -> (f.isVideo() && !tryQuietly{ f.hasExtension('iso') && !f.isDisk() }) || f.isSubtitle() || (f.isDirectory() && f.isDisk()) || (music && f.isAudio()) }
@@ -225,7 +224,7 @@ input = input.findAll{ f -> !(relativeInputPath(f) =~ /(?<=\b|_)(?i:sample|trail
 input = input.findAll{ f -> !(f.isVideo() && ((minFileSize > 0 && f.length() < minFileSize) || (minLengthMS > 0 && tryQuietly{ getMediaInfo(file:f, format:'{duration}').toLong() < minLengthMS }))) }
 
 // ignore subtitles files that are not stored in the same folder as the movie
-input = input.findAll{ f -> !(f.isSubtitle() && !videoFolderSet.contains(f.parentFile)) }
+input = input.findAll{ f -> !(f.isSubtitle() && !f.parentFile.listFiles{ it.isVideo() }.any{ f.isDerived(it) }) }
 
 
 // print exclude and input sets for logging
