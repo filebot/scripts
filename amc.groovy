@@ -140,7 +140,7 @@ if (excludeList?.exists()) {
 // specify how to resolve input folders, e.g. grab files from all folders except disk folders
 def resolveInput(f) {
 	if (f.isHidden())
-		return null
+		return []
 	else if (f.isDirectory() && !f.isDisk())
 		return f.listFiles().toList().findResults{ resolveInput(it) }
 	else
