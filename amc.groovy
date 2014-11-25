@@ -424,7 +424,20 @@ if (getRenameLog().size() > 0) {
 		plex.each{ host ->
 			log.info "Notify Plex: $host"
 			tryLogCatch {
-				refreshPlexLibrary(host)
+				groups.each { group, files ->
+					if (group.tvs || group.anime) {
+						log.info "Telling Plex to refresh TV shows"
+						refreshPlexLibrary(server:host, library:"show")
+					}
+					if (group.mov) {
+						log.info "Telling Plex to refresh movies"
+						refreshPlexLibrary(server:host, library:"movie")
+					}
+					if (group.music) {
+						log.info "Telling Plex to refresh music"
+						refreshPlexLibrary(server:host, library:"artist")
+					}
+				}
 			}
 		}
 	}
