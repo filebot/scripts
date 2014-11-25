@@ -25,9 +25,16 @@ def showNotification(host, port, title, message, image) {
 /**
  * Plex helpers
  */
-def refreshPlexLibrary(server, port = 32400) {
+def refreshPlexLibrary(Map m = [:]) {
 	tryLogCatch {
-		new URL("http://$server:$port/library/sections/all/refresh").get()
+		def defaultMap = ["server": "localhost", "port": 32400]
+		m = defaultMap << m
+		def (server, port, library) = [m["server"], m["port"], m["library"]]
+		new XmlSlurper().parse("http://$server:$port/library/sections").Directory.each { dir ->
+			if ("${dir.@type}" == library) {
+				new URL("http://$server:$port/library/sections/${dir.@key}/refresh").get()
+			}
+		}
 	}
 }
 
