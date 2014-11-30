@@ -133,15 +133,26 @@ if ((tryQuietly{ ut_dir } == '/') || (args.size() > 0 && (tryQuietly{ ut_dir }?.
 def excludePathSet = [] as HashSet
 if (excludeList?.exists()) {
 	excludeList.eachLine('UTF-8'){ excludePathSet += it }
-	log.finest "Using excludes from ${excludeList} (${excludePathSet.size()})"
+	log.finest "Using excludes: ${excludeList} (${excludePathSet.size()})"
 }
 
 
-// specify how to resolve input folders, e.g. grab files from all folders except disk folders
+// specify how to resolve input folders, e.g. grab files from all folders except disk folders and already processed folders (i.e. folders with movie/tvshow nfo files)
 def resolveInput(f) {
-	if (f.isHidden())
+	// ignore system and hidden folders
+	if (f.isHidden()) {
+		log.finest "Ignore hidden: $f"
 		return []
-	else if (f.isDirectory() && !f.isDisk())
+	}
+
+	// ignore already processed folders
+	if (f.isDirectory() && f.listFiles().toList().any{ it.name ==~ /movie.nfo|tvshow.nfo/ }) {
+		log.finest "Ignore processed folder: $f"
+		return []
+	}
+
+	// resolve recursively
+	if (f.isDirectory() && !f.isDisk())
 		return f.listFiles().toList().findResults{ resolveInput(it) }
 	else
 		return f
