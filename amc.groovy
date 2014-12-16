@@ -21,7 +21,7 @@ def exec      = tryQuietly{ exec.toString() }
 
 // array of xbmc/plex hosts
 def xbmc = tryQuietly{ xbmc.split(/[ ,|]+/) }
-def plex = tryQuietly{ plex.split(/[ ,|]+/) }
+def plex = tryQuietly{ plex.split(/[ ,|]+/)*.split(/:/).collect{ it.length >= 2 ? [host:it[0], token:it[1]] : [host:it[0]] } }
 
 // extra options, myepisodes updates and email notifications
 def storeReport = tryQuietly{ storeReport.toBoolean() }
@@ -432,10 +432,10 @@ if (getRenameLog().size() > 0) {
 	
 	// make Plex scan for new content
 	if (plex) {
-		plex.each{ host ->
-			log.info "Notify Plex: $host"
+		plex.each{ instance ->
+			log.info "Notify Plex: ${instance.host}"
 			tryLogCatch {
-				refreshPlexLibrary(host)
+				refreshPlexLibrary(instance.host, 32400, instance.token)
 			}
 		}
 	}
