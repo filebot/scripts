@@ -43,6 +43,10 @@ def sendmail(param) {
  * sendGmail(subject:'Hello Ant World', message:'Dear Ant, ...', to:'someone@gmail.com', user:'rednoah', password:'correcthorsebatterystaple')
  */
 def sendGmail(param) {
+	if (!(param.password ==~ /\w{16}/)) {
+		throw new IllegalArgumentException('Gmail password must be a 16-digit passcode: Application-specific password required')
+	}
+
 	param << [mailhost:'smtp.gmail.com', mailport:'587', ssl:'no', enableStartTLS:'yes']
 	param << [user:param.username ? param.remove('username') + '@gmail.com' : param.user]
 	param << [from: param.from ?: param.user]
