@@ -1,6 +1,8 @@
 // filebot -script fn:suball /path/to/media -non-strict --def maxAgeDays=7
 
 setDefaultValues(
+	minAgeDays: null,
+	maxAgeDays: null,
 	minFileSize: 50 * 1000 * 1000L,
 	minLengthMS: 10 * 60 * 1000L,
 	ignore: null
