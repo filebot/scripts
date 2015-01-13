@@ -1,4 +1,4 @@
-// filebot -script fn:suball /path/to/media -non-strict --def maxAgeDays=7
+// filebot -script dev:suball /path/to/media -non-strict --def maxAgeDays=7
 
 setDefaultValues(
 	minAgeDays: null,
@@ -34,7 +34,7 @@ def accept = { f ->
 		return false
 	
 	// ignore files that already have subtitles
-	if (ignoreTextLanguage != null && getMediaInfo(file:f, format:'''{media.TextLanguageList}''').findMatch(ignoreTextLanguage) != null)
+	if (ignoreTextLanguage != null && getMediaInfo(file:f, format:'{media.TextLanguageList}').findMatch(ignoreTextLanguage) != null)
 		return false
 	
 	return true
