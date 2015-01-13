@@ -1,12 +1,13 @@
 // filebot -script fn:suball /path/to/media -non-strict --def maxAgeDays=7
 
+setDefaultValues(
+	minFileSize: 50 * 1000 * 1000L,
+	minLengthMS: 10 * 60 * 1000L,
+	ignore: null
+)
 
-def minAgeTimeStamp = tryQuietly{ now.time - (minAgeDays.toDouble() * 24 * 60 * 60 * 1000).toLong() }
-def maxAgeTimeStamp = tryQuietly{ now.time - (maxAgeDays.toDouble() * 24 * 60 * 60 * 1000).toLong() }
-def minFileSize = tryQuietly{ minFileSize.toLong() }; if (minFileSize == null) { minFileSize = 50 * 1000L * 1000L }
-def minLengthMS = tryQuietly{ minLengthMS.toLong() }; if (minLengthMS == null) { minLengthMS = 10 * 60 * 1000L }
-def ignore = tryQuietly{ ignore } ?: null
-
+def minAgeTimeStamp = any{ now.time - ((minAgeDays as double) * 24 * 60 * 60 * 1000L) as long }{ null }
+def maxAgeTimeStamp = any{ now.time - ((maxAgeDays as double) * 24 * 60 * 60 * 1000L) as long }{ null }
 
 def accept = { f ->
 	// ignore files that match the give ignore pattern
@@ -48,7 +49,7 @@ args.eachMediaFolder { dir ->
 		log.info "Fetch subtitles for [$dir]"
 		
 		// print excludes
-		(input - selected).each{ f -> log.finest "Exclude: $f" }
+		(input - selected).each{ f -> log.finest "Ignore: $f" }
 
 		getMissingSubtitles(file: selected)
 	} else {
