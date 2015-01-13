@@ -5,7 +5,8 @@ setDefaultValues(
 	maxAgeDays: null,
 	minFileSize: 50 * 1000 * 1000L,
 	minLengthMS: 10 * 60 * 1000L,
-	ignore: null
+	ignore: null,
+	ignoreTextLanguage: '.+'
 )
 
 def minAgeTimeStamp = any{ now.time - ((minAgeDays as double) * 24 * 60 * 60 * 1000L) as long }{ null }
@@ -29,11 +30,11 @@ def accept = { f ->
 		return false
 	
 	// ignore files that are too short
-	if ((minLengthMS > 0 && tryQuietly{ getMediaInfo(file:f, format:'{duration}').toLong() < minLengthMS }))
+	if (minLengthMS > 0 && (getMediaInfo(file:f, format:'{any{duration}{0}}') as double) < minLengthMS)
 		return false
 	
 	// ignore files that already have subtitles
-	if (getMediaInfo(file:f, format:'''{media.TextCodecList}''').length() > 0)
+	if (ignoreTextLanguage != null && getMediaInfo(file:f, format:'''{media.TextLanguageList}''').findMatch(ignoreTextLanguage) != null)
 		return false
 	
 	return true
