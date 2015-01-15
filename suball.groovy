@@ -9,6 +9,9 @@ setDefaultValues(
 	ignoreTextLanguage: '.+'
 )
 
+def minFileSize = minFileSize as long
+def minLengthMS = minLengthMS as long
+
 def minAgeTimeStamp = any{ now.time - ((minAgeDays as double) * 24 * 60 * 60 * 1000L) as long }{ null }
 def maxAgeTimeStamp = any{ now.time - ((maxAgeDays as double) * 24 * 60 * 60 * 1000L) as long }{ null }
 
