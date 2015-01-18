@@ -187,7 +187,7 @@ def tempFiles = []
 input = input.flatten{ f ->
 	if (!skipExtract && (f.isArchive() || f.hasExtension('001'))) {
 		def extractDir = new File(f.dir, f.nameWithoutExtension)
-		def extractFiles = extract(file: f, output: new File(extractDir, f.dir.name), conflict: 'auto', filter: { it.isArchive() || it.isVideo() || (music && it.isAudio()) }, forceExtractAll: true) ?: []
+		def extractFiles = extract(file: f, output: new File(extractDir, f.dir.name), conflict: 'auto', filter: { it.isArchive() || it.isVideo() || it.isSubtitle() || (music && it.isAudio()) }, forceExtractAll: true) ?: []
 
 		if (extractFiles.size() > 0) {
 			extractedArchives += f
@@ -235,7 +235,7 @@ input = input.findAll{ f -> !(relativeInputPath(f) =~ /(?<=\b|_)(?i:sample|trail
 input = input.findAll{ f -> !(f.isVideo() && ((minFileSize > 0 && f.length() < minFileSize) || (minLengthMS > 0 && tryQuietly{ getMediaInfo(file:f, format:'{duration}').toLong() < minLengthMS }))) }
 
 // ignore subtitles files that are not stored in the same folder as the movie
-input = input.findAll{ f -> !(f.isSubtitle() && !f.parentFile.listFiles{ it.isVideo() }.any{ f.isDerived(it) }) }
+input = input.findAll{ f -> !(f.isSubtitle() && !input.findAll{ it.isVideo() }.any{ f.isDerived(it) }) }
 
 
 // print exclude and input sets for logging
