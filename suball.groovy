@@ -33,7 +33,7 @@ def accept = { f ->
 		return false
 	
 	// ignore files that are too short
-	if (minLengthMS > 0 && (getMediaInfo(file:f, format:'{any{duration}{0}}') as double) < minLengthMS)
+	if (minLengthMS > 0 && ((getMediaInfo(file:f, format:'{duration}') ?: minLengthMS) as double) < minLengthMS)
 		return false
 	
 	// ignore files that already have subtitles
