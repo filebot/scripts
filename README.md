@@ -14,3 +14,8 @@ http://www.filebot.net/forums/viewtopic.php?f=4&t=5
 
 AMC script documentation:
 http://www.filebot.net/forums/viewtopic.php?f=4&t=215
+
+
+
+If you want to run scripts from a local file or if you want to make your own modifications just 
+`git clone https://github.com/filebot/scripts.git` to your local filesystem and call it with `filebot -script /path/to/script.groovy` instead of using `filebot -script dev:script` syntax.
