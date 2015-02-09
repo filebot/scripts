@@ -9,7 +9,7 @@ def mes = new MyEpisodesScraper(username:mesacc[0], password:mesacc[1])
 def myshows = mes.getShowList()
 
 // series name => series key (e.g. Doctor Who (2005) => doctorwho)
-def collationKey = { s -> s == null ? '' : s.removeAll(/^(?i)(The|A)\b/).removeAll(/(?<!\d)\d{4}$/).removeAll(/\W/).lower() }
+def collationKey = { s -> s == null ? '' : s.removeAll(/^(?i)(The|A)\b/).removeAll(/\(?\d{4}\)?$/).removeAll(/\W/).lower() }
 
 args.getFiles().findAll{ it.isVideo() && parseEpisodeNumber(it) && detectSeriesName(it) }.groupBy{ detectSeriesName(it) }.each{ series, files ->
 	def show = myshows.find{ collationKey(it.name) == collationKey(series) }
