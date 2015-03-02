@@ -2,7 +2,7 @@
  * Pushover
  * 				https://pushover.net
  ****************************************************************************/
-def Pushover(user, token = 'wcckDz3oygHSU2SdIptvnHxJ92SQKK') {
+def Pushover(user, token) {
 	new PushoverClient(user:user, token:token)
 }
 

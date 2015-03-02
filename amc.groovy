@@ -31,7 +31,7 @@ def excludeList = tryQuietly{ (excludeList as File).isAbsolute() ? (excludeList 
 def myepisodes = tryQuietly{ myepisodes.split(':', 2) }
 def gmail = tryQuietly{ gmail.split(':', 2) }
 def mail = tryQuietly{ mail.split(':', 3) }
-def pushover = tryQuietly{ pushover.toString() }
+def pushover = tryQuietly{ pushover.split(':', 2) }
 def pushbullet = tryQuietly{ pushbullet.toString() }
 def reportError = tryQuietly{ reportError.toBoolean() }
 
@@ -451,7 +451,7 @@ if (getRenameLog().size() > 0) {
 	if (pushover) {
 		log.info 'Sending Pushover notification'
 		tryLogCatch {
-			Pushover(pushover).send(getNotificationTitle(), getNotificationMessage())
+			Pushover(pushover[0], pushover.length == 1 ? 'wcckDz3oygHSU2SdIptvnHxJ92SQKK' : pushover[1]).send(getNotificationTitle(), getNotificationMessage())
 		}
 	}
 	
