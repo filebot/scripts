@@ -135,7 +135,7 @@ if (excludeList) {
 	if (excludeList.exists()) {
 		excludeList.eachLine('UTF-8'){ excludePathSet += it }
 		log.finest "Using excludes: ${excludeList} (${excludePathSet.size()})"
-	} else if (!excludeList.parentFile.mkdirs() || !excludeList.createNewFile()) {
+	} else if ((!excludeList.parentFile.isDirectory() && !excludeList.parentFile.mkdirs()) || (!excludeList.isFile() && !excludeList.createNewFile())) {
 		die("Failed to create excludeList: ${excludeList}")
 	}
 }
@@ -145,7 +145,7 @@ if (excludeList) {
 def resolveInput(f) {
 	// ignore system and hidden folders
 	if (f.isHidden()) {
-		log.finest "Ignore hidden: $f"
+		if (f.isDirectory()) log.finest "Ignore hidden: $f" // ignore all hidden files but only log hidden folders
 		return []
 	}
 
