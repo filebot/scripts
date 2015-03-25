@@ -131,9 +131,13 @@ if ((tryQuietly{ ut_dir } == '/') || (args.size() > 0 && (tryQuietly{ ut_dir }?.
 
 // define and load exclude list (e.g. to make sure files are only processed once)
 def excludePathSet = [] as HashSet
-if (excludeList?.exists()) {
-	excludeList.eachLine('UTF-8'){ excludePathSet += it }
-	log.finest "Using excludes: ${excludeList} (${excludePathSet.size()})"
+if (excludeList) {
+	if (excludeList.exists()) {
+		excludeList.eachLine('UTF-8'){ excludePathSet += it }
+		log.finest "Using excludes: ${excludeList} (${excludePathSet.size()})"
+	} else if (!excludeList.parentFile.mkdirs() || !excludeList.createNewFile()) {
+		die("Failed to create excludeList: ${excludeList}")
+	}
 }
 
 
