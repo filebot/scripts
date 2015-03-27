@@ -21,9 +21,14 @@ try {
 
 // 7-Zip-JBinding: OK
 try {
-	print '7-Zip-JBinding: '
-	net.filebot.archive.SevenZipLoader.requireNativeLibraries() // load 7-Zip-JBinding native libs
-	println 'OK'
+	if (System.getProperty('net.filebot.Archive.extractor') != 'SevenZipExecutable') {
+		print '7-Zip-JBinding: '
+		net.filebot.archive.SevenZipLoader.requireNativeLibraries() // try to load 7-Zip-JBinding native libs (default)
+		println 'OK'
+	} else {
+		print 'p7zip: '
+		println System.getProperty('net.filebot.Archive.7z', '7z').execute().text.match(/^p7zip(.+)$/).trim()
+	}
 } catch(Throwable error) {
 	println error
 }
