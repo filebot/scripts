@@ -131,6 +131,8 @@ if ((tryQuietly{ ut_dir } == '/') || (args.size() > 0 && (tryQuietly{ ut_dir }?.
 
 // define and load exclude list (e.g. to make sure files are only processed once)
 def excludePathSet = [] as HashSet
+def t = now
+println now
 if (excludeList) {
 	if (excludeList.exists()) {
 		excludeList.eachLine('UTF-8'){ excludePathSet += it }
@@ -139,6 +141,8 @@ if (excludeList) {
 		die("Failed to create excludeList: ${excludeList}")
 	}
 }
+println now
+println (now -t)
 
 
 // specify how to resolve input folders, e.g. grab files from all folders except disk folders and already processed folders (i.e. folders with movie/tvshow nfo files)
