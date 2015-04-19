@@ -1,8 +1,8 @@
 // filebot -script fn:configure
 
-console.print('Enter OpenSubtitles username: ')
+console.printf('Enter OpenSubtitles username: ')
 def osdbUser = console.readLine()
-console.print('Enter OpenSubtitles password: ')
+console.printf('Enter OpenSubtitles password: ')
 def osdbPwd = console.readLine()
 
 
@@ -12,10 +12,10 @@ setLogin('osdb.user', osdbUser, osdbPwd)
 /* --------------------------------------------------------------------- */
 
 if (osdbUser) {
-	console.print('Testing OpenSubtitles... ')
+	console.printf('Testing OpenSubtitles... ')
 	WebServices.OpenSubtitles.setUser(osdbUser, osdbPwd)
 	WebServices.OpenSubtitles.login()
-	console.println('OK')
+	console.printf('OK\n')
 }
 
 /* --------------------------------------------------------------------- */
