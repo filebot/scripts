@@ -130,12 +130,10 @@ if ((tryQuietly{ ut_dir } == '/') || (args.size() > 0 && (tryQuietly{ ut_dir }?.
 
 
 // define and load exclude list (e.g. to make sure files are only processed once)
-// #TODO def excludePathSet = new FileSet()
-def excludePathSet = [] as HashSet
+def excludePathSet = new FileSet()
 if (excludeList) {
 	if (excludeList.exists()) {
-		// #TODO excludePathSet.feed(Files.lines(excludeList.toPath(), StandardCharsets.UTF_8))
-		excludePathSet = Files.lines(excludeList.toPath(), java.nio.charset.StandardCharsets.UTF_8).collect(java.util.stream.Collectors.toSet())
+		excludePathSet.feed(Files.lines(excludeList.toPath(), StandardCharsets.UTF_8))
 		log.finest "Using excludes: ${excludeList} (${excludePathSet.size()})"
 	} else if ((!excludeList.parentFile.isDirectory() && !excludeList.parentFile.mkdirs()) || (!excludeList.isFile() && !excludeList.createNewFile())) {
 		die("Failed to create excludeList: ${excludeList}")
