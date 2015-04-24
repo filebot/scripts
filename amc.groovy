@@ -399,7 +399,7 @@ if (unsorted) {
 	if (unsortedFiles.size() > 0) {
 		log.info "Processing ${unsortedFiles.size()} unsorted files"
 		rename(map: unsortedFiles.collectEntries{ original ->
-			[original, new File(_args.output, getMediaInfo(file:original, format:'''Unsorted/{fn}.{ext}'''))]
+			[original, new File(_args.output, getMediaInfo(file:original, format:'''Unsorted/{file.structurePathTail}'''))]
 		})
 	}
 }
