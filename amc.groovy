@@ -2,6 +2,7 @@
 
 
 // log input parameters
+log.fine("Run script [${_args.script}] at [${now}]")
 _def.each{ n, v -> log.finer('Parameter: ' + [n, n =~ /pushover|pushbullet|mail|myepisodes/ ? '*****' : v].join(' = ')) }
 args.each{ log.finer("Argument: $it") }
 
