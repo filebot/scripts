@@ -228,16 +228,16 @@ def fetchMovieNfo(outputFile, movieInfo, movieFile, override) {
 			i.people.each{ p ->
 				if (p.director) {
 					director(p.name)
-				}
-				if (p.writer) {
+				} else if (p.writer) {
 					writer(p.name)
-				}
-				if (p.actor) { 
+				} else if (p.actor) { 
 					actor {
 						name(p.name)
 						role(p.character)
 					}
-				}	
+				} else {
+					credits(p.name)
+				}
 			}
 			i.trailers.each{ t ->
 				t.sources.each { s, v ->
