@@ -216,6 +216,12 @@ def fetchMovieNfo(outputFile, movieInfo, movieFile, override) {
 			runtime(i.runtime)
 			genre(i.genres?.size() > 0 ? i.genres[0] : null)
 			director(i.director)
+			i.productionCountries.each{
+				country(it)
+			}
+			i.productionCompanies.each{
+				studio(it)
+			}
 			i.cast?.each{ a ->
 				actor {
 					name(a.name)
