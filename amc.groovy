@@ -9,13 +9,14 @@ args.each{ log.finer("Argument: $it") }
 
 // initialize variables
 def input = []
-def failOnError = (_args.conflict == 'fail')
+def failOnError = _args.conflict.equalsIgnoreCase('fail')
+def isTest = _args.action.equalsIgnoreCase('test')
 
 // enable/disable features as specified via --def parameters
 def unsorted  = tryQuietly{ unsorted.toBoolean() }
 def music     = tryQuietly{ music.toBoolean() }
 def subtitles = tryQuietly{ subtitles.split(/\W+/) as List }
-def artwork   = tryQuietly{ artwork.toBoolean() && !'TEST'.equalsIgnoreCase(_args.action) }
+def artwork   = tryQuietly{ artwork.toBoolean() && !isTest }
 def extras    = tryQuietly{ extras.toBoolean() }
 def clean     = tryQuietly{ clean.toBoolean() }
 def exec      = tryQuietly{ exec.toString() }
@@ -210,7 +211,7 @@ input = input.flatten{ f ->
 input = input.findAll{ f -> !excludePathSet.contains(f.path) }
 
 // update exclude list with all input that will be processed during this run
-if (excludeList) {
+if (excludeList && !isTest) {
 	excludeList.withWriterAppend('UTF-8') { out ->
 		extractedArchives.path.each{ out.println(it) }
 		input.path.each{ out.println(it) }
