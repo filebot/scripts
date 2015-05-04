@@ -88,7 +88,9 @@ def fetchSeriesNfo(outputFile, seriesInfo, override, locale) {
 			episodeguide {
 				url(cache:"${i.id}.xml", "http://www.thetvdb.com/api/1D62F2F90030C444/series/${i.id}/all/${locale.language}.zip")
 			}
-			genre(i.genres?.size() > 0 ? i.genres[0] : null)
+			i.genres?.each{
+				genre(it)
+			}
 			thumb(i.bannerUrl)
 			premiered(i.firstAired)
 			status(i.status)
@@ -210,21 +212,34 @@ def fetchMovieNfo(outputFile, movieInfo, movieFile, override) {
 			rating(i.rating)
 			votes(i.votes)
 			mpaa(i.certification)
-			id("tt" + (i.imdbId ?: 0).pad(7))
+			id('tt' + (i.imdbId ?: 0).pad(7))
 			plot(i.overview)
 			tagline(i.tagline)
 			runtime(i.runtime)
-			genre(i.genres.join(' / '))
-			country(i.productionCountries.join(' / '))
-			studio(i.productionCompanies.join(' / '))
-			director(i.director)
-			i.cast?.each{ a ->
-				actor {
-					name(a.name)
-					role(a.character)
-				}
+			i.genres.each{
+				genre(it)
 			}
-			i.trailers?.each{ t ->
+			i.productionCountries.each{
+				country(it)
+			}
+			i.productionCompanies.each{
+				studio(it)
+			}
+			i.people.each{ p ->
+				if (p.director) {
+					director(p.name)
+				}
+				if (p.writer) {
+					writer(p.name)
+				}
+				if (p.actor) { 
+					actor {
+						name(p.name)
+						role(p.character)
+					}
+				}	
+			}
+			i.trailers.each{ t ->
 				t.sources.each { s, v ->
 					trailer(type:t.type, name:t.name, size:s, v)
 				}
