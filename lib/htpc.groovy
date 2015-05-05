@@ -235,8 +235,8 @@ def fetchMovieNfo(outputFile, movieInfo, movieFile, override) {
 						name(p.name)
 						role(p.character)
 					}
-				} else {
-					credits(p.name)
+				} else if (p.job ==~ /Writer|Screenplay|Story|Novel/) {
+					credits("$p.name ($p.job)")
 				}
 			}
 			i.trailers.each{ t ->
