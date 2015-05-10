@@ -244,6 +244,8 @@ input = input.findAll{ f -> !(f.isVideo() && ((minFileSize > 0 && f.length() < m
 // ignore subtitles files that are not stored in the same folder as the movie
 input = input.findAll{ f -> !(f.isSubtitle() && !input.findAll{ it.isVideo() }.any{ f.isDerived(it) }) }
 
+// ensure that the final input set is sorted
+input = input.sort()
 
 // print exclude and input sets for logging
 input.each{ f -> log.finer("Input: $f") }
