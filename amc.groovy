@@ -576,7 +576,7 @@ if (clean) {
 		cleanerInput = cleanerInput.findAll{ f -> f.exists() }
 		if (cleanerInput.size() > 0) {
 			log.info 'Clean clutter files and empty folders'
-			executeScript('cleaner', args.empty ? [root:true] : [root:false], cleanerInput)
+			executeScript('cleaner', args.empty ? [root:true, ignore: ignore] : [root:false, ignore: ignore], cleanerInput)
 		}
 	}
 }

@@ -7,7 +7,8 @@ def deleteRootFolder = tryQuietly{ root.toBoolean() }
 def isClutter(f) {
 	// white list
 	def ignore  = tryQuietly{ ignore }          ?: /extrathumbs/
-	if (f.path =~ "(?i)\\b($ignore)\\b") return false
+	if (f.path.findMatch(ignore))
+		return false
 	
 	// black list
 	def exts    = tryQuietly{ exts }            ?: /jpg|jpeg|png|gif|nfo|info|xml|htm|html|log|srt|sub|idx|md5|sfv|txt|rtf|url|db|dna|log|tgmd|json|data|srv|srr|nzb|par\d+|part\d+/
