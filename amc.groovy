@@ -433,7 +433,7 @@ if (getRenameLog().size() > 0) {
 		xbmc.each{ host ->
 			log.info "Notify XBMC: $host"
 			tryLogCatch{
-				showNotification(host, 9090, getNotificationTitle(), getNotificationMessage(), 'http://app.filebot.net/images/icon.png')
+				showNotification(host, 9090, getNotificationTitle(), getNotificationMessage(), 'http://app.filebot.net/icon.png')
 				scanVideoLibrary(host, 9090)
 			}
 		}
