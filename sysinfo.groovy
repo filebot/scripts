@@ -100,12 +100,14 @@ try {
 
 // check for updates
 try {
-	def update = new XmlSlurper().parse('http://app.filebot.net/update.xml')
-	def latestRev = update.revision.text() as int
-	def latestApp  = update.name.text()
+	if (System.getProperty("application.update") != 'skip') {
+		def update = new XmlSlurper().parse('http://app.filebot.net/update.xml')
+		def latestRev = update.revision.text() as int
+		def latestApp  = update.name.text()
 
-	if (latestRev > Settings.getApplicationRevisionNumber()) {
-		println "\n--- UPDATE AVAILABLE: $latestApp (r$latestRev) ---\n"
+		if (latestRev > Settings.getApplicationRevisionNumber()) {
+			println "\n--- UPDATE AVAILABLE: $latestApp (r$latestRev) ---\n"
+		}
 	}
 } catch(Throwable error) {
 	// ignore
