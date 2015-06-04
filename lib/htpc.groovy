@@ -27,7 +27,7 @@ def showNotification(host, port, title, message, image) {
  */
 def refreshPlexLibrary(server, port = 32400, token = null) {
 	tryLogCatch {
-		def url = "http://$server:$port/library/sections/all/refresh"
+		def url = "https://$server:$port/library/sections/all/refresh"
 		if (token) {
 			url += "?X-Plex-Token=$token"
 		}
