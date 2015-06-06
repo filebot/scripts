@@ -27,7 +27,10 @@ def showNotification(host, port, title, message, image) {
  */
 def refreshPlexLibrary(server, port = 32400, token = null) {
 	tryLogCatch {
-		def url = "http://$server:$port/library/sections/all/refresh"
+		// use HTTPS if hostname is specified, use HTTP if IP is specified
+		def addr = java.net.InetAddress.getByName(server)
+		def protocol = addr.hostName != addr.hostAddress ? 'https' : 'http'
+		def url = "$protocol://$server:$port/library/sections/all/refresh"
 		if (token) {
 			url += "?X-Plex-Token=$token"
 		}
