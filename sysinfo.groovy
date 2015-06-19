@@ -8,7 +8,7 @@ try {
 	print 'JNA Native: '
 	println com.sun.jna.Native.nativeVersion
 } catch(Throwable error) {
-	println error.cause
+	println error.cause ?: error.message
 }
 
 // MediaInfo: MediaInfoLib - v0.7.48
@@ -16,7 +16,7 @@ try {
 	print 'MediaInfo: '
 	println MediaInfo.version()
 } catch(Throwable error) {
-	println error.cause
+	println error.cause ?: error.message
 }
 
 // 7-Zip-JBinding: OK
