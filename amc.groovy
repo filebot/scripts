@@ -152,17 +152,25 @@ def resolveInput(f) {
 		return []
 	}
 
-	// ignore already processed folders
-	if (f.isDirectory() && f.listFiles().toList().any{ it.name ==~ /movie.nfo|tvshow.nfo/ }) {
-		log.finest "Ignore processed folder: $f"
-		return []
-	}
+	if (f.isDirectory()) {
+		def files = f.listFiles() as List ?: []
 
-	// resolve recursively
-	if (f.isDirectory() && !f.isDisk())
-		return f.listFiles().toList().findResults{ resolveInput(it) }
-	else
-		return f
+		// ignore already processed folders
+		if (files.any{ it.name ==~ /movie.nfo|tvshow.nfo/ }) {
+			log.finest "Ignore processed folder: $f"
+			return []
+		}
+
+		// resolve folder recursively, except disk folders
+		if (f.isDisk()) {
+			return f
+		}
+
+		// resolve folder recursively
+		return files.findResults{ resolveInput(it) }
+	}
+	
+	return f
 }
 
 // collect input fileset as specified by the given --def parameters
