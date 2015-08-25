@@ -241,11 +241,13 @@ def fetchMovieNfo(outputFile, movieInfo, movieFile, override) {
 					credits("$p.name ($p.job)")
 				}
 			}
+			/** <trailer> element not supported due to lack of specification on acceptable values for both Plex and Kodi
 			i.trailers.each{ t ->
 				t.sources.each { s, v ->
 					trailer(type:t.type, name:t.name, size:s, v)
 				}
 			}
+			**/
 			fileinfo {
 				streamdetails {
 					mi?.each { kind, streams ->
