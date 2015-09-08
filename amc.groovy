@@ -343,7 +343,7 @@ groups.each{ group, files ->
 	// fetch subtitles (but not for anime)
 	if (group.anime == null && subtitles != null && files.findAll{ it.isVideo() }.size() > 0) {
 		subtitles.each{ languageCode ->
-			def subtitleFiles = getMissingSubtitles(file:files, lang:languageCode, strict:true, output:'srt', encoding:'UTF-8', db: 'OpenSubtitles', format:'MATCH_VIDEO_ADD_LANGUAGE_TAG') ?: []
+			def subtitleFiles = getMissingSubtitles(file:files, lang:languageCode, strict:true, output:'srt', encoding:'UTF-8', format:'MATCH_VIDEO_ADD_LANGUAGE_TAG') ?: []
 			files += subtitleFiles
 			input += subtitleFiles // make sure subtitles are added to the exclude list and other post processing operations
 			tempFiles += subtitleFiles // if downloaded for temporarily extraced files delete later
