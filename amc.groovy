@@ -45,7 +45,7 @@ def minLengthMS = tryQuietly{ minLengthMS.toLong() }; if (minLengthMS == null) {
 
 // series/anime/movie format expressions
 def format = [
-	tvs:   any{ seriesFormat }{ '''TV Shows/{n}/{episode.special ? 'Special' : 'Season '+s.pad(2)}/{n} - {episode.special ? 'S00E'+special.pad(2) : s00e00} - {t.replaceAll(/[`´‘’ʻ]/, /'/).replaceAll(/[!?.]+$/).replacePart(', Part $1')}{'.'+lang}''' },
+	tvs:   any{ seriesFormat }{ '''TV Shows/{n}/{episode.special ? 'Special' : 'Season '+s.pad(2)}/{n} - {s00e00} - {t.replaceAll(/[`´‘’ʻ]/, /'/).replaceAll(/[!?.]+$/).replacePart(', Part $1')}{'.'+lang}''' },
 	anime: any{ animeFormat  }{ '''Anime/{primaryTitle}/{primaryTitle} - {sxe} - {t.replaceAll(/[!?.]+$/).replaceAll(/[`´‘’ʻ]/, /'/).replacePart(', Part $1')}''' },
 	mov:   any{ movieFormat  }{ '''Movies/{n} ({y})/{n} ({y}){' CD'+pi}{'.'+lang}''' },
 	music: any{ musicFormat  }{ '''Music/{n}/{album+'/'}{pi.pad(2)+'. '}{artist} - {t}''' },
