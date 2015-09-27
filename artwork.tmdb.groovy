@@ -39,7 +39,7 @@ args.eachMediaFolder{ dir ->
 	
 	// maybe require user input
 	if (options.size() != 1 && !_args.nonStrict && !java.awt.GraphicsEnvironment.headless) {
-		movie = javax.swing.JOptionPane.showInputDialog(null, 'Please select Movie:', dir.path, 3, null, options.toArray(), movie)
+		movie = javax.swing.JOptionPane.showInputDialog(null, 'Please select Movie:', dir.name, 3, null, options.toArray(), movie)
 		if (movie == null) return null
 	}
 	
