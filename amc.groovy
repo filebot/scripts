@@ -138,8 +138,11 @@ if (excludeList) {
 	if (excludeList.exists()) {
 		excludePathSet.feed(Files.lines(excludeList.toPath(), StandardCharsets.UTF_8))
 		log.finest "Using excludes: ${excludeList} (${excludePathSet.size()})"
-	} else if ((!excludeList.parentFile.isDirectory() && !excludeList.parentFile.mkdirs()) || (!excludeList.isFile() && !excludeList.createNewFile())) {
-		die("Failed to create excludeList: ${excludeList}")
+	} else {
+		log.finest "Creating excludes: ${excludeList}"
+		if ((!excludeList.parentFile.isDirectory() && !excludeList.parentFile.mkdirs()) || (!excludeList.isFile() && !excludeList.createNewFile())) {
+			die("Failed to create excludeList: ${excludeList}")
+		}
 	}
 }
 
