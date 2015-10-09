@@ -399,7 +399,7 @@ groups.each{ group, files ->
 	
 	// MUSIC MODE
 	else if (group.music) {
-		def dest = rename(file:files, format:format.music, db:'AcoustID')
+		def dest = rename(file:files, format:format.music, db:'ID3 Tags')
 		if (dest == null && failOnError) {
 			fail("Failed to rename music: $group.music")
 		}
