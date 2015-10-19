@@ -17,12 +17,11 @@ http://www.filebot.net/forums/viewtopic.php?f=4&t=215
 
 
 
-If you want to run scripts from a local file or if you want to make your own modifications just 
+If you want to run scripts from a local file or if you want to make your own modifications just clone the repository into your local filesystem:
 ```
 git clone https://github.com/filebot/scripts.git
 ```
-the repository into your local filesystem and call it with 
+You can call local Groovy scripts by specifiying the filepath:
 ```
 filebot -script /path/to/script.groovy
 ```
-instead of using the `filebot -script dev:script` syntax.
