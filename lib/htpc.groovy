@@ -125,14 +125,14 @@ def fetchSeriesArtworkAndNfo(seriesDir, seasonDir, series, season, override = fa
 		if (seasonDir != seriesDir) {
 			fetchSeriesBanner(seasonDir.resolve('poster.jpg'), series, 'season', 'season', season, override, locale)
 			fetchSeriesBanner(seasonDir.resolve('banner.jpg'), series, 'season', 'seasonwide', season, override, locale)
-			
+
 			// folder image (resuse series poster if possible)
 			copyIfPossible(seasonDir.resolve('poster.jpg'), seasonDir.resolve('folder.jpg'))
 		}
 
 		// fetch fanart
-		fetchSeriesFanart(seriesDir.resolve('clearart.png'), series, 'clearart', null, override, locale)
-		fetchSeriesFanart(seriesDir.resolve('logo.png'), series, 'clearlogo', null, override, locale)
+		['hdclearart', 'clearart'].findResult{ type -> fetchSeriesFanart(seriesDir.resolve('clearart.png'), series, type, null, override, locale) }
+		['hdtvlogo', 'clearlogo'].findResult{ type -> fetchSeriesFanart(seriesDir.resolve('logo.png'), series, type, null, override, locale) }
 		fetchSeriesFanart(seriesDir.resolve('landscape.jpg'), series, 'tvthumb', null, override, locale)
 
 		// fetch season fanart
@@ -303,8 +303,8 @@ def fetchMovieArtworkAndNfo(movieDir, movie, movieFile = null, extras = false, o
 		fetchMovieArtwork(movieDir.resolve('poster.jpg'), movieInfo, 'posters', override, locale)
 		fetchMovieArtwork(movieDir.resolve('fanart.jpg'), movieInfo, 'backdrops', override, locale)
 
-		fetchMovieFanart(movieDir.resolve('clearart.png'), movieInfo, 'movieart', null, override, locale)
-		fetchMovieFanart(movieDir.resolve('logo.png'), movieInfo, 'movielogo', null, override, locale)
+		['hdmovieclearart', 'movieart'].findResult { type -> fetchMovieFanart(movieDir.resolve('clearart.png'), movieInfo, type, null, override, locale) }
+		['hdmovielogo', 'movielogo'].findResult { type -> fetchMovieFanart(movieDir.resolve('logo.png'), movieInfo, type, null, override, locale) }
 		['bluray', 'dvd', null].findResult { diskType -> fetchMovieFanart(movieDir.resolve('disc.png'), movieInfo, 'moviedisc', diskType, override, locale) }
 
 		if (extras) {
