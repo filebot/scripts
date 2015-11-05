@@ -40,7 +40,7 @@ def sendmail(param) {
  * Send email using gmail default settings.
  *
  * e.g.
- * sendGmail(subject:'Hello Ant World', message:'Dear Ant, ...', to:'someone@gmail.com', user:'rednoah', password:'correcthorsebatterystaple')
+ * sendGmail(subject:'Hello Ant World', message:'Dear Ant, ...', to:'someone@gmail.com', user:'rednoah@gmail.com', password:'correcthorsebatterystaple')
  */
 def sendGmail(param) {
 	if (!(param.password ==~ /\w{16}/)) {
@@ -48,8 +48,7 @@ def sendGmail(param) {
 	}
 
 	param << [mailhost:'smtp.gmail.com', mailport:'587', ssl:'no', enableStartTLS:'yes']
-	param << [user:param.username ? param.remove('username') + '@gmail.com' : param.user]
-	param << [from: param.from ?: param.user]
+	param << [from: param.user]
 
 	sendmail(param)
 }
