@@ -33,7 +33,7 @@ try {
 		default:
 			print '7-Zip-JBinding: '
 			net.filebot.archive.SevenZipLoader.requireNativeLibraries() // try to load 7-Zip-JBinding native libs (default)
-			println 'OK'
+			try { println net.filebot.archive.SevenZipLoader.getNativeVersion() } catch(MissingMethodException e) { println 'OK' }
 			break
 	}
 } catch(Throwable error) {
@@ -42,7 +42,7 @@ try {
 
 // chromaprint-tools
 try {
-	print 'chromaprint-tools: '
+	print 'Chromaprint: '
 	def fpcalc = AcoustID.getChromaprintCommand()
 	def version = [fpcalc, '-version'].execute().text.trim() ?: 'fpcalc -version failed'
 	println "$version ($fpcalc)"
@@ -96,6 +96,10 @@ println String.format('CPU/MEM: %s Core / %s Max Memory / %s Used Memory', Runti
 
 // Windows 7 (x86)
 println String.format('OS: %s (%s)', _system['os.name'], _system['os.arch'])
+
+// MAS
+println 'Package: ' + Settings.getApplicationDeployment().toUpperCase()
+println 'Data: ' + Settings.getApplicationFolder()
 
 // print uname -a if available
 try {
