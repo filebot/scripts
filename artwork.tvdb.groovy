@@ -1,11 +1,8 @@
-// filebot -script fn:artwork.tvdb /path/to/media/
+// filebot -script fn:artwork.tvdb /path/to/tv/
+
 def override = _args.conflict == 'override'
 
-/*
- * Fetch series and season banners for all tv shows. Series name is auto-detected if possible or the folder name is used.
- */
 
-// artwork/nfo helpers
 include('lib/htpc')
 
 

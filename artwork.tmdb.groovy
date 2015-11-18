@@ -1,9 +1,6 @@
-/**
- * Fetch movie artwork. The movie is determined using the parent folders name.
- * 
- * Usage: filebot -script fn:artwork.tmdb /path/to/movies/
- */
+// filebot -script fn:artwork.tmdb /path/to/movies/
 
+def extras = any{ extras.toBoolean() }{ false }
 def override = _args.conflict == 'override'
 
 
@@ -45,7 +42,7 @@ args.eachMediaFolder{ dir ->
 	
 	println "$dir => $movie"
 	try {
-		fetchMovieArtworkAndNfo(dir, movie, dir.getFiles{ it.isVideo() }.sort{ it.length() }.reverse().findResult{ it }, true, override, _args.locale ?: Locale.ENGLISH)
+		fetchMovieArtworkAndNfo(dir, movie, dir.getFiles{ it.isVideo() }.sort{ it.length() }.reverse().findResult{ it }, extras, override, _args.locale ?: Locale.ENGLISH)
 	} catch(e) {
 		println "${e.class.simpleName}: ${e.message}"
 	}
