@@ -91,7 +91,7 @@ def sendEmailReport = { title, message, messagetype ->
 			message: message,
 			messagemimetype: messagetype,
 			to: any{ mailto } { gmail[0] + '@gmail.com' }, // mail to self by default
-			user: gmail[0] + '@gmail.com',
+			user: gmail[0].contains('@') ? gmail[0] : gmail[0] + '@gmail.com',
 			password: gmail[1]
 		)
 	}
