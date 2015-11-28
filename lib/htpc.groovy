@@ -167,7 +167,7 @@ def fetchMovieArtwork(outputFile, movieInfo, category, override, locale) {
 	return selection.url.saveAs(outputFile)
 }
 
-def fetchAllMovieArtwork(outputFolder, movieInfo, category, override, locale) {
+def fetchAllMovieArtwork(outputFolder, prefix, movieInfo, category, override, locale) {
 	// select and fetch artwork
 	def artwork = TheMovieDB.getArtwork(movieInfo.id as String)
 	def selection = [locale.language, 'en', null].findResults{ l -> artwork.findAll{ (l == it.language || l == null) && it.category == category } }.flatten().findAll{ it?.url }.unique()
@@ -176,7 +176,7 @@ def fetchAllMovieArtwork(outputFolder, movieInfo, category, override, locale) {
 		return null
 	}
 	selection.eachWithIndex{ s, i ->
-		def outputFile = new File(outputFolder, "$category-${(i+1).pad(2)}.jpg")
+		def outputFile = new File(outputFolder, "${prefix}${i+1}.jpg")
 		if (outputFile.exists() && !override) {
 			log.finest "Artwork already exists: $outputFile"
 		} else {
@@ -308,7 +308,7 @@ def fetchMovieArtworkAndNfo(movieDir, movie, movieFile = null, extras = false, o
 		['bluray', 'dvd', null].findResult { diskType -> fetchMovieFanart(movieDir.resolve('disc.png'), movieInfo, 'moviedisc', diskType, override, locale) }
 
 		if (extras) {
-			fetchAllMovieArtwork(movieDir.resolve('backdrops'), movieInfo, 'backdrops', override, locale)
+			fetchAllMovieArtwork(movieDir.resolve('extrafanart'), 'fanart', movieInfo, 'backdrops', override, locale)
 		}
 
 		// folder image (reuse movie poster if possible)
