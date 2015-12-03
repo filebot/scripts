@@ -415,7 +415,8 @@ if (unsorted) {
 	if (unsortedFiles.size() > 0) {
 		log.info "Processing ${unsortedFiles.size()} unsorted files"
 		rename(map: unsortedFiles.collectEntries{ original ->
-			[original, new File(_args.output, getMediaInfo(file: original, format: format.unsorted))]
+			def destination = getMediaInfo(file: original, format: format.unsorted) as File
+			return [original, destination.isAbsolute() ? destination : new File(_args.output, destination)]
 		})
 	}
 }
