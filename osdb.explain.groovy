@@ -1,13 +1,45 @@
-// filebot -script fn:osdb.explain /path/to/video
+// filebot -script fn:osdb.explain /path/to/video --def fetch=y
 
-args.getFiles{ it.isVideo() }.each{
-	def rs = WebServices.OpenSubtitles.getSubtitleList([it] as File[], _args.locale.ISO3Language)
-	rs.each{ f, ds ->
-		println "\n$f"
-		ds.each{ d ->
-			println "\n\t$d"
-			OpenSubtitlesSubtitleDescriptor.Property.values().each{ p ->
-				println "\t\t${p} = ${d.getProperty(p)}"
+def lang = _args.locale.ISO3Language
+def strict = !_args.nonStrict
+
+def fetch = any{ fetch as boolean }{ false }
+
+
+args.getFiles{ it.isVideo() }.each{ f ->
+	println "File: $f"
+
+	// hash search
+	def hash = net.filebot.web.OpenSubtitlesHasher.computeHash(f)
+	def size = f.length()
+	println "Hash Lookup (hash: $hash, size: $size, lang: $lang)"
+
+	def hashMatches = WebServices.OpenSubtitles.getSubtitleList([f] as File[], lang).get(f)
+	hashMatches.eachWithIndex{ d, i ->
+		println "Result ${i+1}: ${d.properties}"
+	}
+	
+	def bestHashMatch = net.filebot.subtitle.SubtitleUtilities.getBestMatch(f, hashMatches, strict)
+	println "Best Hash Match: ${bestHashMatch?.properties}"
+
+	// name search
+	def nameMatches = []
+	if (!strict) {
+		println "Name Lookup (file: $f.nameWithoutExtension, strict: $strict, lang: $lang)"
+		nameMatches = net.filebot.subtitle.SubtitleUtilities.findSubtitleMatches(WebServices.OpenSubtitles, [f], lang, null, true, strict).get(f)
+		nameMatches.eachWithIndex{ d, i ->
+			println "Result ${i+1}: ${d.properties}"
+		}
+		println "Best Name Match: ${nameMatches[0]?.properties}"
+	}
+
+	// fetch subtitles
+	if (fetch) {
+		[hashMatches, nameMatches].flatten().unique{ d -> d.path }.each{ d ->
+			def s = f.resolveSibling(d.path)
+			if (!s.exists()) {
+				println "Fetch $s"
+				d.fetch().saveAs(s)
 			}
 		}
 	}
