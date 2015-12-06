@@ -149,18 +149,10 @@ if (excludeList) {
 
 // specify how to resolve input folders, e.g. grab files from all folders except disk folders and already processed folders (i.e. folders with movie/tvshow nfo files)
 def resolveInput(f) {
-	// ignore system and hidden folders
-	if (f.isHidden()) {
-		if (f.isDirectory()) log.finest "Ignore hidden: $f" // ignore all hidden files but only log hidden folders
-		return []
-	}
-
 	if (f.isDirectory()) {
-		def files = f.listFiles() as List ?: []
-
-		// ignore already processed folders
-		if (files.any{ it.name ==~ /movie.nfo|tvshow.nfo/ }) {
-			log.finest "Ignore processed folder: $f"
+		// ignore system and hidden folders
+		if (f.isHidden() || f.name ==~ /[.@].+|bin|initrd|opt|sbin|var|dev|lib|proc|sys|var.defaults|etc|lost.found|root|tmp|etc.defaults|mnt|run|usr|System.Volume.Information/) {
+			log.finest "Ignore hidden folder: $f"
 			return []
 		}
 
@@ -170,10 +162,15 @@ def resolveInput(f) {
 		}
 
 		// resolve folder recursively
+		def files = f.listFiles() as List ?: []
 		return files.findResults{ resolveInput(it) }
 	}
-	
-	return f
+
+	// ignore non-standard files
+	if (f.isFile() && !f.isHidden()) {
+		return f
+	}
+	return []
 }
 
 // collect input fileset as specified by the given --def parameters
