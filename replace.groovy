@@ -1,7 +1,6 @@
 // filebot -script fn:replace --action test --filter "[.]srt$" --def "e=[.](eng|english)" "r=.en"
 
 
-def action = StandardRenameAction.forName(_args.action)
 def accept = { f -> _args.filter ? f.path =~ _args.filter : true }
 def pattern = Pattern.compile(e, Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE)
 
