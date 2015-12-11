@@ -29,7 +29,7 @@ def plex = tryQuietly{ plex.split(/[ ,|]+/)*.split(/:/).collect{ it.length >= 2 
 def storeReport = tryQuietly{ storeReport.toBoolean() }
 def skipExtract = tryQuietly{ skipExtract.toBoolean() }
 def deleteAfterExtract = tryQuietly{ deleteAfterExtract.toBoolean() }
-def excludeList = tryQuietly{ (excludeList as File).isAbsolute() ? (excludeList as File) : new File(_args.output ?: '.', excludeList).getCanonicalFile() }
+def excludeList = tryQuietly{ (excludeList as File).isAbsolute() ? (excludeList as File) : new File((_args.output ?: '.') as File, excludeList as String).getCanonicalFile() }
 def myepisodes = tryQuietly{ myepisodes.split(':', 2) }
 def gmail = tryQuietly{ gmail.split(':', 2) }
 def mail = tryQuietly{ mail.split(':', 3) }
@@ -413,7 +413,7 @@ if (unsorted) {
 		log.info "Processing ${unsortedFiles.size()} unsorted files"
 		rename(map: unsortedFiles.collectEntries{ original ->
 			def destination = getMediaInfo(file: original, format: format.unsorted) as File
-			return [original, destination.isAbsolute() ? destination : new File(_args.output as File, destination as String)]
+			return [original, destination.isAbsolute() ? destination : new File((_args.output ?: '.') as File, destination as String)]
 		})
 	}
 }
