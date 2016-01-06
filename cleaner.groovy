@@ -53,7 +53,7 @@ args.getFiles{ isClutter(it) && !hasMediaFiles(it.dir) }.each{ clean(it) }
 
 // delete empty folders but exclude given args
 args.getFolders().sort().reverse().each{
-	if (it.isDirectory() && it.listFiles{ !isClutter(it) }.isEmpty()) {
+	if (it.isDirectory() && it.listFiles{ it.isDirectory() || !isClutter(it) }.isEmpty()) {
 		if (deleteRootFolder || !args.contains(it)) 
 			clean(it)
 	}
