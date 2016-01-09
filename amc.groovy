@@ -420,10 +420,9 @@ if (unsorted) {
 
 // run program on newly processed files
 if (exec) {
-	getRenameLog().each{ from, to ->
-		def command = getMediaInfo(format: exec, file: to)
-		log.finest("Execute: $command")
-		execute(command)
+	getRenameLog().collect{ from, to -> getMediaInfo(format: exec, file: to) }.unique().each{
+		log.finest("Execute: $it")
+		execute(it)
 	}
 }
 
