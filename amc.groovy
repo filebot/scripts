@@ -136,12 +136,16 @@ if ((tryQuietly{ ut_dir } == '/') || (args.size() > 0 && (tryQuietly{ ut_dir }?.
 def excludePathSet = new FileSet()
 if (excludeList) {
 	if (excludeList.exists()) {
-		excludePathSet.feed(Files.lines(excludeList.toPath(), StandardCharsets.UTF_8))
+		try {
+			excludePathSet.feed(Files.lines(excludeList.toPath(), StandardCharsets.UTF_8))
+		} catch(Exception e) {
+			fail("Failed to load excludeList: ${e}")
+		}
 		log.finest "Using excludes: ${excludeList} (${excludePathSet.size()})"
 	} else {
 		log.finest "Creating excludes: ${excludeList}"
 		if ((!excludeList.parentFile.isDirectory() && !excludeList.parentFile.mkdirs()) || (!excludeList.isFile() && !excludeList.createNewFile())) {
-			die("Failed to create excludeList: ${excludeList}")
+			fail("Failed to create excludeList: ${excludeList}")
 		}
 	}
 }
