@@ -6,7 +6,6 @@ log.fine("Run script [${_args.script}] at [${now}]")
 _def.each{ n, v -> log.finer('Parameter: ' + [n, n =~ /pushover|pushbullet|mail|myepisodes/ ? '*****' : v].join(' = ')) }
 args.each{ log.finer("Argument: $it") }
 
-
 // initialize variables
 def input = []
 def failOnError = _args.conflict.equalsIgnoreCase('fail')
@@ -126,8 +125,8 @@ if (tryQuietly{ !(ut_state ==~ ut_state_allow) }) {
 }
 
 // check ut mode vs standalone mode
-if ((tryQuietly{ ut_dir } == '/') || (args.size() > 0 && (tryQuietly{ ut_dir }?.size() > 0 || tryQuietly{ ut_file }?.size() > 0)) || (args.size() == 0 && (tryQuietly{ ut_dir } == null && tryQuietly{ ut_file } == null))) {
-	fail("Invalid arguments: pass in either file arguments or ut_dir/ut_file parameters but not both")
+if ((tryQuietly{ ut_dir } == '/') || (tryQuietly{ ut_dir } == '%D') || (args.size() > 0 && (tryQuietly{ ut_dir }?.size() > 0 || tryQuietly{ ut_file }?.size() > 0)) || (args.size() == 0 && (tryQuietly{ ut_dir } == null && tryQuietly{ ut_file } == null))) {
+	fail("Invalid usage: bad file arguments or ut_dir/ut_file parameters")
 }
 
 
