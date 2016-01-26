@@ -567,7 +567,7 @@ if (deleteAfterExtract) {
 
 // clean empty folders, clutter files, etc after move
 if (clean) {
-	if (['COPY', 'HARDLINK'].find{ it.equalsIgnoreCase(_args.action) } && tempFiles.size() > 0) {
+	if (['DUPLICATE', 'COPY', 'HARDLINK'].any{ it.equalsIgnoreCase(_args.action) } && tempFiles.size() > 0) {
 		log.info 'Clean temporary extracted files'
 		// delete extracted files
 		tempFiles.findAll{ it.isFile() }.sort().each{
