@@ -27,7 +27,7 @@ args.eachMediaFolder{ dir ->
 	}
 	
 	if (options.isEmpty()) {
-		println "$dir => movie not found"
+		println "$dir ${videos.name} => movie not found"
 		return
 	}
 	
