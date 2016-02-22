@@ -23,7 +23,7 @@ def exec      = tryQuietly{ exec.toString() }
 // array of kodi/plex/emby hosts
 def kodi = tryQuietly{ any{kodi}{xbmc}.split(/[ ,|]+/) }
 def plex = tryQuietly{ plex.split(/[ ,|]+/)*.split(/:/).collect{ it.length >= 2 ? [host:it[0], token:it[1]] : [host:it[0]] } }
-def emby = tryQuietly{ plex.split(/[ ,|]+/)*.split(/:/).collect{ it.length >= 2 ? [host:it[0], token:it[1]] : [host:it[0]] } }
+def emby = tryQuietly{ emby.split(/[ ,|]+/)*.split(/:/).collect{ it.length >= 2 ? [host:it[0], token:it[1]] : [host:it[0]] } }
 
 // extra options, myepisodes updates and email notifications
 def storeReport = tryQuietly{ storeReport.toBoolean() }
