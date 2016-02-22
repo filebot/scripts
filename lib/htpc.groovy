@@ -53,7 +53,7 @@ def refreshEmbyLibrary(server, port = 8096, token = null) {
 			url += "?api_key=$token"
 		}
 		log.finest "GET: $url"
-		new URL(url).get()
+		new URL(url).post([:], [:])
 	}
 }
 
