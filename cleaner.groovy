@@ -11,7 +11,7 @@ def isClutter(f) {
 		return false
 	
 	// black list
-	def exts    = tryQuietly{ exts }            ?: /jpg|jpeg|png|gif|ico|nfo|info|xml|htm|html|log|srt|sub|idx|md5|sfv|txt|rtf|url|db|dna|log|tgmd|json|data|ignore|srv|srr|nzb|par\d+|part\d+/
+	def exts    = tryQuietly{ exts }            ?: /jpg|jpeg|png|gif|ico|nfo|info|xml|htm|html|log|srt|sub|idx|smi|sub|md5|sfv|txt|rtf|url|db|dna|log|tgmd|json|data|ignore|srv|srr|nzb|rar|par\d+|part\d+/
 	def terms   = tryQuietly{ terms }           ?: /sample|trailer|extras|deleted.scenes|music.video|scrapbook|DS_Store/
 	def minsize = tryQuietly{ minsize as Long } ?:  20 * 1024 * 1024
 	def maxsize = tryQuietly{ maxsize as Long } ?: 100 * 1024 * 1024
