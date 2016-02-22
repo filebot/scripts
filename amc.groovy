@@ -20,9 +20,10 @@ def extras    = tryQuietly{ extras.toBoolean() }
 def clean     = tryQuietly{ clean.toBoolean() }
 def exec      = tryQuietly{ exec.toString() }
 
-// array of xbmc/plex hosts
-def xbmc = tryQuietly{ xbmc.split(/[ ,|]+/) }
+// array of kodi/plex/emby hosts
+def kodi = tryQuietly{ any{kodi}{xbmc}.split(/[ ,|]+/) }
 def plex = tryQuietly{ plex.split(/[ ,|]+/)*.split(/:/).collect{ it.length >= 2 ? [host:it[0], token:it[1]] : [host:it[0]] } }
+def emby = tryQuietly{ plex.split(/[ ,|]+/)*.split(/:/).collect{ it.length >= 2 ? [host:it[0], token:it[1]] : [host:it[0]] } }
 
 // extra options, myepisodes updates and email notifications
 def storeReport = tryQuietly{ storeReport.toBoolean() }
@@ -76,7 +77,7 @@ def forceIgnore = { f ->
 
 
 // include artwork/nfo, pushover/pushbullet and ant utilities as required
-if (artwork || xbmc || plex) { include('lib/htpc') }
+if (artwork || kodi || plex || emby) { include('lib/htpc') }
 if (pushover || pushbullet ) { include('lib/web') }
 if (gmail || mail) { include('lib/ant') }
 
@@ -267,7 +268,7 @@ if (input.size() == 0) die("No files selected for processing")
 
 
 
-// group episodes/movies and rename according to XBMC standards
+// group episodes/movies and rename according to Plex standards
 def groups = input.groupBy{ f ->
 	// skip auto-detection if possible
 	if (forceIgnore(f))
@@ -434,15 +435,14 @@ if (exec) {
 
 
 if (getRenameLog().size() > 0) {
-	
-	// messages used for xbmc / plex / pushover notifications
+	// messages used for kodi / plex / emby pushover notifications
 	def getNotificationTitle = { "FileBot finished processing ${getRenameLog().values().findAll{ !it.isSubtitle() }.size()} files" }.memoize()
 	def getNotificationMessage = { prefix = '• ', postfix = '\n' -> tryQuietly{ ut_title } ?: (input.any{ !it.isSubtitle() } ? input.findAll{ !it.isSubtitle() } : input).collect{ relativeInputPath(it) as File }*.getRoot()*.getNameWithoutExtension().unique().sort{ it.toLowerCase() }.collect{ prefix + it }.join(postfix).trim() }.memoize()
 	
-	// make XMBC scan for new content and display notification message
-	if (xbmc) {
-		xbmc.each{ host ->
-			log.info "Notify XBMC: $host"
+	// make Kodi scan for new content and display notification message
+	if (kodi) {
+		kodi.each{ host ->
+			log.info "Notify Kodi: $host"
 			tryLogCatch{
 				showNotification(host, 9090, getNotificationTitle(), getNotificationMessage(), 'http://app.filebot.net/icon.png')
 				scanVideoLibrary(host, 9090)
@@ -456,6 +456,16 @@ if (getRenameLog().size() > 0) {
 			log.info "Notify Plex: ${instance.host}"
 			tryLogCatch {
 				refreshPlexLibrary(instance.host, 32400, instance.token)
+			}
+		}
+	}
+
+	// make Emby scan for new content
+	if (emby) {
+		emby.each{ instance ->
+			log.info "Notify Emby: ${instance.host}"
+			tryLogCatch {
+				refreshEmbyLibrary(instance.host, 8096, instance.token)
 			}
 		}
 	}
