@@ -12,7 +12,7 @@ args.getFiles{ it.isVideo() }.each{ f ->
 	// hash search
 	def hash = net.filebot.web.OpenSubtitlesHasher.computeHash(f)
 	def size = f.length()
-	println "Hash Lookup (hash: $hash, size: $size, lang: $lang)"
+	println "Hash/Tag Lookup (hash: $hash, size: $size, lang: $lang)"
 
 	def hashMatches = WebServices.OpenSubtitles.getSubtitleList([f] as File[], lang).get(f)
 	hashMatches.eachWithIndex{ d, i ->
