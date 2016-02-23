@@ -6,10 +6,10 @@ def shows = []
 args.getFiles().each{ f ->
 	if (f.isVideo()) {
 		def episode = f.metadata
-		def show = any{ ['tvdb', episode.series, episode.series.seriesId] }{ ['anidb', episode.series, episode.series.animeId] }
-		
+		def show = episode.seriesInfo
+
 		log.finest "${show} | ${episode} | ${f}"
-		
+
 		if (episode != null && show != null) {
 			episodes << episode
 			shows << show
@@ -18,20 +18,14 @@ args.getFiles().each{ f ->
 }
 
 
-def episodeList = shows.collectMany{ s -> 
-	(s[0] == 'tvdb' ? TheTVDB : AniDB).getEpisodeList(s[1])
+def episodeList = shows.collectMany{
+	WebServices.getEpisodeListProvider(it.database).getEpisodeList(it.id, it.order as SortOrder, new Locale(it.language))
 }
-
-// keep only normal episodes
-episodeList = episodeList.findAll{ e ->
-	e.episode != null && e.special == null
-}
-
 
 episodeList = episodeList as LinkedHashSet
 episodeList.removeAll(episodes)
 
 // print missing episodes
-episodeList.each{ e ->
-	println e
+episodeList.each{
+	println it
 }
