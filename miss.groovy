@@ -1,4 +1,4 @@
-// filebot -script fn:miss /path/to/media --log off
+// filebot -script fn:miss /path/to/media
 
 def episodes = []
 def shows = []
@@ -6,9 +6,9 @@ def shows = []
 args.getFiles().each{ f ->
 	if (f.isVideo()) {
 		def episode = f.metadata
-		def show = episode.seriesInfo
+		def show = episode?.seriesInfo
 
-		log.finest "${show} | ${episode} | ${f}"
+		log.finest "$show | $episode | $f"
 
 		if (episode != null && show != null) {
 			episodes << episode
@@ -19,11 +19,11 @@ args.getFiles().each{ f ->
 
 
 def episodeList = shows.collectMany{
-	WebServices.getEpisodeListProvider(it.database).getEpisodeList(it.id, it.order as SortOrder, new Locale(it.language))
-}
+	return WebServices.getEpisodeListProvider(it.database).getEpisodeList(it.id, it.order as SortOrder, new Locale(it.language))
+} as LinkedHashSet
 
-episodeList = episodeList as LinkedHashSet
 episodeList.removeAll(episodes)
+
 
 // print missing episodes
 episodeList.each{
