@@ -242,7 +242,7 @@ def relativeInputPath = { f ->
 
 
 // keep original input around so we can print excluded files later
-def originalInputSet = input as LinkedHashSet
+def originalInputSet = new LinkedHashSet(input)
 
 // process only media files
 input = input.findAll{ f -> (f.isVideo() && !tryQuietly{ f.hasExtension('iso') && !f.isDisk() }) || f.isSubtitle() || (f.isDirectory() && f.isDisk()) || (music && f.isAudio()) }
@@ -342,6 +342,9 @@ groups = groups.groupBy{ group, files -> group.collectEntries{ type, query -> [t
 // log movie/series/anime detection results
 groups.each{ group, files -> log.finest("Group: $group => ${files*.name}") }
 
+// keep track of unsorted files or files that could not be processed for some reason
+def unsortedFiles = []
+
 // process each batch
 groups.each{ group, files ->
 	// fetch subtitles (but not for anime)
@@ -353,57 +356,72 @@ groups.each{ group, files ->
 			tempFiles += subtitleFiles // if downloaded for temporarily extraced files delete later
 		}
 	}
-	
+
 	// EPISODE MODE
 	if ((group.tvs || group.anime) && !group.mov) {
 		// choose series / anime config
-		def config = group.tvs ? [name:group.tvs,   format:format.tvs,   db:'TheTVDB']
-		                       : [name:group.anime, format:format.anime, db:'AniDB']
+		def config = group.tvs ? [name:group.tvs, format:format.tvs, db:'TheTVDB'] : [name:group.anime, format:format.anime, db:'AniDB']
 		def dest = rename(file: files, format: config.format, db: config.db)
-		if (dest && artwork) {
-			dest.mapByFolder().each{ dir, fs ->
-				def hasSeasonFolder = (config.format =~ /(?i)Season/)
-				def sxe = fs.findResult{ eps -> parseEpisodeNumber(eps) }
-				def seriesName = detectSeriesName(fs, true, false)
-				def options = TheTVDB.search(seriesName, _args.locale)
-				if (options.isEmpty()) {
-					log.warning "TV Series not found: $config.name"
-					return
+
+		if (dest != null) {
+			if (artwork) {
+				dest.mapByFolder().each{ dir, fs ->
+					def hasSeasonFolder = (config.format =~ /(?i)Season/)
+					def sxe = fs.findResult{ eps -> parseEpisodeNumber(eps) }
+					def seriesName = detectSeriesName(fs, true, false)
+					def options = TheTVDB.search(seriesName, _args.locale)
+					if (options.isEmpty()) {
+						log.warning "TV Series not found: $config.name"
+						return
+					}
+					def series = options.sortBySimilarity(seriesName, { s -> s.name }).get(0)
+					log.fine "Fetching series artwork for [$series] to [$dir]"
+					fetchSeriesArtworkAndNfo(hasSeasonFolder ? dir.dir : dir, dir, series, sxe && sxe.season > 0 ? sxe.season : 1, false, _args.locale)
 				}
-				def series = options.sortBySimilarity(seriesName, { s -> s.name }).get(0)
-				log.fine "Fetching series artwork for [$series] to [$dir]"
-				fetchSeriesArtworkAndNfo(hasSeasonFolder ? dir.dir : dir, dir, series, sxe && sxe.season > 0 ? sxe.season : 1, false, _args.locale)
 			}
-		}
-		if (dest == null && failOnError) {
+		} else if (failOnError) {
 			fail("Failed to rename series: $config.name")
+		} else {
+			unsortedFiles += files
 		}
 	}
-	
+
 	// MOVIE MODE
 	else if (group.mov && !group.tvs && !group.anime) {
 		def dest = rename(file:files, format:format.mov, db:'TheMovieDB')
-		if (dest && artwork) {
-			dest.mapByFolder().each{ dir, fs ->
-				def movieFile = fs.findAll{ it.isVideo() || it.isDisk() }.sort{ it.length() }.reverse().findResult{ it }
-				if (movieFile != null) {
-					def movie = detectMovie(movieFile, false)
-					log.fine "Fetching movie artwork for [$movie] to [$dir]"
-					fetchMovieArtworkAndNfo(dir, movie, movieFile, extras, false, _args.locale)
+
+		if (dest != null) {
+			if (artwork) {
+				dest.mapByFolder().each{ dir, fs ->
+					def movieFile = fs.findAll{ it.isVideo() || it.isDisk() }.sort{ it.length() }.reverse().findResult{ it }
+					if (movieFile != null) {
+						def movie = detectMovie(movieFile, false)
+						log.fine "Fetching movie artwork for [$movie] to [$dir]"
+						fetchMovieArtworkAndNfo(dir, movie, movieFile, extras, false, _args.locale)
+					}
 				}
 			}
-		}
-		if (dest == null && failOnError) {
+		} else if (failOnError) {
 			fail("Failed to rename movie: $group.mov")
+		} else {
+			unsortedFiles += files
 		}
 	}
-	
+
 	// MUSIC MODE
 	else if (group.music) {
 		def dest = rename(file:files, format:format.music, db:'ID3 Tags')
+
 		if (dest == null && failOnError) {
 			fail("Failed to rename music: $group.music")
+		} else {
+			unsortedFiles += files
 		}
+	}
+
+	// UNSORTED
+	else {
+		unsortedFiles += files
 	}
 }
 
@@ -412,7 +430,6 @@ groups.each{ group, files ->
 
 // deal with remaining files that cannot be sorted automatically
 if (unsorted) {
-	def unsortedFiles = (input - getRenameLog().keySet())
 	if (unsortedFiles.size() > 0) {
 		log.info "Processing ${unsortedFiles.size()} unsorted files"
 		rename(map: unsortedFiles.collectEntries{ original ->
