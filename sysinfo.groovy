@@ -112,7 +112,7 @@ try {
 // check for updates
 try {
 	if (System.getProperty("application.update") != 'skip') {
-		def update = new XmlSlurper().parse('http://app.filebot.net/update.xml')
+		def update = new XmlSlurper().parse('https://app.filebot.net/update.xml')
 		def latestRev = update.revision.text() as int
 		def latestApp  = update.name.text()
 
