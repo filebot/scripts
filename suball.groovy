@@ -9,16 +9,19 @@ setDefaultValues(
 	ignoreTextLanguage: '.+'
 )
 
+
 def minFileSize = minFileSize as long
 def minLengthMS = minLengthMS as long
 
 def minAgeTimeStamp = any{ now.time - ((minAgeDays as double) * 24 * 60 * 60 * 1000L) as long }{ null }
 def maxAgeTimeStamp = any{ now.time - ((maxAgeDays as double) * 24 * 60 * 60 * 1000L) as long }{ null }
 
+
 def ignore = { f, m ->
 	log.finest "Ignore [$f.name]: $m"
 	return false
 }
+
 
 def accept = { f ->
 	def creationDate = f.creationDate
@@ -60,13 +63,7 @@ def accept = { f ->
 /*
  * Get subtitles for all your media files  
  */
-args.eachMediaFolder { dir ->
-	def files = dir.listFiles{ f -> f.isVideo() && accept(f) }
-
-	if (files.size() > 0) {
-		log.info "Fetch subtitles for [$dir]"
-		getMissingSubtitles(file: files)
-	} else {
-		log.fine "Exclude: $dir"
-	}
+args.getFiles{ it.isVideo() && accept(it) }.groupBy{ it.dir }.each{ dir, files ->
+	log.info "Fetch subtitles for [$dir]"
+	getMissingSubtitles(file: files)
 }
