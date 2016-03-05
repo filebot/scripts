@@ -14,11 +14,11 @@ args.getFiles{ it.isVideo() }.each{ f ->
 	def size = f.length()
 	println "Hash/Tag Lookup (hash: $hash, size: $size, lang: $lang)"
 
-	def hashMatches = WebServices.OpenSubtitles.getSubtitleList([f] as File[], lang).get(f)
+	def hashMatches = net.filebot.subtitle.SubtitleUtilities.lookupSubtitlesByHash(WebServices.OpenSubtitles, [f], lang, true, strict).get(f)
 	hashMatches.eachWithIndex{ d, i ->
 		println "Result ${i+1}: ${d.properties}"
 	}
-	
+
 	def bestHashMatch = net.filebot.subtitle.SubtitleUtilities.getBestMatch(f, hashMatches, strict)
 	println "Best Hash Match: ${bestHashMatch?.properties}"
 
@@ -26,7 +26,7 @@ args.getFiles{ it.isVideo() }.each{ f ->
 	def nameMatches = []
 	if (!strict) {
 		println "Name Lookup (file: $f.nameWithoutExtension, strict: $strict, lang: $lang)"
-		nameMatches = net.filebot.subtitle.SubtitleUtilities.findSubtitleMatches(WebServices.OpenSubtitles, [f], lang, null, true, strict).get(f)
+		nameMatches = net.filebot.subtitle.SubtitleUtilities.findSubtitlesByName(WebServices.OpenSubtitles, [f], lang, null, true, strict).get(f)
 		nameMatches.eachWithIndex{ d, i ->
 			println "Result ${i+1}: ${d.properties}"
 		}
