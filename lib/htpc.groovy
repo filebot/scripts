@@ -178,7 +178,7 @@ def fetchMovieArtwork(outputFile, movieInfo, category, override, locale) {
 
 	// select and fetch artwork
 	def artwork = TheMovieDB.getArtwork(movieInfo.id as String)
-	def selection = [locale.language, 'en', null].findResult{ l -> artwork.find{ (l == it.language || l == null) && it.category == category } }
+	def selection = [locale.language, 'en', null].findResult{ l -> artwork.find{ l == it.language && it.category == category } }
 	if (selection == null) {
 		log.finest "Artwork not found: $outputFile"
 		return null
@@ -190,7 +190,7 @@ def fetchMovieArtwork(outputFile, movieInfo, category, override, locale) {
 def fetchAllMovieArtwork(outputFolder, prefix, movieInfo, category, override, locale) {
 	// select and fetch artwork
 	def artwork = TheMovieDB.getArtwork(movieInfo.id as String)
-	def selection = [locale.language, 'en', null].findResults{ l -> artwork.findAll{ (l == it.language || l == null) && it.category == category } }.flatten().findAll{ it?.url }.unique()
+	def selection = [locale.language, 'en', null].findResults{ l -> artwork.findAll{ l == it.language && it.category == category } }.flatten().findAll{ it?.url }.unique()
 	if (selection == null) {
 		log.finest "Artwork not found: $outputFolder"
 		return null
