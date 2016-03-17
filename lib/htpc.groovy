@@ -190,7 +190,7 @@ def fetchMovieArtwork(outputFile, movieInfo, category, override, locale) {
 def fetchAllMovieArtwork(outputFolder, prefix, movieInfo, category, override, locale) {
 	// select and fetch artwork
 	def artwork = TheMovieDB.getArtwork(movieInfo.id as String)
-	def selection = [locale.language, 'en', null].findResults{ l -> artwork.findAll{ l == it.language && it.category == category } }.flatten().findAll{ it?.url }.unique()
+	def selection = [locale.language, 'en', null].findResults{ l -> artwork.findAll{ l == it.language && it.category == category } }.flatten().unique{ it.url }
 	if (selection == null) {
 		log.finest "Artwork not found: $outputFolder"
 		return null
