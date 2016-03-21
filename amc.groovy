@@ -254,7 +254,7 @@ input = input.findAll{ f -> !(relativeInputPath(f) =~ /(?<=\b|_)(?i:sample|trail
 input = input.findAll{ f -> !(f.isVideo() && ((minFileSize > 0 && f.length() < minFileSize) || (minLengthMS > 0 && tryQuietly{ getMediaInfo(file:f, format:'{duration}', filter:null).toLong() < minLengthMS }))) }
 
 // ignore subtitles files that are not stored in the same folder as the movie
-input = input.findAll{ f -> !(f.isSubtitle() && !input.findAll{ it.isVideo() }.any{ f.isDerived(it) }) }
+input = input.findAll{ f -> !(f.isSubtitle() && !input.findAll{ it.isVideo() }.any{ v -> f.isDerived(v) || f.path.startsWith(v.parentFile.path) }) }
 
 // ensure that the final input set is sorted
 input = input.sort()
@@ -281,12 +281,12 @@ def groups = input.groupBy{ f ->
 		return [tvs:   detectSeriesName(f, true, false) ?: detectSeriesName(input.findAll{ s -> f.dir == s.dir && s.isVideo() }, true, false)]
 	if (forceAnime(f))
 		return [anime: detectSeriesName(f, false, true) ?: detectSeriesName(input.findAll{ s -> f.dir == s.dir && s.isVideo() }, false, true)]
-	
-	
+
+
 	def tvs = detectSeriesName(f, true, false)
 	def mov = detectMovie(f, false)
 	log.fine("$f.name [series: $tvs, movie: $mov]")
-	
+
 	// DECIDE EPISODE VS MOVIE (IF NOT CLEAR)
 	if (tvs && mov) {
 		def norm = { s -> s.ascii().normalizePunctuation().lower().space(' ') }
@@ -295,7 +295,7 @@ def groups = input.groupBy{ f ->
 		def sn = norm(tvs)
 		def mn = norm(mov.name)
 		def my = mov.year as String
-		
+
 		/*
 		println '--- EPISODE FILTER (POS) ---'
 		println parseEpisodeNumber(fn, true) || parseDate(fn)
@@ -312,7 +312,7 @@ def groups = input.groupBy{ f ->
 		println ([dn, fn].find{ it =~ mn && !(it.after(mn) =~ /\b\d{1,3}\b/) && (it.getSimilarity(mn) > 0.2 + it.getSimilarity(sn)) } != null)
 		println (detectMovie(f, true) && [dn, fn].find{ it =~ /(19|20)\d{2}/ } != null)
 		*/
-		
+
 		// S00E00 | 2012.07.21 | One Piece 217 | Firefly - Serenity | [Taken 1, Taken 2, Taken 3, Taken 4, ..., Taken 10]
 		if ((parseEpisodeNumber(fn, true) || parseDate(fn) || ([dn, fn].find{ it =~ sn && matchMovie(it) == null } && (parseEpisodeNumber(stripReleaseInfo(fn.after(sn), false), false) || stripReleaseInfo(fn.after(sn), false) =~ /\D\d{1,2}\D{1,3}\d{1,2}\D/) && matchMovie(fn) == null) || (fn.after(sn) ==~ /.{0,3} - .+/ && matchMovie(fn) == null) || f.dir.listFiles{ it.isVideo() && (dn =~ sn || norm(it.name) =~ sn) && it.name =~ /\d{1,3}/}.findResults{ it.name.matchAll(/\d{1,3}/) as Set }.unique().size() >= 10 || mov.year < 1900) && !( (mn == fn) || (mov.year >= 1950 && f.listPath().reverse().take(3).find{ it.name.contains(my) && parseEpisodeNumber(it.name.after(my), false) == null }) || (mn =~ sn && [dn, fn].find{ it =~ /\b(19|20)\d{2}\b/ && parseEpisodeNumber(it.after(/\b(19|20)\d{2}\b/), false) == null }) ) ) {
 			log.fine("Exclude Movie: $mov")
@@ -322,7 +322,7 @@ def groups = input.groupBy{ f ->
 			tvs = null
 		}
 	}
-	
+
 	// CHECK CONFLICT
 	if (((mov && tvs) || (!mov && !tvs))) {
 		if (failOnError) {
@@ -332,7 +332,7 @@ def groups = input.groupBy{ f ->
 			return [tvs: null, mov: null, anime: null]
 		}
 	}
-	
+
 	return [tvs: tvs, mov: mov, anime: null]
 }
 
@@ -455,7 +455,7 @@ if (getRenameLog().size() > 0) {
 	// messages used for kodi / plex / emby pushover notifications
 	def getNotificationTitle = { "FileBot finished processing ${getRenameLog().values().findAll{ !it.isSubtitle() }.size()} files" }.memoize()
 	def getNotificationMessage = { prefix = '• ', postfix = '\n' -> tryQuietly{ ut_title } ?: (input.any{ !it.isSubtitle() } ? input.findAll{ !it.isSubtitle() } : input).collect{ relativeInputPath(it) as File }*.getRoot()*.getNameWithoutExtension().unique().sort{ it.toLowerCase() }.collect{ prefix + it }.join(postfix).trim() }.memoize()
-	
+
 	// make Kodi scan for new content and display notification message
 	if (kodi) {
 		kodi.each{ host ->
@@ -466,7 +466,7 @@ if (getRenameLog().size() > 0) {
 			}
 		}
 	}
-	
+
 	// make Plex scan for new content
 	if (plex) {
 		plex.each{ instance ->
@@ -486,7 +486,7 @@ if (getRenameLog().size() > 0) {
 			}
 		}
 	}
-	
+
 	// mark episodes as 'acquired'
 	if (myepisodes) {
 		log.info 'Update MyEpisodes'
@@ -494,14 +494,14 @@ if (getRenameLog().size() > 0) {
 			executeScript('update-mes', [login:myepisodes.join(':'), addshows:true], getRenameLog().values())
 		}
 	}
-	
+
 	if (pushover) {
 		log.info 'Sending Pushover notification'
 		tryLogCatch {
 			Pushover(pushover[0], pushover.length == 1 ? 'wcckDz3oygHSU2SdIptvnHxJ92SQKK' : pushover[1]).send(getNotificationTitle(), getNotificationMessage())
 		}
 	}
-	
+
 	// messages used for email / pushbullet reports
 	def getReportSubject = { getNotificationMessage('', ', ') }
 	def getReportTitle = { '[FileBot] ' + getReportSubject() }
@@ -552,14 +552,14 @@ if (getRenameLog().size() > 0) {
 			}
 		}
 	}
-	
+
 	// store processing report
 	if (storeReport) {
 		def reportFolder = new File(Settings.getApplicationFolder(), 'reports').getCanonicalFile()
 		def reportFile = getReportMessage().saveAs(new File(reportFolder, "AMC ${now.format('''[yyyy-MM-dd HH'h'mm'm']''')} ${getReportSubject().take(50).trim()}.html".validateFileName()))
 		log.finest("Saving report as ${reportFile}")
 	}
-	
+
 	// send pushbullet report
 	if (pushbullet) {
 		log.info 'Sending PushBullet report'
@@ -567,7 +567,7 @@ if (getRenameLog().size() > 0) {
 			PushBullet(pushbullet).sendFile(getNotificationTitle(), getReportMessage(), 'text/html', getNotificationMessage(), tryQuietly{ mailto })
 		}
 	}
-	
+
 	// send email report
 	if (gmail || mail) {
 		tryLogCatch {
@@ -607,7 +607,7 @@ if (clean) {
 			if (it.getFiles().isEmpty()) it.deleteDir()
 		}
 	}
-	
+
 	// deleting remaining files only makes sense after moving files
 	if ('MOVE'.equalsIgnoreCase(_args.action)) {
 		def cleanerInput = !args.empty ? args : ut_kind == 'multi' && ut_dir ? [ut_dir as File] : []
