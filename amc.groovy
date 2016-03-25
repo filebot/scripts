@@ -55,7 +55,7 @@ def format = [
 
 // force movie/series/anime logic
 def forceMovie = { f ->
-	label =~ /^(?i:Movie|Film|Concert)/ || f.dir.listPath().any{ it.name ==~ /(?i:Movies)/ }  || f.path =~ /(?<=tt)\\d{7}/
+	label =~ /^(?i:Movie|Film|Concert)/ || f.dir.listPath().any{ it.name ==~ /(?i:Movies)/ }  || f.path =~ /tt\d{7}/
 }
 
 def forceSeries = { f ->
@@ -296,31 +296,40 @@ def groups = input.groupBy{ f ->
 		def mn = norm(mov.name)
 		def my = mov.year as String
 
-		/*
-		println '--- EPISODE FILTER (POS) ---'
-		println parseEpisodeNumber(fn, true) || parseDate(fn)
-		println ([dn, fn].find{ it =~ sn && matchMovie(it) == null } && (parseEpisodeNumber(stripReleaseInfo(fn.after(sn), false), false) || stripReleaseInfo(fn.after(sn), false) =~ /\D\d{1,2}\D{1,3}\d{1,2}\D/) && matchMovie(fn) == null)
-		println (fn.after(sn) ==~ /.{0,3} - .+/ && matchMovie(fn) == null)
-		println f.dir.listFiles{ it.isVideo() && (dn =~ sn || norm(it.name) =~ sn) && it.name =~ /\d{1,3}/}.findResults{ it.name.matchAll(/\d{1,3}/) as Set }.unique().size() >= 10
-		println '--- EPISODE FILTER (NEG) ---'
-		println (mn == fn)
-		println (mov.year >= 1950 && f.listPath().reverse().take(3).find{ it.name.contains(my) && parseEpisodeNumber(it.name.after(my), false) == null })
-		println (mn =~ sn && [dn, fn].find{ it =~ /\b(19|20)\d{2}\b/ && parseEpisodeNumber(it.after(/\b(19|20)\d{2}\b/), false) == null })
-		println '--- MOVIE FILTER (POS) ---'
-		println (fn.contains(mn) && parseEpisodeNumber(fn.after(mn), false) == null)
-		println (mn.getSimilarity(fn) >= 0.8 || [dn, fn].find{ it.findAll( ~/\d{4}/ ).findAll{ y -> [mov.year-1, mov.year, mov.year+1].contains(y.toInteger()) }.size() > 0 } != null)
-		println ([dn, fn].find{ it =~ mn && !(it.after(mn) =~ /\b\d{1,3}\b/) && (it.getSimilarity(mn) > 0.2 + it.getSimilarity(sn)) } != null)
-		println (detectMovie(f, true) && [dn, fn].find{ it =~ /(19|20)\d{2}/ } != null)
-		*/
-
 		// S00E00 | 2012.07.21 | One Piece 217 | Firefly - Serenity | [Taken 1, Taken 2, Taken 3, Taken 4, ..., Taken 10]
-		if ((parseEpisodeNumber(fn, true) || parseDate(fn) || ([dn, fn].find{ it =~ sn && matchMovie(it) == null } && (parseEpisodeNumber(stripReleaseInfo(fn.after(sn), false), false) || stripReleaseInfo(fn.after(sn), false) =~ /\D\d{1,2}\D{1,3}\d{1,2}\D/) && matchMovie(fn) == null) || (fn.after(sn) ==~ /.{0,3} - .+/ && matchMovie(fn) == null) || f.dir.listFiles{ it.isVideo() && (dn =~ sn || norm(it.name) =~ sn) && it.name =~ /\d{1,3}/}.findResults{ it.name.matchAll(/\d{1,3}/) as Set }.unique().size() >= 10 || mov.year < 1900) && !( (mn == fn) || (mov.year >= 1950 && f.listPath().reverse().take(3).find{ it.name.contains(my) && parseEpisodeNumber(it.name.after(my), false) == null }) || (mn =~ sn && [dn, fn].find{ it =~ /\b(19|20)\d{2}\b/ && parseEpisodeNumber(it.after(/\b(19|20)\d{2}\b/), false) == null }) ) ) {
-			log.fine("Exclude Movie: $mov")
-			mov = null
-		} else if ((fn.contains(mn) && parseEpisodeNumber(fn.after(mn), false) == null) || (mn.getSimilarity(fn) >= 0.8 || [dn, fn].find{ it.findAll( ~/\d{4}/ ).findAll{ y -> [mov.year-1, mov.year, mov.year+1].contains(y.toInteger()) }.size() > 0 } != null) || ([dn, fn].find{ it =~ mn && !(it.after(mn) =~ /\b\d{1,3}\b/) && (it.getSimilarity(mn) > 0.2 + it.getSimilarity(sn)) } != null) || (detectMovie(f, false) && [dn, fn].find{ it =~ /(19|20)\d{2}|(?i:CD)[1-9]/ } != null)) {
-			log.fine("Exclude Series: $tvs")
-			tvs = null
+		def metrics = [
+			[tvs: -1, mov:  0, fun: { mn == fn } ],
+			[tvs: -1, mov:  0, fun: { mov.year >= 1950 && f.listPath().reverse().take(3).find{ it.name.contains(my) && parseEpisodeNumber(it.name.after(my), false) == null } } ],
+			[tvs: -1, mov:  0, fun: { mn =~ sn && [dn, fn].find{ it =~ /\b(19|20)\d{2}\b/ && parseEpisodeNumber(it.after(/\b(19|20)\d{2}\b/), false) == null } } ],
+			[tvs:  5, mov: -1, fun: { parseEpisodeNumber(fn, true) || parseDate(fn) } ],
+			[tvs:  5, mov: -1, fun: { f.dir.listFiles{ it.isVideo() && (dn =~ sn || norm(it.name) =~ sn) && it.name =~ /\d{1,3}/}.findResults{ it.name.matchAll(/\d{1,3}/) as Set }.unique().size() >= 10 } ],
+			[tvs:  1, mov: -1, fun: { fn.after(sn) ==~ /.{0,3}\s-\s.+/ && matchMovie(fn) == null } ],
+			[tvs:  1, mov: -1, fun: { [dn, fn].find{ it =~ sn && matchMovie(it) == null } && (parseEpisodeNumber(stripReleaseInfo(fn.after(sn), false), false) || stripReleaseInfo(fn.after(sn), false) =~ /\D\d{1,2}\D{1,3}\d{1,2}\D/) && matchMovie(fn) == null } ],
+			[tvs: -1, mov:  1, fun: { fn =~ /tt\d{7}/ } ],
+			[tvs: -1, mov:  1, fun: { f.nameWithoutExtension ==~ /[\D\s_.]+/ } ],
+			[tvs: -1, mov:  5, fun: { detectMovie(f, true) && [dn, fn].find{ it =~ /(19|20)\d{2}/ } != null } ],
+			[tvs: -1, mov:  1, fun: { fn.contains(mn) && parseEpisodeNumber(fn.after(mn), false) == null } ],
+			[tvs: -1, mov:  1, fun: { mn.getSimilarity(fn) >= 0.8 || [dn, fn].find{ it.findAll( ~/\d{4}/ ).findAll{ y -> [mov.year-1, mov.year, mov.year+1].contains(y.toInteger()) }.size() > 0 } != null } ],
+			[tvs: -1, mov:  1, fun: { [dn, fn].find{ it =~ mn && !(it.after(mn) =~ /\b\d{1,3}\b/) && (it.getSimilarity(mn) > 0.2 + it.getSimilarity(sn)) } != null } ],
+			[tvs: -1, mov:  1, fun: { detectMovie(f, false).aliasNames.find{ fn.contains(norm(it)) } } ]
+		]
+
+		def score = [tvs: 0, mov: 0]		
+		metrics.each{
+			if (tvs && mov && it.fun()) {
+				score.tvs += it.tvs
+				score.mov += it.mov
+
+				if (score.tvs >= 1 && score.mov <= -1) {
+					log.fine("Exclude Movie: $mov")
+					mov = null
+				} else if (score.mov >= 1 && score.tvs <= -1) {
+					log.fine("Exclude Series: $tvs")
+					tvs = null
+				}
+			}
 		}
+
 	}
 
 	// CHECK CONFLICT
@@ -329,11 +338,11 @@ def groups = input.groupBy{ f ->
 			fail("Media detection failed")
 		} else {
 			log.fine("Unable to differentiate: [$f.name] => [$tvs] VS [$mov]")
-			return [tvs: null, mov: null, anime: null]
+			return [:]
 		}
 	}
 
-	return [tvs: tvs, mov: mov, anime: null]
+	return [tvs: tvs, mov: mov]
 }
 
 // group entries by unique tvs/mov descriptor
