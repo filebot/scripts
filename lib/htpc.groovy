@@ -29,7 +29,7 @@ def showNotification(host, port, title, message, image) {
 def refreshPlexLibrary(server, port = 32400, token = null) {
 	tryLogCatch {
 		// use HTTPS if hostname is specified, use HTTP if IP is specified
-		def protocol = server.split(/[.]/).length == 4 ? 'http' : 'https'
+		def protocol = server ==~ /localhost|[0-9.:]+/ ? 'http' : 'https'
 		def url = "$protocol://$server:$port/library/sections/all/refresh"
 		if (token) {
 			url += "?X-Plex-Token=$token"
