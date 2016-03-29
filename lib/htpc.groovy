@@ -84,7 +84,7 @@ def fetchSeriesFanart(outputFile, series, type, season, override, locale) {
 		return outputFile
 	}
 
-	def fanart = [locale, null].findResult{ lang -> FanartTV.getSeriesArtwork(series.seriesId).find{ type == it.type && (season == null || season == it.season) && (lang == null || lang == it.language) }}
+	def fanart = [locale, null].findResult{ lang -> FanartTV.getSeriesArtwork(series.id).find{ type == it.type && (season == null || season == it.season) && (lang == null || lang == it.language) }}
 	if (fanart == null) {
 		log.finest "Fanart not found: $outputFile / $type"
 		return null
