@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<project name="filebot-scripts" default="repository">
+	<property file="profile.properties" />
+
+	<property name="bundle" value="bundle"/>
+
+	<target name="repository">
+		<jar destfile="${bundle}.jar">
+			<fileset dir="." includes="**/*.groovy" />
+		</jar>
+		<signjar alias="${bundle}" keystore="${bundle}.jks" storepass="${profile.storepass}" keypass="${profile.keypass}">
+			<path>
+				<fileset dir="." includes="*.jar" />
+			</path>
+		</signjar>
+	</target>
+
+	<target name="genkey">
+		<exec executable="keytool">
+			<arg line="-genkey -v"/>
+			<arg line="-keyalg RSA -keysize 2048"/>
+			<arg line="-validity 3650"/>
+			<arg line="-dname 'CN=rednoah, O=FileBot'"/>
+			<arg line="-alias ${bundle}"/>
+			<arg line="-keystore ${bundle}.jks"/>
+			<arg line="-storepass ${profile.storepass}"/>
+			<arg line="-keypass ${profile.keypass}"/>
+		</exec>
+		<exec executable="keytool">
+			<arg line="-export -v"/>
+			<arg line="-file ${bundle}.cer"/>
+			<arg line="-alias ${bundle}"/>
+			<arg line="-keystore ${bundle}.jks"/>
+			<arg line="-storepass ${profile.storepass}"/>
+			<arg line="-keypass ${profile.keypass}"/>
+		</exec>
+	</target>
+
+</project>
