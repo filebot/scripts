@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <project name="filebot-scripts" default="repository">
-	<property file="profile.properties" />
+	<property file="repository.properties" />
 
 	<property name="bundle" value="repository"/>
 
@@ -8,10 +8,11 @@
 		<jar destfile="${bundle}.jar">
 			<fileset dir="." includes="**/*.groovy" />
 		</jar>
-		<signjar jar="${bundle}.jar" alias="${bundle}" keystore="${bundle}.jks" storepass="${profile.storepass}" keypass="${profile.keypass}" />
+		<signjar jar="${bundle}.jar" alias="${bundle}" keystore="${bundle}.jks" storepass="${repository.storepass}" keypass="${repository.keypass}" />
 	</target>
 
 	<target name="genkey">
+		<delete file="${bundle}.jks" />
 		<exec executable="keytool">
 			<arg line="-genkey -v"/>
 			<arg line="-keyalg RSA -keysize 2048"/>
@@ -19,16 +20,16 @@
 			<arg line="-dname 'CN=rednoah, O=FileBot'"/>
 			<arg line="-alias ${bundle}"/>
 			<arg line="-keystore ${bundle}.jks"/>
-			<arg line="-storepass ${profile.storepass}"/>
-			<arg line="-keypass ${profile.keypass}"/>
+			<arg line="-storepass ${repository.storepass}"/>
+			<arg line="-keypass ${repository.keypass}"/>
 		</exec>
 		<exec executable="keytool">
 			<arg line="-export -v"/>
 			<arg line="-file ${bundle}.cer"/>
 			<arg line="-alias ${bundle}"/>
 			<arg line="-keystore ${bundle}.jks"/>
-			<arg line="-storepass ${profile.storepass}"/>
-			<arg line="-keypass ${profile.keypass}"/>
+			<arg line="-storepass ${repository.storepass}"/>
+			<arg line="-keypass ${repository.keypass}"/>
 		</exec>
 	</target>
 
