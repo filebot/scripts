@@ -47,12 +47,12 @@ def accept = { f ->
 	}
 
 	// ignore files that are too short
-	if (minLengthMS > 0 && ((getMediaInfo(file:f, format:'{duration}', filter:null) ?: minLengthMS) as double) < minLengthMS) {
+	if (minLengthMS > 0 && ((getMediaInfo(f, '{duration}') ?: minLengthMS) as double) < minLengthMS) {
 		return ignore(f, 'Video duration is too short')
 	}
 
 	// ignore files that already have subtitles
-	if (ignoreTextLanguage != null && getMediaInfo(file:f, format:'{media.TextLanguageList}', filter:null).findMatch(ignoreTextLanguage) != null) {
+	if (ignoreTextLanguage != null && getMediaInfo(f, '{media.TextLanguageList}').findMatch(ignoreTextLanguage) != null) {
 		return ignore(f, 'Video file already contains embedded subtitles')
 	}
 

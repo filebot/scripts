@@ -26,7 +26,7 @@ args.getFiles{ f -> f.xattr.size() > 0 }.each{ f ->
 	// import xattr metadata into Mac OS X Finder tags (UAYOR)
 	if (_args.action == 'import') {
 		def xkey = 'com.apple.metadata:_kMDItemUserTags'
-		def info = getMediaInfo(file:f, format:'''{if (movie) 'Movie'};{if (episode) 'Episode'};{source};{vf};{sdhd}''', filter:null)
+		def info = getMediaInfo(f, '''{if (movie) 'Movie'};{if (episode) 'Episode'};{source};{vf};{sdhd}''')
 		def tags = info.split(';')*.trim().findAll{ it.length() > 0 }
 
 		def plist = '''<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n''' + XML{

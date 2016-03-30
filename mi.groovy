@@ -21,7 +21,7 @@ if (csvFile.name.endsWith('.csv')) {
 
 		// print info for each video file (sorted by filename)
 		args.getFiles{ it.isVideo() }.sort{ a, b -> a.name.compareToIgnoreCase(b.name) }.each{
-			def mi = getMediaInfo(file:it, format:template, filter:null)
+			def mi = getMediaInfo(it, template)
 
 			// print to console
 			println mi

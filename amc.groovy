@@ -43,35 +43,52 @@ def ignore = tryQuietly{ ignore } ?: null
 def minFileSize = tryQuietly{ minFileSize.toLong() }; if (minFileSize == null) { minFileSize = 50 * 1000L * 1000L }
 def minLengthMS = tryQuietly{ minLengthMS.toLong() }; if (minLengthMS == null) { minLengthMS = 10 * 60 * 1000L }
 
+
+
 // series/anime/movie format expressions
 def format = [
-	tvs:   any{ seriesFormat }{ '''TV Shows/{n}/{episode.special ? 'Special' : 'Season '+s.pad(2)}/{n} - {s00e00} - {t.replaceAll(/[`´‘’ʻ]/, /'/).replaceAll(/[!?.]+$/).replacePart(', Part $1')}{'.'+lang}''' },
-	anime: any{ animeFormat  }{ '''Anime/{primaryTitle}/{primaryTitle} - {sxe} - {t.replaceAll(/[!?.]+$/).replaceAll(/[`´‘’ʻ]/, /'/).replacePart(', Part $1')}''' },
-	mov:   any{ movieFormat  }{ '''Movies/{n} ({y})/{n} ({y}){' CD'+pi}{'.'+lang}''' },
-	music: any{ musicFormat  }{ '''Music/{n}/{album+'/'}{pi.pad(2)+'. '}{artist} - {t}''' },
-	unsorted: any{ unsortedFormat }{ '''Unsorted/{file.structurePathTail}''' }
+	tvs:   any{ seriesFormat }{ '{plex}' },
+	anime: any{ animeFormat  }{ '{plex}' },
+	mov:   any{ movieFormat  }{ '{plex}' },
+	music: any{ musicFormat  }{ '{plex}' },
+	unsorted: any{ unsortedFormat }{ 'Unsorted/{file.structurePathTail}' }
 ]
 
 
-// force movie/series/anime logic
+
+// force Movie / TV Series / Anime behaviour
 def forceMovie = { f ->
-	label =~ /^(?i:Movie|Film|Concert)/ || f.dir.listPath().any{ it.name ==~ /(?i:Movies)/ }  || f.path =~ /tt\d{7}/
+	label =~ /^(?i:Movie|Film|Concert)/
+	|| f.dir.listPath().any{ it.name ==~ /(?i:Movies)/ }
+	|| f.isMovie()
 }
 
 def forceSeries = { f ->
-	label =~ /^(?i:TV|Show|Series|Documetary)/ || f.dir.listPath().any{ it.name ==~ /(?i:TV.Shows)/ } || parseEpisodeNumber(f.path) || parseDate(f.path) || f.path =~ /(?i:tvs-|tvp-|EP[0-9]{2,3}|Season\D?[0-9]{1,2}\D|(19|20)\d{2}.S\d{2})/
+	label =~ /^(?i:TV|Show|Series|Documetary)/
+	|| f.dir.listPath().any{ it.name ==~ /(?i:TV.Shows)/ }
+	|| f.path =~ /(?i:tvs-|tvp-|EP\d{1,3}|Season\D?\d{1,2}|\d{4}.S\d{2})/
+	|| f.isEpisode()
 }
 
 def forceAnime = { f ->
-	label =~ /^(?i:Anime)/ || f.dir.listPath().any{ it.name ==~ /(?i:Anime)/ } || (f.isVideo() && (f.name =~ /(?i:HorribleSubs)/ || f.name =~ "[\\(\\[]\\p{XDigit}{8}[\\]\\)]" || (getMediaInfo(file:f, format:'''{media.AudioLanguageList} {media.TextCodecList}''', filter:null).tokenize().containsAll(['Japanese', 'ASS']) && (parseEpisodeNumber(f.name, false) != null || getMediaInfo(file:f, format:'{minutes}', filter:null).toInteger() < 60))))
+	label =~ /^(?i:Anime)/
+	|| f.dir.listPath().any{ it.name ==~ /(?i:Anime)/ }
+	|| (f.isVideo()
+		&& (f.name =~ /(?i:HorribleSubs)/
+			|| f.name =~ /[\(\[]\p{XDigit}{8}[\]\)]/
+			|| (getMediaInfo(f, '''{media.AudioLanguageList} {media.TextCodecList}''').tokenize().containsAll(['Japanese', 'ASS'])
+				&& (parseEpisodeNumber(f.name, false) != null
+					|| getMediaInfo(f, '{minutes}').toInteger() < 60))))
 }
 
 def forceAudio = { f ->
-	label =~ /^(?i:audio|music|music.video)/ || (f.isAudio() && !f.isVideo())
+	label =~ /^(?i:audio|music|music.video)/
+	|| (f.isAudio() && !f.isVideo())
 }
 
 def forceIgnore = { f ->
-	label =~ /^(?i:games|ebook|other|ignore|seeding)/ || f.path.findMatch(ignore) != null
+	label =~ /^(?i:games|ebook|other|ignore|seeding)/
+	|| f.path.findMatch(ignore) != null
 }
 
 
@@ -87,23 +104,15 @@ if (gmail || mail) { include('lib/ant') }
 def sendEmailReport = { title, message, messagetype ->
 	if (gmail) {
 		sendGmail(
-			subject: title,
-			message: message,
-			messagemimetype: messagetype,
-			to: any{ mailto } { gmail[0].contains('@') ? gmail[0] : gmail[0] + '@gmail.com' }, // mail to self by default
-			user: gmail[0].contains('@') ? gmail[0] : gmail[0] + '@gmail.com',
-			password: gmail[1]
+			subject: title, message: message, messagemimetype: messagetype,
+			to: any{ mailto } { gmail[0].contains('@') ? gmail[0] : gmail[0] + '@gmail.com' },		// mail to self by default
+			user: gmail[0].contains('@') ? gmail[0] : gmail[0] + '@gmail.com', password: gmail[1]
 		)
 	}
 	if (mail) {
 		sendmail(
-			mailhost: mail[0],
-			mailport: mail[1],
-			from: mail[2],
-			to: mailto,
-			subject: title,
-			message: message,
-			messagemimetype: messagetype
+			subject: title, message: message, messagemimetype: messagetype
+			mailhost: mail[0], mailport: mail[1], from: mail[2], to: mailto,
 		)
 	}
 }
@@ -137,7 +146,7 @@ def excludePathSet = new FileSet()
 if (excludeList) {
 	if (excludeList.exists()) {
 		try {
-			excludePathSet.feed(Files.lines(excludeList.toPath(), StandardCharsets.UTF_8))
+			excludePathSet.load(excludeList)
 		} catch(Exception e) {
 			fail("Failed to load excludeList: ${e}")
 		}
@@ -251,7 +260,7 @@ input = input.findAll{ f -> (f.isVideo() && !tryQuietly{ f.hasExtension('iso') &
 input = input.findAll{ f -> !(relativeInputPath(f) =~ /(?<=\b|_)(?i:sample|trailer|extras|music.video|scrapbook|behind.the.scenes|extended.scenes|deleted.scenes|mini.series|s\d{2}c\d{2}|S\d+EXTRA|\d+xEXTRA|NCED|NCOP|(OP|ED)\d+|Formula.1.\d{4})(?=\b|_)/) }
 
 // ignore video files that don't conform with the file-size and video-length limits
-input = input.findAll{ f -> !(f.isVideo() && ((minFileSize > 0 && f.length() < minFileSize) || (minLengthMS > 0 && tryQuietly{ getMediaInfo(file:f, format:'{duration}', filter:null).toLong() < minLengthMS }))) }
+input = input.findAll{ f -> !(f.isVideo() && ((minFileSize > 0 && f.length() < minFileSize) || (minLengthMS > 0 && tryQuietly{ getMediaInfo(f, '{duration}').toLong() < minLengthMS }))) }
 
 // ignore subtitles files that are not stored in the same folder as the movie
 input = input.findAll{ f -> !(f.isSubtitle() && !input.findAll{ it.isVideo() }.any{ v -> f.isDerived(v) || f.path.startsWith(v.parentFile.path) }) }
@@ -442,7 +451,7 @@ if (unsorted) {
 	if (unsortedFiles.size() > 0) {
 		log.info "Processing ${unsortedFiles.size()} unsorted files"
 		rename(map: unsortedFiles.collectEntries{ original ->
-			def destination = getMediaInfo(file: original, format: format.unsorted, filter: null) as File
+			def destination = getMediaInfo(original, format.unsorted) as File
 			return [original, destination.isAbsolute() ? destination : new File((_args.output ?: '.') as File, destination as String)]
 		})
 	}
@@ -450,7 +459,7 @@ if (unsorted) {
 
 // run program on newly processed files
 if (exec) {
-	getRenameLog().collect{ from, to -> getMediaInfo(format: exec, file: to, filter: null) }.unique().each{
+	getRenameLog().collect{ from, to -> getMediaInfo(to, exec) }.unique().each{
 		log.finest("Execute: $it")
 		execute(it)
 	}
