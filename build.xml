@@ -2,17 +2,13 @@
 <project name="filebot-scripts" default="repository">
 	<property file="profile.properties" />
 
-	<property name="bundle" value="bundle"/>
+	<property name="bundle" value="repository"/>
 
 	<target name="repository">
 		<jar destfile="${bundle}.jar">
 			<fileset dir="." includes="**/*.groovy" />
 		</jar>
-		<signjar alias="${bundle}" keystore="${bundle}.jks" storepass="${profile.storepass}" keypass="${profile.keypass}">
-			<path>
-				<fileset dir="." includes="*.jar" />
-			</path>
-		</signjar>
+		<signjar jar="${bundle}.jar" alias="${bundle}" keystore="${bundle}.jks" storepass="${profile.storepass}" keypass="${profile.keypass}" />
 	</target>
 
 	<target name="genkey">
