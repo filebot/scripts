@@ -58,37 +58,23 @@ def format = [
 
 // force Movie / TV Series / Anime behaviour
 def forceMovie = { f ->
-	label =~ /^(?i:Movie|Film|Concert)/
-	|| f.dir.listPath().any{ it.name ==~ /(?i:Movies)/ }
-	|| f.isMovie()
+	label =~ /^(?i:Movie|Film|Concert)/ || f.dir.listPath().any{ it.name ==~ /(?i:Movies)/ } || f.isMovie()
 }
 
 def forceSeries = { f ->
-	label =~ /^(?i:TV|Show|Series|Documetary)/
-	|| f.dir.listPath().any{ it.name ==~ /(?i:TV.Shows)/ }
-	|| f.path =~ /(?i:tvs-|tvp-|EP\d{1,3}|Season\D?\d{1,2}|\d{4}.S\d{2})/
-	|| f.isEpisode()
+	label =~ /^(?i:TV|Show|Series|Documetary)/ || f.dir.listPath().any{ it.name ==~ /(?i:TV.Shows)/ } || f.path =~ /(?i:tvs-|tvp-|EP\d{1,3}|Season\D?\d{1,2}|\d{4}.S\d{2})/ || f.isEpisode()
 }
 
 def forceAnime = { f ->
-	label =~ /^(?i:Anime)/
-	|| f.dir.listPath().any{ it.name ==~ /(?i:Anime)/ }
-	|| (f.isVideo()
-		&& (f.name =~ /(?i:HorribleSubs)/
-			|| f.name =~ /[\(\[]\p{XDigit}{8}[\]\)]/
-			|| (getMediaInfo(f, '''{media.AudioLanguageList} {media.TextCodecList}''').tokenize().containsAll(['Japanese', 'ASS'])
-				&& (parseEpisodeNumber(f.name, false) != null
-					|| getMediaInfo(f, '{minutes}').toInteger() < 60))))
+	label =~ /^(?i:Anime)/ || f.dir.listPath().any{ it.name ==~ /(?i:Anime)/ } || (f.isVideo() && (f.name =~ /(?i:HorribleSubs)/ || f.name =~ /[\(\[]\p{XDigit}{8}[\]\)]/ || (getMediaInfo(f, '''{media.AudioLanguageList} {media.TextCodecList}''').tokenize().containsAll(['Japanese', 'ASS']) && (parseEpisodeNumber(f.name, false) != null || getMediaInfo(f, '{minutes}').toInteger() < 60))))
 }
 
 def forceAudio = { f ->
-	label =~ /^(?i:audio|music|music.video)/
-	|| (f.isAudio() && !f.isVideo())
+	label =~ /^(?i:audio|music|music.video)/ || (f.isAudio() && !f.isVideo())
 }
 
 def forceIgnore = { f ->
-	label =~ /^(?i:games|ebook|other|ignore|seeding)/
-	|| f.path.findMatch(ignore) != null
+	label =~ /^(?i:games|ebook|other|ignore|seeding)/ || f.path.findMatch(ignore) != null
 }
 
 
@@ -111,8 +97,8 @@ def sendEmailReport = { title, message, messagetype ->
 	}
 	if (mail) {
 		sendmail(
-			subject: title, message: message, messagemimetype: messagetype
-			mailhost: mail[0], mailport: mail[1], from: mail[2], to: mailto,
+			subject: title, message: message, messagemimetype: messagetype,
+			mailhost: mail[0], mailport: mail[1], from: mail[2], to: mailto
 		)
 	}
 }
