@@ -2,34 +2,50 @@
 <project name="filebot-scripts" default="repository">
 	<property file="repository.properties" />
 
-	<property name="bundle" value="repository"/>
+	<property name="milestone" value="scripts/m1" />
 
 	<target name="repository">
-		<jar destfile="${bundle}.jar">
+		<exec executable="git" outputproperty="git-commit">
+			<arg line="rev-parse HEAD" />
+		</exec>
+
+		<jar destfile="dist/${milestone}.jar">
 			<fileset dir="." includes="**/*.groovy" />
+			<manifest>
+				<attribute name="Git-Commit" value="${git-commit}" />
+			</manifest>
 		</jar>
-		<signjar jar="${bundle}.jar" alias="${bundle}" keystore="${bundle}.jks" storepass="${repository.storepass}" keypass="${repository.keypass}" />
+
+		<signjar jar="dist/${milestone}.jar" alias="repository" keystore="repository.jks" storepass="${repository.storepass}" keypass="${repository.keypass}" />
 	</target>
 
+
+	<target name="deploy" depends="repository">
+		<scp todir="rednoah,filebot@web.sourceforge.net:htdocs" trust="yes" verbose="true" sftp="true" keyfile="sourceforge_id.key">
+			<fileset dir="dist" includes="**/*.jar" />
+		</scp>
+	</target>
+
+
 	<target name="genkey">
-		<delete file="${bundle}.jks" />
+		<delete file="repository.jks" />
 		<exec executable="keytool">
-			<arg line="-genkey -v"/>
-			<arg line="-keyalg RSA -keysize 2048"/>
-			<arg line="-validity 3650"/>
-			<arg line="-dname 'CN=rednoah, O=FileBot'"/>
-			<arg line="-alias ${bundle}"/>
-			<arg line="-keystore ${bundle}.jks"/>
-			<arg line="-storepass ${repository.storepass}"/>
-			<arg line="-keypass ${repository.keypass}"/>
+			<arg line="-genkey -v" />
+			<arg line="-keyalg RSA -keysize 2048" />
+			<arg line="-validity 3650" />
+			<arg line="-dname 'CN=rednoah, O=FileBot'" />
+			<arg line="-alias repository" />
+			<arg line="-keystore repository.jks" />
+			<arg line="-storepass ${repository.storepass}" />
+			<arg line="-keypass ${repository.keypass}" />
 		</exec>
 		<exec executable="keytool">
-			<arg line="-export -v"/>
-			<arg line="-file ${bundle}.cer"/>
-			<arg line="-alias ${bundle}"/>
-			<arg line="-keystore ${bundle}.jks"/>
-			<arg line="-storepass ${repository.storepass}"/>
-			<arg line="-keypass ${repository.keypass}"/>
+			<arg line="-export -v" />
+			<arg line="-file repository.cer" />
+			<arg line="-alias repository" />
+			<arg line="-keystore repository.jks" />
+			<arg line="-storepass ${repository.storepass}" />
+			<arg line="-keypass ${repository.keypass}" />
 		</exec>
 	</target>
 

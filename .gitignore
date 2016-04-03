@@ -1,4 +1,7 @@
+dist/
+*.properties
+*.key
+
 *.DS_Store
 *.sublime-project
 *.sublime-workspace
-*.properties
