@@ -219,10 +219,7 @@ input = input.findAll{ f -> !excludePathSet.contains(f.path) }
 
 // update exclude list with all input that will be processed during this run
 if (excludeList && !isTest) {
-	excludeList.withWriterAppend('UTF-8') { out ->
-		extractedArchives.path.each{ out.println(it) }
-		input.path.each{ out.println(it) }
-	}
+	excludePathSet.append(excludeList, extractedArchives, input)
 }
 
 
