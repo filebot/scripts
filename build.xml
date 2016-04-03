@@ -4,6 +4,7 @@
 
 	<property name="milestone" value="scripts/m1" />
 
+
 	<target name="repository">
 		<exec executable="git" outputproperty="git-commit">
 			<arg line="rev-parse HEAD" />
@@ -21,7 +22,10 @@
 
 
 	<target name="deploy" depends="repository">
-		<scp todir="rednoah,filebot@web.sourceforge.net:htdocs" trust="yes" verbose="true" sftp="true" keyfile="sourceforge_id.key">
+		<property name="deploy.website" value="rednoah,filebot@web.sourceforge.net:htdocs" />
+		<property name="deploy.keyfile" value="sourceforge_id.key" />
+
+		<scp todir="${deploy.website}" trust="yes" verbose="true" sftp="true" keyfile="${deploy.keyfile}">
 			<fileset dir="dist" includes="**/*.jar" />
 		</scp>
 	</target>
