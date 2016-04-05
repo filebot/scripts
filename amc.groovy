@@ -270,12 +270,12 @@ def groups = input.groupBy{ f ->
 	if (forceMovie(f))
 		return [mov:   detectMovie(f, false)]
 	if (forceSeries(f))
-		return [tvs:   detectSeriesName(f, true, false) ?: detectSeriesName(input.findAll{ s -> f.dir == s.dir && s.isVideo() }, true, false)]
+		return [tvs:   detectSeriesName(f) ?: detectSeriesName(input.findAll{ s -> f.dir == s.dir && s.isVideo() })]
 	if (forceAnime(f))
-		return [anime: detectSeriesName(f, false, true) ?: detectSeriesName(input.findAll{ s -> f.dir == s.dir && s.isVideo() }, false, true)]
+		return [anime: detectAnimeName(f) ?: detectAnimeName(input.findAll{ s -> f.dir == s.dir && s.isVideo() })]
 
 
-	def tvs = detectSeriesName(f, true, false)
+	def tvs = detectSeriesName(f)
 	def mov = detectMovie(f, false)
 	log.fine("$f.name [series: $tvs, movie: $mov]")
 
@@ -369,7 +369,7 @@ groups.each{ group, files ->
 				dest.mapByFolder().each{ dir, fs ->
 					def hasSeasonFolder = (config.format =~ /(?i)Season/)
 					def sxe = fs.findResult{ eps -> parseEpisodeNumber(eps) }
-					def seriesName = detectSeriesName(fs, true, false)
+					def seriesName = detectSeriesName(fs)
 					def options = TheTVDB.search(seriesName, _args.locale)
 					if (options.isEmpty()) {
 						log.warning "TV Series not found: $config.name"
