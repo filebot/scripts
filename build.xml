@@ -6,6 +6,9 @@
 
 
 	<target name="repository">
+		<tstamp>
+			<format property="build-date" pattern="yyyy-MM-dd HH:mm:ss" timezone="UTC" />
+		</tstamp>
 		<exec executable="git" outputproperty="git-commit">
 			<arg line="rev-parse HEAD" />
 		</exec>
@@ -13,6 +16,7 @@
 		<jar destfile="dist/${milestone}.jar">
 			<fileset dir="." includes="**/*.groovy" />
 			<manifest>
+				<attribute name="Build-Date" value="${build-date}" />
 				<attribute name="Git-Commit" value="${git-commit}" />
 			</manifest>
 		</jar>
