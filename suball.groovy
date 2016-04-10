@@ -2,7 +2,7 @@
 
 setDefaultValues(
 	minAgeDays: null,
-	maxAgeDays: null,
+	maxAgeDays: 30,
 	minFileSize: 50 * 1000 * 1000L,
 	minLengthMS: 10 * 60 * 1000L,
 	ignore: null,
@@ -15,6 +15,7 @@ def minLengthMS = minLengthMS as long
 
 def minAgeTimeStamp = any{ now.time - ((minAgeDays as double) * 24 * 60 * 60 * 1000L) as long }{ null }
 def maxAgeTimeStamp = any{ now.time - ((maxAgeDays as double) * 24 * 60 * 60 * 1000L) as long }{ null }
+def maxAgeDaysLimit = any{ maxAgeDaysLimit.toBoolean() }{ true }
 
 
 def ignore = { f, m ->
@@ -54,6 +55,11 @@ def accept = { f ->
 	// ignore files that already have subtitles
 	if (ignoreTextLanguage != null && getMediaInfo(f, '{media.TextLanguageList}').findMatch(ignoreTextLanguage) != null) {
 		return ignore(f, 'Video file already contains embedded subtitles')
+	}
+
+	// sanity check
+	if (maxAgeDaysLimit && (maxAgeDays == null || maxAgeDays.toDouble() > 30)) {
+		return ignore(f, "Your maxAgeDays limit ($maxAgeDays) is unreasonable")
 	}
 
 	return true
