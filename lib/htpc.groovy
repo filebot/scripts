@@ -286,7 +286,7 @@ def fetchMovieNfo(outputFile, movieInfo, movieFile, override) {
 								audio {
 									codec((s.'CodecID/Hint' ?: s.'Format').replaceAll(/\p{Punct}/, '').trim())
 									language(s.'Language/String3')
-									channels(s.'ChannelPositions/String2'.split(' / ').collect{ it.split('/')*.toBigDecimal().sum() }.max().setScale(1, java.math.RoundingMode.HALF_UP).toPlainString())
+									channels(s.'Channel(s)_Original' ?: s.'Channel(s)')
 								}
 							}
 							if (section == 'text') {
