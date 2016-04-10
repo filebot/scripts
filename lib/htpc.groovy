@@ -260,7 +260,7 @@ def fetchMovieNfo(outputFile, movieInfo, movieFile, override) {
 							role(p.character.replaceAll(/\s+/, ' ').trim())
 						}
 					}
-				} else if (p.job ==~ /Writer|Author|Novel|Characters|Adaptation|Storyboard|Screenplay|Story|Book/) {
+				} else if (p.job ==~ /Author|Novel|Characters|Adaptation|Storyboard|Screenplay|Story|Book/) {
 					credits("$p.name ($p.job)")
 				}
 			}
