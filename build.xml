@@ -35,6 +35,11 @@
 	</target>
 
 
+	<target name="clean">
+		<delete dir="dist" />
+	</target>
+
+
 	<target name="genkey">
 		<delete file="repository.jks" />
 		<exec executable="keytool">
