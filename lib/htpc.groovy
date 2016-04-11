@@ -252,12 +252,12 @@ def fetchMovieNfo(outputFile, movieInfo, movieFile, override) {
 				if (p.director) {
 					director(p.name)
 				} else if (p.writer) {
-					writer(p.name)
+					credits(p.name)
 				} else if (p.actor) { 
 					actor {
-						name(p.name.trim())
+						name(p.name)
 						if (p.character != null) {
-							role(p.character.replaceAll(/\s+/, ' ').trim())
+							role(p.character)
 						}
 					}
 				} else if (p.job ==~ /Author|Novel|Characters|Adaptation|Storyboard|Screenplay|Story|Book/) {
