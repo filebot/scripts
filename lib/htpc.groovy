@@ -225,7 +225,7 @@ def fetchMovieNfo(outputFile, movieInfo, movieFile, override) {
 	log.fine "Generate Movie NFO: $movieInfo.name [$movieInfo.id]"
 	def i = movieInfo
 	def mi = tryLogCatch{ movieFile?.isFile() ? MediaInfo.snapshot(movieFile) : null }
-	XML {
+	def xml = XML {
 		movie {
 			title(i.name)
 			originaltitle(i.originalName)
@@ -302,7 +302,7 @@ def fetchMovieNfo(outputFile, movieInfo, movieFile, override) {
 			tmdb(id:i.id, "http://www.themoviedb.org/movie/${i.id}")
 		}
 	}
-	.saveAs(outputFile)
+	xml.saveAs(outputFile)
 }
 
 def fetchMovieArtworkAndNfo(movieDir, movie, movieFile = null, extras = false, override = false, locale = Locale.ENGLISH) {
