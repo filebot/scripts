@@ -260,7 +260,7 @@ def fetchMovieNfo(outputFile, movieInfo, movieFile, override) {
 							role(p.character)
 						}
 					}
-				} else if (p.job ==~ /Author|Novel|Characters|Adaptation|Storyboard|Screenplay|Story|Book/) {
+				} else if (p.department == 'Writing') {
 					credits("$p.name ($p.job)")
 				}
 			}
