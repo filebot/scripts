@@ -256,9 +256,7 @@ def fetchMovieNfo(outputFile, movieInfo, movieFile, override) {
 				} else if (p.actor) { 
 					actor {
 						name(p.name)
-						if (p.character != null) {
-							role(p.character)
-						}
+						role(p.character)
 					}
 				} else if (p.department == 'Writing') {
 					credits("$p.name ($p.job)")
