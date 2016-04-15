@@ -93,10 +93,10 @@ def fetchSeriesFanart(outputFile, series, type, season, override, locale) {
 	return fanart.url.saveAs(outputFile)
 }
 
-def fetchSeriesNfo(outputFile, seriesInfo, override, locale) {
+def fetchSeriesNfo(outputFile, seriesInfo, locale) {
 	log.fine "Generate Series NFO: $seriesInfo.name [$seriesInfo.id]"
 	def i = seriesInfo
-	XML {
+	def xml = XML {
 		tvshow {
 			title(i.name)
 			sorttitle([i.name, i.firstAired as String].findAll{ it?.length() > 0 }.findResults{ it.sortName('$2') }.join(' :: '))
@@ -125,14 +125,14 @@ def fetchSeriesNfo(outputFile, seriesInfo, override, locale) {
 			tvdb(id:i.id, "http://www.thetvdb.com/?tab=series&id=${i.id}")
 		}
 	}
-	.saveAs(outputFile)
+	xml.saveAs(outputFile)
 }
 
 def fetchSeriesArtworkAndNfo(seriesDir, seasonDir, series, season, override = false, locale = Locale.ENGLISH) {
 	tryLogCatch {
 		// fetch nfo
 		def seriesInfo = TheTVDB.getSeriesInfo(series, locale)
-		fetchSeriesNfo(seriesDir.resolve('tvshow.nfo'), seriesInfo, override, locale)
+		fetchSeriesNfo(seriesDir.resolve('tvshow.nfo'), seriesInfo, locale)
 
 		// fetch series banner, fanart, posters, etc
 		['680x1000', null].findResult{ fetchSeriesBanner(seriesDir.resolve('poster.jpg'), series, 'poster', it, null, override, locale) }
@@ -221,7 +221,7 @@ def fetchMovieFanart(outputFile, movieInfo, type, diskType, override, locale) {
 	return fanart.url.saveAs(outputFile)
 }
 
-def fetchMovieNfo(outputFile, movieInfo, movieFile, override) {
+def fetchMovieNfo(outputFile, movieInfo, movieFile) {
 	log.fine "Generate Movie NFO: $movieInfo.name [$movieInfo.id]"
 	def i = movieInfo
 	def mi = tryLogCatch{ movieFile?.isFile() ? MediaInfo.snapshot(movieFile) : null }
@@ -308,7 +308,7 @@ def fetchMovieArtworkAndNfo(movieDir, movie, movieFile = null, extras = false, o
 		def movieInfo = TheMovieDB.getMovieInfo(movie, locale, true)
 
 		// fetch nfo
-		fetchMovieNfo(movieDir.resolve('movie.nfo'), movieInfo, movieFile, override)
+		fetchMovieNfo(movieDir.resolve('movie.nfo'), movieInfo, movieFile)
 
 		// generate url files
 		if (extras) {

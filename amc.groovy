@@ -377,7 +377,7 @@ groups.each{ group, files ->
 					}
 					def series = options.sortBySimilarity(seriesName, { s -> s.name }).get(0)
 					log.fine "Fetching series artwork for [$series] to [$dir]"
-					fetchSeriesArtworkAndNfo(hasSeasonFolder ? dir.dir : dir, dir, series, sxe && sxe.season > 0 ? sxe.season : 1, true, _args.locale)
+					fetchSeriesArtworkAndNfo(hasSeasonFolder ? dir.dir : dir, dir, series, sxe && sxe.season > 0 ? sxe.season : 1, false, _args.locale)
 				}
 			}
 		} else if (failOnError) {
@@ -398,7 +398,7 @@ groups.each{ group, files ->
 					if (movieFile != null) {
 						def movie = detectMovie(movieFile, false)
 						log.fine "Fetching movie artwork for [$movie] to [$dir]"
-						fetchMovieArtworkAndNfo(dir, movie, movieFile, extras, true, _args.locale)
+						fetchMovieArtworkAndNfo(dir, movie, movieFile, extras, false, _args.locale)
 					}
 				}
 			}
