@@ -10,6 +10,7 @@ args.each{ log.finer("Argument: $it") }
 def input = []
 def failOnError = _args.conflict.equalsIgnoreCase('fail')
 def isTest = _args.action.equalsIgnoreCase('test')
+def outputFolder = new File(_args.output ?: '.').getCanonicalFile()
 
 // enable/disable features as specified via --def parameters
 def unsorted  = tryQuietly{ unsorted.toBoolean() }
@@ -29,7 +30,7 @@ def emby = tryQuietly{ emby.split(/[ ,|]+/)*.split(/:/).collect{ it.length >= 2 
 def storeReport = tryQuietly{ storeReport.toBoolean() }
 def skipExtract = tryQuietly{ skipExtract.toBoolean() }
 def deleteAfterExtract = tryQuietly{ deleteAfterExtract.toBoolean() }
-def excludeList = tryQuietly{ (excludeList as File).isAbsolute() ? (excludeList as File) : new File((_args.output ?: '.') as File, excludeList as String).getCanonicalFile() }
+def excludeList = tryQuietly{ (excludeList as File).isAbsolute() ? (excludeList as File) : new File(outputFolder, excludeList as String).getCanonicalFile() }
 def myepisodes = tryQuietly{ myepisodes.split(':', 2) }
 def gmail = tryQuietly{ gmail.split(':', 2) }
 def mail = tryQuietly{ mail.split(':', 3) }
@@ -117,12 +118,17 @@ args.findAll{ !it.exists() }.each{ fail("File not found: $it") }
 
 // check user-defined pre-condition
 if (tryQuietly{ !(ut_state ==~ ut_state_allow) }) {
-	fail("Invalid state: ut_state = $ut_state (expected $ut_state_allow)")
+	fail("Illegal state: ut_state = $ut_state (expected $ut_state_allow)")
 }
 
 // check ut mode vs standalone mode
 if ((tryQuietly{ ut_dir } == '/') || (tryQuietly{ ut_dir } == '%D') || (args.size() > 0 && (tryQuietly{ ut_dir }?.size() > 0 || tryQuietly{ ut_file }?.size() > 0)) || (args.size() == 0 && (tryQuietly{ ut_dir } == null && tryQuietly{ ut_file } == null))) {
-	fail("Invalid usage: bad file arguments or ut_dir/ut_file parameters")
+	fail("Illegal usage: bad file arguments or ut_dir/ut_file parameters")
+}
+
+// make sure input and output folders do not overlap
+if (args.any{ outputFolder.path.startsWith(it.canonicalPath) } || tryQuietly{ outputFolder.path.startsWith(ut_dir) } ) {
+	fail("Illegal usage: output folder must not contain input folder")
 }
 
 
@@ -435,7 +441,7 @@ if (unsorted) {
 		log.info "Processing ${unsortedFiles.size()} unsorted files"
 		rename(map: unsortedFiles.collectEntries{ original ->
 			def destination = getMediaInfo(original, format.unsorted) as File
-			return [original, destination.isAbsolute() ? destination : new File((_args.output ?: '.') as File, destination as String)]
+			return [original, destination.isAbsolute() ? destination : new File(outputFolder, destination as String)]
 		})
 	}
 }
