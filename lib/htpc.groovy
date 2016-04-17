@@ -69,7 +69,8 @@ def fetchSeriesBanner(outputFile, series, bannerType, bannerType2, season, overr
 	}
 
 	// select and fetch banner
-	def banner = [locale, null].findResult { TheTVDB.getBanner(series, [BannerType:bannerType, BannerType2:bannerType2, Season:season, Language:it]) }
+	def artwork = TheTVDB.getArtwork(series.id, bannerType, locale)
+	def banner = [locale.language, null].findResult { lang -> artwork.find{ (bannerType2 == null || it.category.contains(bannerType2)) && (season == null || it.category.contains(season)) && (lang == null || lang == it.language) } }
 	if (banner == null) {
 		log.finest "Banner not found: $outputFile / $bannerType:$bannerType2"
 		return null
@@ -85,7 +86,7 @@ def fetchSeriesFanart(outputFile, series, type, season, override, locale) {
 	}
 
 	def artwork = FanartTV.getArtwork(series.id, "tv", locale)
-	def fanart = [locale, null].findResult{ lang -> artwork.find{ it.category.contains(type) && (season == null || it.category.contains(season)) && (lang == null || lang == it.language) }}
+	def fanart = [locale.language, null].findResult{ lang -> artwork.find{ it.category.contains(type) && (season == null || it.category.contains(season)) && (lang == null || lang == it.language) }}
 	if (fanart == null) {
 		log.finest "Fanart not found: $outputFile / $type"
 		return null
@@ -108,9 +109,6 @@ def fetchSeriesNfo(outputFile, seriesInfo, locale) {
 			runtime(i.runtime)
 			mpaa(i.contentRating)
 			id(i.id)
-			episodeguide {
-				url(cache:"${i.id}.xml", "http://www.thetvdb.com/api/1D62F2F90030C444/series/${i.id}/all/${locale.language}.zip")
-			}
 			i.genres?.each{
 				genre(it)
 			}

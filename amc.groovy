@@ -373,7 +373,7 @@ groups.each{ group, files ->
 		if (dest != null) {
 			if (artwork) {
 				dest.mapByFolder().each{ dir, fs ->
-					def hasSeasonFolder = (config.format =~ /(?i)Season/)
+					def hasSeasonFolder = dir.name =~ /(?i:Season.\d+)/
 					def sxe = fs.findResult{ eps -> parseEpisodeNumber(eps) }
 					def seriesName = detectSeriesName(fs)
 					def options = TheTVDB.search(seriesName, _args.locale)
