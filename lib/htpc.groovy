@@ -84,7 +84,8 @@ def fetchSeriesFanart(outputFile, series, type, season, override, locale) {
 		return outputFile
 	}
 
-	def fanart = [locale, null].findResult{ lang -> FanartTV.getSeriesArtwork(series.id).find{ type == it.type && (season == null || season == it.season) && (lang == null || lang == it.language) }}
+	def artwork = FanartTV.getArtwork(series.id, "tv", locale)
+	def fanart = [locale, null].findResult{ lang -> artwork.find{ it.category.contains(type) && (season == null || it.category.contains(season)) && (lang == null || lang == it.language) }}
 	if (fanart == null) {
 		log.finest "Fanart not found: $outputFile / $type"
 		return null
@@ -177,8 +178,8 @@ def fetchMovieArtwork(outputFile, movieInfo, category, override, locale) {
 	}
 
 	// select and fetch artwork
-	def artwork = TheMovieDB.getArtwork(movieInfo.id as String)
-	def selection = [locale.language, 'en', null].findResult{ l -> artwork.find{ l == it.language && it.category == category } }
+	def artwork = TheMovieDB.getArtwork(movieInfo.id, category, locale)
+	def selection = [locale.language, 'en', null].findResult{ l -> artwork.find{ l == it.language } }
 	if (selection == null) {
 		log.finest "Artwork not found: $outputFile"
 		return null
@@ -189,8 +190,8 @@ def fetchMovieArtwork(outputFile, movieInfo, category, override, locale) {
 
 def fetchAllMovieArtwork(outputFolder, prefix, movieInfo, category, override, locale) {
 	// select and fetch artwork
-	def artwork = TheMovieDB.getArtwork(movieInfo.id as String)
-	def selection = [locale.language, 'en', null].findResults{ l -> artwork.findAll{ l == it.language && it.category == category } }.flatten().unique{ it.url }
+	def artwork = TheMovieDB.getArtwork(movieInfo.id, category, locale)
+	def selection = [locale.language, 'en', null].findResults{ l -> artwork.findAll{ l == it.language } }.flatten().unique()
 	if (selection == null) {
 		log.finest "Artwork not found: $outputFolder"
 		return null
@@ -212,7 +213,8 @@ def fetchMovieFanart(outputFile, movieInfo, type, diskType, override, locale) {
 		return outputFile
 	}
 
-	def fanart = [locale, null].findResult{ lang -> FanartTV.getMovieArtwork(movieInfo.id).find{ type == it.type && (diskType == null || diskType == it.diskType) && (lang == null || lang == it.language) }}
+	def artwork = FanartTV.getArtwork(movieInfo.id, "movies", locale)
+	def fanart = [locale, null].findResult{ lang -> artwork.find{ it.category.contains(type) && (diskType == null || it.category.contains(diskType)) && (lang == null || lang == it.language) }}
 	if (fanart == null) {
 		log.finest "Fanart not found: $outputFile / $type"
 		return null
