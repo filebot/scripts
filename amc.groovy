@@ -63,7 +63,7 @@ def forceMovie = { f ->
 }
 
 def forceSeries = { f ->
-	label =~ /^(?i:TV|Show|Series|Documetary)/ || f.dir.listPath().any{ it.name ==~ /(?i:TV.Shows)/ } || f.path =~ /(?i:tvs-|tvp-|EP\d{1,3}|Season\D?\d{1,2}|\d{4}.S\d{2})/ || f.isEpisode()
+	label =~ /^(?i:TV|Show|Series|Documetary)/ || f.dir.listPath().any{ it.name ==~ /(?i:TV.Shows)/ } || f.path =~ /(?i:tvs-|tvp-|E{2,3}|EP\d{1,3}|Season\D?\d{1,2}|\d{4}.S\d{2})/ || f.isEpisode()
 }
 
 def forceAnime = { f ->
