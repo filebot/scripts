@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <project name="filebot-scripts" default="repository">
-	<property file="repository.properties" />
+	<property file="build.properties" />
 
 	<property name="milestone" value="scripts/m1" />
 
@@ -26,9 +26,6 @@
 
 
 	<target name="deploy" depends="repository">
-		<property name="deploy.website" value="rednoah,filebot@web.sourceforge.net:htdocs" />
-		<property name="deploy.keyfile" value="sourceforge_id.key" />
-
 		<scp todir="${deploy.website}" trust="yes" verbose="true" sftp="true" keyfile="${deploy.keyfile}">
 			<fileset dir="dist" includes="**/*.jar" />
 		</scp>
