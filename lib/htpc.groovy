@@ -107,7 +107,7 @@ def fetchSeriesNfo(outputFile, seriesInfo, locale) {
 			votes(i.ratingCount)
 			plot(i.overview)
 			runtime(i.runtime)
-			mpaa(i.contentRating)
+			mpaa(i.certification)
 			id(i.id)
 			i.genres?.each{
 				genre(it)
