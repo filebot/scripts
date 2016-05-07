@@ -22,7 +22,7 @@ args.getFiles().findAll{ it.isVideo() && parseEpisodeNumber(it) && detectSeriesN
 		mes.addShow(show.id)
 		println "[added] $show.name"
 	}
-	
+
 	files.each{
 		if (show != null) {
 			def sxe = parseEpisodeNumber(it)
@@ -46,33 +46,33 @@ import org.jsoup.Connection.Method
 class MyEpisodesScraper {
 	def username
 	def password
-	
-	def cache = Cache.getCache('web-datasource-lv2')
+
+	def cache = Cache.getCache('myepisodes', CacheType.Weekly)
 	def session = [:]
-	
+
 	def login = {
 		def response = Jsoup.connect('http://www.myepisodes.com/login.php').data('username', username, 'password', password, 'action', 'Login', 'u', '').method(Method.POST).execute()
 		session << response.cookies()
 		return response.parse()
 	}
-	
+
 	def get = { url ->
 		if (session.isEmpty()) {
 			login()
 		}
-		
+
 		def response = Jsoup.connect(url).cookies(session).method(Method.GET).execute()
 		session << response.cookies()
 		def html = response.parse()
-		
+
 		if (html.select('#frmLogin')) {
 			session.clear()
 			throw new Exception('Login failed')
 		}
-		
+
 		return html
 	}
-	
+
 	def getShows = {
 		def shows = cache.get('MyEpisodes.Shows')
 		if (shows == null) {
@@ -89,7 +89,7 @@ class MyEpisodesScraper {
 		}
 		return shows
 	}
-	
+
 	def getShowList = {
 		get("http://www.myepisodes.com/shows.php?type=manage").select('option').findResults{ option ->
 			try {
@@ -99,11 +99,11 @@ class MyEpisodesScraper {
 			}
 		}
 	}
-	
+
 	def addShow = { showid ->
 		get("http://www.myepisodes.com/views.php?type=manageshow&mode=add&showid=${showid}")
 	}
-	
+
 	def update = { showid, season, episode, tick = 'acquired', value = '1' ->
 		get("http://www.myepisodes.com/myshows.php?action=Update&showid=${showid}&season=${season}&episode=${episode}&${tick}=${value}")
 	}
