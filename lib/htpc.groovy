@@ -116,11 +116,6 @@ def fetchSeriesNfo(outputFile, seriesInfo, locale) {
 			premiered(i.startDate)
 			status(i.status)
 			studio(i.network)
-			i.actors?.each{ n ->
-				actor {
-					name(n)
-				}
-			}
 			tvdb(id:i.id, "http://www.thetvdb.com/?tab=series&id=${i.id}")
 		}
 	}
