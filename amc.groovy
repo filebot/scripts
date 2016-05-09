@@ -209,11 +209,10 @@ input = input.flatten{ f ->
 		def extractDir = new File(f.dir, f.nameWithoutExtension)
 		def extractFiles = extract(file: f, output: new File(extractDir, f.dir.name), conflict: 'auto', filter: { it.isArchive() || it.isVideo() || it.isSubtitle() || (music && it.isAudio()) }, forceExtractAll: true) ?: []
 
-		if (extractFiles.size() > 0) {
-			extractedArchives += f
-			tempFiles += extractDir
-			tempFiles += extractFiles
-		}
+		extractedArchives += f
+		tempFiles += extractDir
+		tempFiles += extractFiles
+
 		return extractFiles
 	}
 	return f
