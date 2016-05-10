@@ -95,9 +95,8 @@ def fetchSeriesFanart(outputFile, series, type, season, override, locale) {
 	return fanart.url.saveAs(outputFile)
 }
 
-def fetchSeriesNfo(outputFile, seriesInfo, locale) {
-	log.fine "Generate Series NFO: $seriesInfo.name [$seriesInfo.id]"
-	def i = seriesInfo
+def fetchSeriesNfo(outputFile, i, locale) {
+	log.fine "Generate Series NFO: $i.name [$i.id]"
 	def xml = XML {
 		tvshow {
 			title(i.name)
@@ -109,7 +108,7 @@ def fetchSeriesNfo(outputFile, seriesInfo, locale) {
 			runtime(i.runtime)
 			mpaa(i.certification)
 			id(i.id)
-			i.genres?.each{
+			i.genres.each{
 				genre(it)
 			}
 			thumb(i.bannerUrl)
@@ -216,10 +215,9 @@ def fetchMovieFanart(outputFile, movieInfo, type, diskType, override, locale) {
 	return fanart.url.saveAs(outputFile)
 }
 
-def fetchMovieNfo(outputFile, movieInfo, movieFile) {
-	log.fine "Generate Movie NFO: $movieInfo.name [$movieInfo.id]"
-	def i = movieInfo
-	def mi = tryLogCatch{ movieFile?.isFile() ? MediaInfo.snapshot(movieFile) : null }
+def fetchMovieNfo(outputFile, i, movieFile) {
+	log.fine "Generate Movie NFO: $i.name [$i.id]"
+	def mi = tryLogCatch{ movieFile ? MediaInfo.snapshot(movieFile) : null }
 	def xml = XML {
 		movie {
 			title(i.name)
