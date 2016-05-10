@@ -137,7 +137,7 @@ def fetchSeriesArtworkAndNfo(seriesDir, seasonDir, series, season, override = fa
 		// fetch season banners
 		if (seasonDir != seriesDir) {
 			fetchSeriesBanner(seasonDir.resolve('poster.jpg'), series, 'season', 'season', season, override, locale)
-			fetchSeriesBanner(seasonDir.resolve('banner.jpg'), series, 'season', 'seasonwide', season, override, locale)
+			fetchSeriesBanner(seasonDir.resolve('banner.jpg'), series, 'seasonwide', 'seasonwide', season, override, locale)
 
 			// folder image (resuse series poster if possible)
 			copyIfPossible(seasonDir.resolve('poster.jpg'), seasonDir.resolve('folder.jpg'))
