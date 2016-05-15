@@ -423,7 +423,9 @@ groups.each{ group, files ->
 	else if (group.music) {
 		def dest = rename(file:files, format:format.music, db:'ID3')
 
-		if (dest == null && failOnError) {
+		if (dest != null) {
+			// music artwork not supported
+		} else if (failOnError) {
 			fail("Failed to rename music: $group.music")
 		} else {
 			unsortedFiles += files
