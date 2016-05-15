@@ -35,7 +35,7 @@ args.getFiles{ it.isVideo() }.each{ f ->
 
 	// fetch subtitles
 	if (fetch) {
-		[hashMatches, nameMatches].flatten().unique{ d -> d.path }.each{ d ->
+		[hashMatches, nameMatches].collectMany{ it ?: [] }.unique{ d -> d.path }.each{ d ->
 			def s = f.resolveSibling(d.path)
 			if (!s.exists()) {
 				println "Fetch $s"
