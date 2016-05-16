@@ -379,7 +379,7 @@ groups.each{ group, files ->
 				dest.mapByFolder().each{ dir, fs ->
 					def hasSeasonFolder = any{ dir.parentFile.structurePathTail.listPath().size() > 0 }{ false }	// MAY NOT WORK FOR CERTAIN FORMATS
 
-					fs.findResults{ it.metadata }.collect{ [name: it.seriesName, season: it.special ? 0 : it.season, id: it.seriesInfo.id] }.unique().each{
+					fs.findResults{ it.metadata }.findAll{ it.seriesInfo.database == 'TheTVDB' }.collect{ [name: it.seriesName, season: it.special ? 0 : it.season, id: it.seriesInfo.id] }.unique().each{
 						log.fine "Fetching series artwork for [$it.name] to [$dir]"
 						fetchSeriesArtworkAndNfo(hasSeasonFolder ? dir.parentFile : dir, dir, it.id, it.season, false, _args.locale)
 					}
