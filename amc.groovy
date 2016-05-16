@@ -377,17 +377,12 @@ groups.each{ group, files ->
 		if (dest != null) {
 			if (artwork) {
 				dest.mapByFolder().each{ dir, fs ->
-					def hasSeasonFolder = dir.name =~ /(?i:Season.\d+)/
-					def sxe = fs.findResult{ eps -> parseEpisodeNumber(eps) }
-					def seriesName = detectSeriesName(fs)
-					def options = TheTVDB.search(seriesName, _args.locale)
-					if (options.isEmpty()) {
-						log.warning "TV Series not found: $config.name"
-						return
+					def hasSeasonFolder = any{ dir.parentFile.structurePathTail.listPath().size() > 0 }{ false }	// MAY NOT WORK FOR CERTAIN FORMATS
+
+					fs.findResults{ it.metadata }.collect{ [name: it.seriesName, season: it.special ? 0 : it.season, id: it.seriesInfo.id] }.unique().each{
+						log.fine "Fetching series artwork for [$it.name] to [$dir]"
+						fetchSeriesArtworkAndNfo(hasSeasonFolder ? dir.parentFile : dir, dir, it.id, it.season, false, _args.locale)
 					}
-					def series = options.sortBySimilarity(seriesName, { s -> s.name }).get(0)
-					log.fine "Fetching series artwork for [$series] to [$dir]"
-					fetchSeriesArtworkAndNfo(hasSeasonFolder ? dir.dir : dir, dir, series, sxe && sxe.season > 0 ? sxe.season : 1, false, _args.locale)
 				}
 			}
 		} else if (failOnError) {
@@ -405,10 +400,10 @@ groups.each{ group, files ->
 			if (artwork) {
 				dest.mapByFolder().each{ dir, fs ->
 					def movieFile = fs.findAll{ it.isVideo() || it.isDisk() }.sort{ it.length() }.reverse().findResult{ it }
-					if (movieFile != null) {
-						def movie = detectMovie(movieFile, false)
-						log.fine "Fetching movie artwork for [$movie] to [$dir]"
-						fetchMovieArtworkAndNfo(dir, movie, movieFile, extras, false, _args.locale)
+					if (movieFile) {
+						def movieInfo = movieFile.metadata
+						log.fine "Fetching movie artwork for [$movieInfo] to [$dir]"
+						fetchMovieArtworkAndNfo(dir, movieInfo, movieFile, extras, false, _args.locale)
 					}
 				}
 			}

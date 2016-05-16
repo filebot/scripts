@@ -62,14 +62,14 @@ def refreshEmbyLibrary(server, port = 8096, token = null) {
 /**
  * TheTVDB artwork/nfo helpers
  */
-def fetchSeriesBanner(outputFile, series, bannerType, bannerType2, season, override, locale) {
+def fetchSeriesBanner(outputFile, seriesId, bannerType, bannerType2, season, override, locale) {
 	if (outputFile.exists() && !override) {
 		log.finest "Banner already exists: $outputFile"
 		return outputFile
 	}
 
 	// select and fetch banner
-	def artwork = TheTVDB.getArtwork(series.id, bannerType, locale)
+	def artwork = TheTVDB.getArtwork(seriesId, bannerType, locale)
 	def banner = [locale.language, null].findResult { lang -> artwork.find{ it.matches(bannerType2, season, lang) } }
 	if (banner == null) {
 		log.finest "Banner not found: $outputFile / $bannerType:$bannerType2"
@@ -79,13 +79,13 @@ def fetchSeriesBanner(outputFile, series, bannerType, bannerType2, season, overr
 	return banner.url.saveAs(outputFile)
 }
 
-def fetchSeriesFanart(outputFile, series, type, season, override, locale) {
+def fetchSeriesFanart(outputFile, seriesId, type, season, override, locale) {
 	if (outputFile.exists() && !override) {
 		log.finest "Fanart already exists: $outputFile"
 		return outputFile
 	}
 
-	def artwork = FanartTV.getArtwork(series.id, "tv", locale)
+	def artwork = FanartTV.getArtwork(seriesId, "tv", locale)
 	def fanart = [locale.language, null].findResult{ lang -> artwork.find{ it.matches(type, season, lang) } }
 	if (fanart == null) {
 		log.finest "Fanart not found: $outputFile / $type"
@@ -121,36 +121,36 @@ def fetchSeriesNfo(outputFile, i, locale) {
 	xml.saveAs(outputFile)
 }
 
-def fetchSeriesArtworkAndNfo(seriesDir, seasonDir, series, season, override = false, locale = Locale.ENGLISH) {
+def fetchSeriesArtworkAndNfo(seriesDir, seasonDir, seriesId, season, override = false, locale = Locale.ENGLISH) {
 	tryLogCatch {
 		// fetch nfo
-		def seriesInfo = TheTVDB.getSeriesInfo(series, locale)
+		def seriesInfo = TheTVDB.getSeriesInfo(seriesId, locale)
 		fetchSeriesNfo(seriesDir.resolve('tvshow.nfo'), seriesInfo, locale)
 
 		// fetch series banner, fanart, posters, etc
-		['680x1000', null].findResult{ fetchSeriesBanner(seriesDir.resolve('poster.jpg'), series, 'poster', it, null, override, locale) }
-		['graphical', null].findResult{ fetchSeriesBanner(seriesDir.resolve('banner.jpg'), series, 'series', it, null, override, locale) }
+		['680x1000', null].findResult{ fetchSeriesBanner(seriesDir.resolve('poster.jpg'), seriesId, 'poster', it, null, override, locale) }
+		['graphical', null].findResult{ fetchSeriesBanner(seriesDir.resolve('banner.jpg'), seriesId, 'series', it, null, override, locale) }
 
 		// fetch highest resolution fanart
-		['1920x1080', '1280x720', null].findResult{ fetchSeriesBanner(seriesDir.resolve('fanart.jpg'), series, 'fanart', it, null, override, locale) }
+		['1920x1080', '1280x720', null].findResult{ fetchSeriesBanner(seriesDir.resolve('fanart.jpg'), seriesId, 'fanart', it, null, override, locale) }
 
 		// fetch season banners
 		if (seasonDir != seriesDir) {
-			fetchSeriesBanner(seasonDir.resolve('poster.jpg'), series, 'season', 'season', season, override, locale)
-			fetchSeriesBanner(seasonDir.resolve('banner.jpg'), series, 'seasonwide', 'seasonwide', season, override, locale)
+			fetchSeriesBanner(seasonDir.resolve('poster.jpg'), seriesId, 'season', 'season', season, override, locale)
+			fetchSeriesBanner(seasonDir.resolve('banner.jpg'), seriesId, 'seasonwide', 'seasonwide', season, override, locale)
 
 			// folder image (resuse series poster if possible)
 			copyIfPossible(seasonDir.resolve('poster.jpg'), seasonDir.resolve('folder.jpg'))
 		}
 
 		// fetch fanart
-		['hdclearart', 'clearart'].findResult{ type -> fetchSeriesFanart(seriesDir.resolve('clearart.png'), series, type, null, override, locale) }
-		['hdtvlogo', 'clearlogo'].findResult{ type -> fetchSeriesFanart(seriesDir.resolve('logo.png'), series, type, null, override, locale) }
-		fetchSeriesFanart(seriesDir.resolve('landscape.jpg'), series, 'tvthumb', null, override, locale)
+		['hdclearart', 'clearart'].findResult{ type -> fetchSeriesFanart(seriesDir.resolve('clearart.png'), seriesId, type, null, override, locale) }
+		['hdtvlogo', 'clearlogo'].findResult{ type -> fetchSeriesFanart(seriesDir.resolve('logo.png'), seriesId, type, null, override, locale) }
+		fetchSeriesFanart(seriesDir.resolve('landscape.jpg'), seriesId, 'tvthumb', null, override, locale)
 
 		// fetch season fanart
 		if (seasonDir != seriesDir) {
-			fetchSeriesFanart(seasonDir.resolve('landscape.jpg'), series, 'seasonthumb', season, override, locale)
+			fetchSeriesFanart(seasonDir.resolve('landscape.jpg'), seriesId, 'seasonthumb', season, override, locale)
 		}
 
 		// folder image (resuse series poster if possible)
