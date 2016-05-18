@@ -269,7 +269,7 @@ if (input.size() == 0) die("No files selected for processing")
 def groups = input.groupBy{ f ->
 	// print xattr metadata
 	if (f.metadata) {
-		log.finest "xattr: [$f] => [$f.metadata]"
+		log.finest "xattr: [$f.name] => [$f.metadata]"
 	}
 
 	// skip auto-detection if possible
