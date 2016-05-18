@@ -15,7 +15,7 @@ def pathExcludePattern      = "(?i)\\b($terms)\\b"
 /*
  * Delete orphaned "clutter" files like nfo, jpg, etc and sample files
  */
-def isClutter(f) {
+def isClutter = { f ->
 	// whitelist
 	if (f.path.findMatch(ignore))
 		return false
@@ -37,7 +37,7 @@ def isClutter(f) {
 }
 
 
-def clean(f) {
+def clean = { f ->
 	println "Delete $f"
 
 	// do a dry run via --action test
