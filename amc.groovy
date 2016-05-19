@@ -10,6 +10,8 @@ args.each{ log.finer("Argument: $it") }
 def input = []
 def failOnError = _args.conflict.equalsIgnoreCase('fail')
 def isTest = _args.action.equalsIgnoreCase('test')
+
+// --output folder must be a valid folder
 def outputFolder = new File(_args.output ?: '.').getCanonicalFile()
 
 // enable/disable features as specified via --def parameters
