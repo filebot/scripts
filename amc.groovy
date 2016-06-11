@@ -130,7 +130,7 @@ if ((tryQuietly{ ut_dir } == '/') || (tryQuietly{ ut_dir } == '%D') || (args.siz
 
 // make sure input and output folders do not overlap
 if (args.any{ outputFolder.path.startsWith(it.canonicalPath) } || tryQuietly{ outputFolder.path.startsWith(ut_dir) } ) {
-	fail("Illegal usage: output folder must not contain input folder")
+	fail("Illegal usage: input folder must not contain output folder")
 }
 
 
