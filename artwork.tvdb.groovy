@@ -43,5 +43,5 @@ args.eachMediaFolder{ dir ->
 	def season = sxe && sxe.season > 0 ? sxe.season : 1
 
 	println "$dir => $series"
-	fetchSeriesArtworkAndNfo(seriesDir, dir, series, season, false, _args.locale ?: Locale.ENGLISH)
+	fetchSeriesArtworkAndNfo(seriesDir, dir, series.id, season, false, _args.locale ?: Locale.ENGLISH)
 }
