@@ -15,7 +15,15 @@ If you want to run scripts from a local file or if you want to make your own mod
 ```
 git clone https://github.com/filebot/scripts.git
 ```
-You can call local Groovy scripts by specifiying the filepath:
+Update to the latest revision:
+```
+git pull
+```
+Discard local changes:
+```
+git reset --hard
+```
+You may call local Groovy scripts by specifiying the file path:
 ```
 filebot -script /path/to/script.groovy
 ```
