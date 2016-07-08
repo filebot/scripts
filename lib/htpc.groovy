@@ -6,18 +6,14 @@ import static groovy.json.StringEscapeUtils.*
  * XBMC helper functions
  */
 def scanVideoLibrary(host, port) {
-	tryLogCatch {
-		telnet(host, port) { writer, reader ->
-			writer.println("""{"jsonrpc":"2.0","method":"VideoLibrary.Scan","id":1}""")
-		}
+	telnet(host, port) { writer, reader ->
+		writer.println("""{"jsonrpc":"2.0","method":"VideoLibrary.Scan","id":1}""")
 	}
 }
 
 def showNotification(host, port, title, message, image) {
-	tryLogCatch {
-		telnet(host, port) { writer, reader ->
-			writer.println("""{"jsonrpc":"2.0","method":"GUI.ShowNotification","params":{"title":"${escapeJavaScript(title)}","message":"${escapeJavaScript(message)}", "image":"${escapeJavaScript(image)}"},"id":1}""")
-		}
+	telnet(host, port) { writer, reader ->
+		writer.println("""{"jsonrpc":"2.0","method":"GUI.ShowNotification","params":{"title":"${escapeJavaScript(title)}","message":"${escapeJavaScript(message)}", "image":"${escapeJavaScript(image)}"},"id":1}""")
 	}
 }
 
@@ -27,16 +23,14 @@ def showNotification(host, port, title, message, image) {
  * Plex helpers
  */
 def refreshPlexLibrary(server, port = 32400, token = null) {
-	tryLogCatch {
-		// use HTTPS if hostname is specified, use HTTP if IP is specified
-		def protocol = server ==~ /localhost|[0-9.:]+/ ? 'http' : 'https'
-		def url = "$protocol://$server:$port/library/sections/all/refresh"
-		if (token) {
-			url += "?X-Plex-Token=$token"
-		}
-		log.finest "GET: $url"
-		new URL(url).get()
+	// use HTTPS if hostname is specified, use HTTP if IP is specified
+	def protocol = server ==~ /localhost|[0-9.:]+/ ? 'http' : 'https'
+	def url = "$protocol://$server:$port/library/sections/all/refresh"
+	if (token) {
+		url += "?X-Plex-Token=$token"
 	}
+	log.finest "GET: $url"
+	new URL(url).get()
 }
 
 
@@ -45,16 +39,14 @@ def refreshPlexLibrary(server, port = 32400, token = null) {
  * Emby helpers
  */
 def refreshEmbyLibrary(server, port = 8096, token = null) {
-	tryLogCatch {
-		// use HTTPS if hostname is specified, use HTTP if IP is specified
-		def protocol = server.split(/[.]/).length == 4 ? 'http' : 'https'
-		def url = "$protocol://$server:$port/Library/Refresh"
-		if (token) {
-			url += "?api_key=$token"
-		}
-		log.finest "GET: $url"
-		new URL(url).post([:], [:])
+	// use HTTPS if hostname is specified, use HTTP if IP is specified
+	def protocol = server.split(/[.]/).length == 4 ? 'http' : 'https'
+	def url = "$protocol://$server:$port/Library/Refresh"
+	if (token) {
+		url += "?api_key=$token"
 	}
+	log.finest "GET: $url"
+	new URL(url).post([:], [:])
 }
 
 
