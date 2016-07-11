@@ -75,7 +75,7 @@ try {
 try {
 	if (Settings.useGVFS()) {
 		print 'GVFS: '
-		assert net.filebot.gio.GVFS.defaultVFS != null
+		assert net.filebot.gio.GVFS.getDefaultVFS() != null
 		println 'OK'
 	}
 } catch(Throwable error) {
