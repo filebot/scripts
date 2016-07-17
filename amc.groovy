@@ -61,7 +61,7 @@ def format = [
 
 // force Movie / TV Series / Anime behaviour
 def forceMovie = { f ->
-	label =~ /^(?i:Movie|Film|Concert)/ || f.dir.listPath().any{ it.name ==~ /(?i:Movies)/ } || f.isMovie()
+	label =~ /^(?i:Movie|Film|Concert|UFC)/ || f.dir.listPath().any{ it.name ==~ /(?i:Movies)/ } || f.isMovie()
 }
 
 def forceSeries = { f ->
