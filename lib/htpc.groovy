@@ -108,6 +108,11 @@ def fetchSeriesNfo(outputFile, i, locale) {
 			status(i.status)
 			studio(i.network)
 			tvdb(id:i.id, "http://www.thetvdb.com/?tab=series&id=${i.id}")
+
+			/** Kodi requires an <episodeguide> element with a TheTVDB API (v1) Series Record XML URL **/
+			episodeguide {
+				url(cache:"${i.id}.xml", "http://www.thetvdb.com/api/1D62F2F90030C444/series/${i.id}/all/${locale.language}.zip")
+			}
 		}
 	}
 	xml.saveAs(outputFile)
@@ -247,13 +252,6 @@ def fetchMovieNfo(outputFile, i, movieFile) {
 					credits("$p.name ($p.job)")
 				}
 			}
-			/** <trailer> element not supported due to lack of specification on acceptable values for both Plex and Kodi
-			i.trailers.each{ t ->
-				t.sources.each { s, v ->
-					trailer(type:t.type, name:t.name, size:s, v)
-				}
-			}
-			**/
 			fileinfo {
 				streamdetails {
 					mi?.each { kind, streams ->
@@ -283,6 +281,14 @@ def fetchMovieNfo(outputFile, i, movieFile) {
 			}
 			imdb(id:"tt" + (i.imdbId ?: 0).pad(7), "http://www.imdb.com/title/tt" + (i.imdbId ?: 0).pad(7))
 			tmdb(id:i.id, "http://www.themoviedb.org/movie/${i.id}")
+
+			/** <trailer> element not supported due to lack of specification on acceptable values for both Plex and Kodi
+			i.trailers.each{ t ->
+				t.sources.each { s, v ->
+					trailer(type:t.type, name:t.name, size:s, v)
+				}
+			}
+			**/
 		}
 	}
 	xml.saveAs(outputFile)
