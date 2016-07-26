@@ -22,6 +22,7 @@ def artwork   = tryQuietly{ artwork.toBoolean() && !isTest }
 def extras    = tryQuietly{ extras.toBoolean() }
 def clean     = tryQuietly{ clean.toBoolean() }
 def exec      = tryQuietly{ exec.toString() }
+def extractFolder = tryQuietly{ extractFolder.toString() }
 
 // array of kodi/plex/emby hosts
 def kodi = tryQuietly{ any{kodi}{xbmc}.split(/[ ,|]+/) }
@@ -208,7 +209,7 @@ def extractedArchives = []
 def tempFiles = []
 input = input.flatten{ f ->
 	if (!skipExtract && (f.isArchive() || f.hasExtension('001'))) {
-		def extractDir = new File(f.dir, f.nameWithoutExtension)
+		def extractDir = new File(extractFolder? extractFolder: f.dir, f.nameWithoutExtension)
 		def extractFiles = extract(file: f, output: new File(extractDir, f.dir.name), conflict: 'auto', filter: { it.isArchive() || it.isVideo() || it.isSubtitle() || (music && it.isAudio()) }, forceExtractAll: true) ?: []
 
 		extractedArchives += f
