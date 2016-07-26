@@ -22,7 +22,6 @@ def artwork   = tryQuietly{ artwork.toBoolean() && !isTest }
 def extras    = tryQuietly{ extras.toBoolean() }
 def clean     = tryQuietly{ clean.toBoolean() }
 def exec      = tryQuietly{ exec.toString() }
-def extractFolder = tryQuietly{ extractFolder.toString() }
 
 // array of kodi/plex/emby hosts
 def kodi = tryQuietly{ any{kodi}{xbmc}.split(/[ ,|]+/) }
@@ -30,7 +29,7 @@ def plex = tryQuietly{ plex.split(/[ ,|]+/)*.split(/:/).collect{ it.length >= 2 
 def emby = tryQuietly{ emby.split(/[ ,|]+/)*.split(/:/).collect{ it.length >= 2 ? [host:it[0], token:it[1]] : [host:it[0]] } }
 
 // extra options, myepisodes updates and email notifications
-def storeReport = tryQuietly{ storeReport.toBoolean() }
+def extractFolder = tryQuietly{ extractFolder.toString() }
 def skipExtract = tryQuietly{ skipExtract.toBoolean() }
 def deleteAfterExtract = tryQuietly{ deleteAfterExtract.toBoolean() }
 def excludeList = tryQuietly{ (excludeList as File).isAbsolute() ? (excludeList as File) : new File(outputFolder, excludeList as String).getCanonicalFile() }
@@ -39,6 +38,7 @@ def gmail = tryQuietly{ gmail.split(':', 2) }
 def mail = tryQuietly{ mail.split(':', 3) }
 def pushover = tryQuietly{ pushover.split(':', 2) }
 def pushbullet = tryQuietly{ pushbullet.toString() }
+def storeReport = tryQuietly{ storeReport.toBoolean() }
 def reportError = tryQuietly{ reportError.toBoolean() }
 
 // user-defined filters
@@ -209,7 +209,7 @@ def extractedArchives = []
 def tempFiles = []
 input = input.flatten{ f ->
 	if (!skipExtract && (f.isArchive() || f.hasExtension('001'))) {
-		def extractDir = new File(extractFolder? extractFolder: f.dir, f.nameWithoutExtension)
+		def extractDir = new File(extractFolder ?: f.dir, f.nameWithoutExtension)
 		def extractFiles = extract(file: f, output: new File(extractDir, f.dir.name), conflict: 'auto', filter: { it.isArchive() || it.isVideo() || it.isSubtitle() || (music && it.isAudio()) }, forceExtractAll: true) ?: []
 
 		extractedArchives += f
