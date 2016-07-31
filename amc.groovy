@@ -35,7 +35,7 @@ def deleteAfterExtract = tryQuietly{ deleteAfterExtract.toBoolean() }
 def excludeList = tryQuietly{ (excludeList as File).isAbsolute() ? (excludeList as File) : new File(outputFolder, excludeList as String).getCanonicalFile() }
 def myepisodes = tryQuietly{ myepisodes.split(':', 2) }
 def gmail = tryQuietly{ gmail.split(':', 2) }
-def mail = tryQuietly{ mail.split(':', 3) }
+def mail = tryQuietly{ mail.split(':', 5) }
 def pushover = tryQuietly{ pushover.split(':', 2) }
 def pushbullet = tryQuietly{ pushbullet.toString() }
 def storeReport = tryQuietly{ storeReport.toBoolean() }
@@ -102,7 +102,8 @@ def sendEmailReport = { title, message, messagetype ->
 	if (mail) {
 		sendmail(
 			subject: title, message: message, messagemimetype: messagetype,
-			mailhost: mail[0], mailport: mail[1], from: mail[2], to: mailto
+			mailhost: mail[0], mailport: mail[1], from: mail[2], to: mailto,
+			user: mail[3], password: mail[4]
 		)
 	}
 }
