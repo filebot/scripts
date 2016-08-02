@@ -6,15 +6,19 @@ import static groovy.json.StringEscapeUtils.*
  * XBMC helper functions
  */
 def scanVideoLibrary(host, port) {
-	telnet(host, port) { writer, reader ->
-		writer.println("""{"jsonrpc":"2.0","method":"VideoLibrary.Scan","id":1}""")
-	}
+	def json = [jsonrpc: '2.0', method: 'VideoLibrary.Scan', id: 1]
+	def url = "http://$host:$port/jsonrpc?request=" + URLEncoder.encode(JsonOutput.toJson(json), 'UTF-8')
+
+	log.finest "GET: $url"
+	new URL(url).get()
 }
 
 def showNotification(host, port, title, message, image) {
-	telnet(host, port) { writer, reader ->
-		writer.println("""{"jsonrpc":"2.0","method":"GUI.ShowNotification","params":{"title":"${escapeJavaScript(title)}","message":"${escapeJavaScript(message)}", "image":"${escapeJavaScript(image)}"},"id":1}""")
-	}
+	def json = [jsonrpc:'2.0', method:'GUI.ShowNotification', params: [title: title, message: message, image: image], id: 1]
+	def url = "http://$host:$port/jsonrpc?request=" + URLEncoder.encode(JsonOutput.toJson(json), 'UTF-8')
+
+	log.finest "GET: $url"
+	new URL(url).get()
 }
 
 
