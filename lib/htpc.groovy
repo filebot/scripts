@@ -1,6 +1,3 @@
-import static groovy.json.StringEscapeUtils.*
-
-
 
 /**
  * XBMC helper functions
