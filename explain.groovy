@@ -11,7 +11,7 @@ args.getFiles{ it.isVideo() }.each{ f ->
 	if (o) {
 		println ' Episode Metrics '.center(80, '-')
 		EpisodeMetrics.defaultSequence(false).each{ m ->
-			print "$m".padRight(20, ' ')
+			print m.name().padRight(20, ' ')
 			println m.getSimilarity(f, o).round(1)
 		}
 	}
