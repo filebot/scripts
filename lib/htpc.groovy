@@ -1,10 +1,11 @@
 
 /**
- * XBMC helper functions
+ * XBMC/Kodi helper functions
  */
 def scanVideoLibrary(host, port) {
 	def json = [jsonrpc: '2.0', method: 'VideoLibrary.Scan', id: 1]
-	def url = "http://$host:$port/jsonrpc?request=" + URLEncoder.encode(JsonOutput.toJson(json), 'UTF-8')
+	def hostAndPort = getHostAndPort(host, port)
+	def url = "http://$hostAndPort/jsonrpc?request=" + URLEncoder.encode(JsonOutput.toJson(json), 'UTF-8')
 
 	log.finest "GET: $url"
 	new URL(url).get()
@@ -12,12 +13,19 @@ def scanVideoLibrary(host, port) {
 
 def showNotification(host, port, title, message, image) {
 	def json = [jsonrpc:'2.0', method:'GUI.ShowNotification', params: [title: title, message: message, image: image], id: 1]
-	def url = "http://$host:$port/jsonrpc?request=" + URLEncoder.encode(JsonOutput.toJson(json), 'UTF-8')
+	def hostAndPort = getHostAndPort(host, port)
+	def url = "http://$hostAndPort/jsonrpc?request=" + URLEncoder.encode(JsonOutput.toJson(json), 'UTF-8')
 
 	log.finest "GET: $url"
 	new URL(url).get()
 }
 
+def getHostAndPort(hostWithPort, defaultPort) {
+    def hostAndPortSplitted = hostWithPort.split(/:/)
+    def hostOnly = hostAndPortSplitted[0];
+    def portOnly = (hostAndPortSplitted.length == 2) ? hostAndPortSplitted[1] : defaultPort;
+    return "$hostOnly:$portOnly"
+}
 
 
 /**
