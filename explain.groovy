@@ -2,17 +2,17 @@
 
 
 args.getFiles{ it.isVideo() }.each{ f ->
-	println ' File / Object '.center(80, '-')
+	println ' File / Object / MediaInfo '.center(80, '-')
 
-	def o = f.metadata
 	println 'File:   ' + f
-	println 'Object: ' + o?.objectToJson()
+	println 'Object: ' + f.xattr['net.filebot.metadata']
+	println 'Media:  ' + any{ MediaInfo.snapshot(f) }{ null }
 
-	if (o) {
+	if (f.metadata) {
 		println ' Episode Metrics '.center(80, '-')
 		EpisodeMetrics.defaultSequence(false).each{ m ->
 			print m.name().padRight(20, ' ')
-			println m.getSimilarity(f, o).round(1)
+			println m.getSimilarity(f, f.metadata).round(1)
 		}
 	}
 }
