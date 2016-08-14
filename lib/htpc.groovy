@@ -1,6 +1,6 @@
 
 /**
- * XBMC helper functions
+ * Kodi helper functions
  */
 def scanVideoLibrary(host, port) {
 	def json = [jsonrpc: '2.0', method: 'VideoLibrary.Scan', id: 1]
@@ -23,7 +23,7 @@ def showNotification(host, port, title, message, image) {
 /**
  * Plex helpers
  */
-def refreshPlexLibrary(server, port = 32400, token = null) {
+def refreshPlexLibrary(server, port, token) {
 	// use HTTPS if hostname is specified, use HTTP if IP is specified
 	def protocol = server ==~ /localhost|[0-9.:]+/ ? 'http' : 'https'
 	def url = "$protocol://$server:$port/library/sections/all/refresh"
@@ -39,7 +39,7 @@ def refreshPlexLibrary(server, port = 32400, token = null) {
 /**
  * Emby helpers
  */
-def refreshEmbyLibrary(server, port = 8096, token = null) {
+def refreshEmbyLibrary(server, port, token) {
 	// use HTTPS if hostname is specified, use HTTP if IP is specified
 	def protocol = server.split(/[.]/).length == 4 ? 'http' : 'https'
 	def url = "$protocol://$server:$port/Library/Refresh"

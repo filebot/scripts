@@ -24,9 +24,9 @@ def clean     = tryQuietly{ clean.toBoolean() }
 def exec      = tryQuietly{ exec.toString() }
 
 // array of kodi/plex/emby hosts
-def kodi = tryQuietly{ any{kodi}{xbmc}.split(/[ ,|]+/) }
-def plex = tryQuietly{ plex.split(/[ ,|]+/)*.split(/:/).collect{ it.length >= 2 ? [host:it[0], token:it[1]] : [host:it[0]] } }
-def emby = tryQuietly{ emby.split(/[ ,|]+/)*.split(/:/).collect{ it.length >= 2 ? [host:it[0], token:it[1]] : [host:it[0]] } }
+def kodi = tryQuietly{ kodi.split(/[ ,|]+/)*.split(/:/).collect{ it.length >= 2 ? [host: it[0], port: it[1] as int] : [host: it[0], port: 8080] } }
+def plex = tryQuietly{ plex.split(/[ ,|]+/)*.split(/:/).collect{ it.length >= 2 ? [host: it[0], token: it[1]] : [host: it[0]] } }
+def emby = tryQuietly{ emby.split(/[ ,|]+/)*.split(/:/).collect{ it.length >= 2 ? [host: it[0], token: it[1]] : [host: it[0]] } }
 
 // extra options, myepisodes updates and email notifications
 def extractFolder = tryQuietly{ extractFolder.toString() }
@@ -470,11 +470,11 @@ if (getRenameLog().size() > 0) {
 
 	// make Kodi scan for new content and display notification message
 	if (kodi) {
-		kodi.each{ host ->
-			log.info "Notify Kodi: $host"
+		kodi.each{ instance ->
+			log.info "Notify Kodi: ${instance.host}:${instance.port}"
 			tryLogCatch{
-				showNotification(host, 9090, getNotificationTitle(), getNotificationMessage(), 'http://app.filebot.net/icon.png')
-				scanVideoLibrary(host, 9090)
+				showNotification(instance.host, instance.port, getNotificationTitle(), getNotificationMessage(), 'http://app.filebot.net/icon.png')
+				scanVideoLibrary(instance.host, instance.port)
 			}
 		}
 	}
