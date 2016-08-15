@@ -11,8 +11,7 @@ args.getFiles{ it.isVideo() }.each{ f ->
 	if (f.metadata) {
 		println ' Episode Metrics '.center(80, '-')
 		EpisodeMetrics.defaultSequence(false).each{ m ->
-			print m.name().padRight(20, ' ')
-			println m.getSimilarity(f, f.metadata).round(1)
+			println String.format('%-20s % 1.1f', m, m.getSimilarity(f, f.metadata))
 		}
 	}
 }
