@@ -24,7 +24,7 @@ def clean     = tryQuietly{ clean.toBoolean() }
 def exec      = tryQuietly{ exec.toString() }
 
 // array of kodi/plex/emby hosts
-def kodi = tryQuietly{ any{kodi}{xbmc}.split(/[ ,|]+/)*.split(/:/).collect{ it.length >= 2 ? [host: it[0], port: it[1] as int] : [host: it[0], port: 8080] } }
+def kodi = tryQuietly{ any{kodi}{xbmc}.split(/[ ,|]+/)*.split(/:[0-9]+/).collect{ it.length >= 2 ? [host: it[0], port: it[1] as int] : [host: it[0], port: 8080] } }
 def plex = tryQuietly{ plex.split(/[ ,|]+/)*.split(/:/).collect{ it.length >= 2 ? [host: it[0], token: it[1]] : [host: it[0]] } }
 def emby = tryQuietly{ emby.split(/[ ,|]+/)*.split(/:/).collect{ it.length >= 2 ? [host: it[0], token: it[1]] : [host: it[0]] } }
 
