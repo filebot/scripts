@@ -474,6 +474,8 @@ if (getRenameLog().size() > 0) {
 			log.info "Notify Kodi: ${instance.host}:${instance.port}"
 			tryLogCatch{
 				showNotification(instance.host, instance.port, getNotificationTitle(), getNotificationMessage(), 'http://app.filebot.net/icon.png')
+			}
+			tryLogCatch{
 				scanVideoLibrary(instance.host, instance.port)
 			}
 		}
