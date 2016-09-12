@@ -3,7 +3,7 @@
 def deleteRootFolder = any{ root.toBoolean() }{ false }
 
 def ignore  = any{ ignore }{ /extrathumbs/ }
-def exts    = any{ exts }{ /jpg|jpeg|png|gif|ico|nfo|info|xml|htm|html|log|srt|sub|idx|smi|sup|md5|sfv|txt|rtf|url|db|dna|log|tgmd|json|data|ignore|srv|srr|nzb/ }
+def exts    = any{ exts }{ /jpg|jpeg|png|gif|ico|nfo|info|xml|htm|html|log|srt|sub|idx|smi|sup|md5|sfv|txt|rtf|url|db|dna|log|tgmd|json|data|ignore|srv|srr|nzb|vbs|ini/ }
 def terms   = any{ terms }{ /sample|trailer|extras|deleted.scenes|music.video|scrapbook|DS_Store/ }
 def minsize = any{ minsize.toLong() }{ 20 * 1024 * 1024 }
 def maxsize = any{ maxsize.toLong() }{ 100 * 1024 * 1024 }
