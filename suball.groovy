@@ -1,5 +1,6 @@
 // filebot -script dev:suball /path/to/media -non-strict --def maxAgeDays=7
 
+
 setDefaultValues(
 	minAgeDays: null,
 	maxAgeDays: 30,
@@ -8,6 +9,9 @@ setDefaultValues(
 	ignore: null,
 	ignoreTextLanguage: '.+'
 )
+
+
+def languages = any{ _args.lang.split(/\W+/) }{ ['en'] } as List
 
 
 def minFileSize = minFileSize as long
@@ -71,5 +75,7 @@ def accept = { f ->
  */
 args.getFiles{ it.isVideo() && accept(it) }.groupBy{ it.dir }.each{ dir, files ->
 	log.info "Fetch subtitles for [$dir]"
-	getMissingSubtitles(file: files, output:'srt', encoding:'UTF-8')
+	languages.each{
+		getMissingSubtitles(lang: it, file: files, output: 'srt', encoding: 'UTF-8')
+	}
 }
