@@ -34,7 +34,7 @@ def clearPreferences = {
 
 
 if (args) {
-	args.each{ f-> importPreferences(f) }
+	args.each{ f -> importPreferences(f) }
 } 
 
 if (_args.output) {
