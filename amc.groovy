@@ -510,7 +510,7 @@ if (getRenameLog().size() > 0) {
 	if (pushover) {
 		log.info 'Sending Pushover notification'
 		tryLogCatch {
-			Pushover(pushover[0], pushover.length == 1 ? 'wcckDz3oygHSU2SdIptvnHxJ92SQKK' : pushover[1]).send(getNotificationTitle(), getNotificationMessage())
+			Pushover(pushover[0], pushover[1] ?: 'wcckDz3oygHSU2SdIptvnHxJ92SQKK').send(getNotificationTitle(), getNotificationMessage())
 		}
 	}
 
