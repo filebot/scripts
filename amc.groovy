@@ -7,78 +7,73 @@ _def.each{ n, v -> log.finer('Parameter: ' + [n, n =~ /plex|kodi|pushover|pushbu
 args.each{ log.finer("Argument: $it") }
 
 // initialize variables
-def input = []
-def failOnError = _args.conflict.equalsIgnoreCase('fail')
-def isTest = _args.action.equalsIgnoreCase('test')
+failOnError = _args.conflict.equalsIgnoreCase('fail')
+testRun = _args.action.equalsIgnoreCase('test')
 
 // --output folder must be a valid folder
-def outputFolder = new File(_args.output ?: '.').getCanonicalFile()
+outputFolder = new File(_args.output ?: '.').getCanonicalFile()
 
 // enable/disable features as specified via --def parameters
-def unsorted  = tryQuietly{ unsorted.toBoolean() }
-def music     = tryQuietly{ music.toBoolean() }
-def subtitles = tryQuietly{ subtitles.split(/\W+/) as List }
-def artwork   = tryQuietly{ artwork.toBoolean() && !isTest }
-def extras    = tryQuietly{ extras.toBoolean() }
-def clean     = tryQuietly{ clean.toBoolean() }
-def exec      = tryQuietly{ exec.toString() }
+unsorted  = tryQuietly{ unsorted.toBoolean() }
+music     = tryQuietly{ music.toBoolean() }
+subtitles = tryQuietly{ subtitles.split(/\W+/) as List }
+artwork   = tryQuietly{ artwork.toBoolean() && !testRun }
+extras    = tryQuietly{ extras.toBoolean() }
+clean     = tryQuietly{ clean.toBoolean() }
+exec      = tryQuietly{ exec.toString() }
 
 // array of kodi/plex/emby hosts
-def kodi = tryQuietly{ any{kodi}{xbmc}.split(/[ ,|]+/)*.split(/:(?=\d+$)/).collect{ it.length >= 2 ? [host: it[0], port: it[1] as int] : [host: it[0], port: 8080] } }
-def plex = tryQuietly{ plex.split(/[ ,|]+/)*.split(/:/).collect{ it.length >= 2 ? [host: it[0], token: it[1]] : [host: it[0]] } }
-def emby = tryQuietly{ emby.split(/[ ,|]+/)*.split(/:/).collect{ it.length >= 2 ? [host: it[0], token: it[1]] : [host: it[0]] } }
+kodi = tryQuietly{ any{kodi}{xbmc}.split(/[ ,|]+/)*.split(/:(?=\d+$)/).collect{ it.length >= 2 ? [host: it[0], port: it[1] as int] : [host: it[0]] } }
+plex = tryQuietly{ plex.split(/[ ,;|]+/)*.split(/:/).collect{ it.length >= 2 ? [host: it[0], token: it[1]] : [host: it[0]] } }
+emby = tryQuietly{ emby.split(/[ ,;|]+/)*.split(/:/).collect{ it.length >= 2 ? [host: it[0], token: it[1]] : [host: it[0]] } }
 
 // extra options, myepisodes updates and email notifications
-def extractFolder = tryQuietly{ extractFolder.toString() }
-def skipExtract = tryQuietly{ skipExtract.toBoolean() }
-def deleteAfterExtract = tryQuietly{ deleteAfterExtract.toBoolean() }
-def excludeList = tryQuietly{ (excludeList as File).isAbsolute() ? (excludeList as File) : new File(outputFolder, excludeList as String).getCanonicalFile() }
-def myepisodes = tryQuietly{ myepisodes.split(':', 2) as List }
-def gmail = tryQuietly{ gmail.split(':', 2) as List }
-def mail = tryQuietly{ mail.split(':', 5) as List }
-def pushover = tryQuietly{ pushover.split(':', 2) as List }
-def pushbullet = tryQuietly{ pushbullet.toString() }
-def storeReport = tryQuietly{ storeReport.toBoolean() }
-def reportError = tryQuietly{ reportError.toBoolean() }
+extractFolder      = tryQuietly{ extractFolder.toString() }
+skipExtract        = tryQuietly{ skipExtract.toBoolean() }
+deleteAfterExtract = tryQuietly{ deleteAfterExtract.toBoolean() }
+excludeList        = tryQuietly{ def f = excludeList as File; f.isAbsolute() ? f : outputFolder.resolve(f.path) }
+myepisodes         = tryQuietly{ myepisodes.split(':', 2) as List }
+gmail              = tryQuietly{ gmail.split(':', 2) as List }
+mail               = tryQuietly{ mail.split(':', 5) as List }
+pushover           = tryQuietly{ pushover.split(':', 2) as List }
+pushbullet         = tryQuietly{ pushbullet.toString() }
+storeReport        = tryQuietly{ storeReport.toBoolean() }
+reportError        = tryQuietly{ reportError.toBoolean() }
 
 // user-defined filters
-def label = tryQuietly{ ut_label } ?: null
-def ignore = tryQuietly{ ignore } ?: null
-def minFileSize = tryQuietly{ minFileSize.toLong() }; if (minFileSize == null) { minFileSize = 50 * 1000L * 1000L }
-def minLengthMS = tryQuietly{ minLengthMS.toLong() }; if (minLengthMS == null) { minLengthMS = 10 * 60 * 1000L }
-
-
+label       = any{ ut_label }{ null }
+ignore      = any{ ignore }{ null }
+minFileSize = any{ minFileSize.toLong() }{ 50 * 1000L * 1000L }
+minLengthMS = any{ minLengthMS.toLong() }{ 10 * 60 * 1000L }
 
 // series/anime/movie format expressions
-def format = [
-	tvs:   any{ seriesFormat }{ '{plex}' },
-	anime: any{ animeFormat  }{ '{plex}' },
-	mov:   any{ movieFormat  }{ '{plex}' },
-	music: any{ musicFormat  }{ '{plex}' },
-	unsorted: any{ unsortedFormat }{ 'Unsorted/{file.structurePathTail}' }
-]
+seriesFormat   = any{ seriesFormat   }{ '{plex}' }
+animeFormat    = any{ animeFormat    }{ '{plex}' }
+movieFormat    = any{ movieFormat    }{ '{plex}' }
+musicFormat    = any{ musicFormat    }{ '{plex}' }
+unsortedFormat = any{ unsortedFormat }{ 'Unsorted/{file.structurePathTail}' }
 
 
 
 // force Movie / TV Series / Anime behaviour
-def forceMovie = { f ->
+def forceMovie(f) {
 	label =~ /^(?i:Movie|Film|Concert|UFC)/ || f.dir.listPath().any{ it.name ==~ /(?i:Movies)/ } || f.isMovie()
 }
 
-def forceSeries = { f ->
+def forceSeries(f) {
 	label =~ /^(?i:TV|Show|Series|Documentary)/ || f.dir.listPath().any{ it.name ==~ /(?i:TV.Shows)/ } || f.path =~ /(?<=\b|_)(?i:tv[sp]-|Season\D?\d{1,2}|\d{4}.S\d{2})(?=\b|_)/ || parseEpisodeNumber(f.path, true) || parseDate(f.path)
 }
 
-def forceAnime = { f ->
+def forceAnime(f) {
 	label =~ /^(?i:Anime)/ || f.dir.listPath().any{ it.name ==~ /(?i:Anime)/ } || (f.isVideo() && (f.name =~ /(?i:HorribleSubs)/ || f.name =~ /[\(\[]\p{XDigit}{8}[\]\)]/ || (getMediaInfo(f, '''{media.AudioLanguageList} {media.TextCodecList}''').tokenize().containsAll(['Japanese', 'ASS']) && (parseEpisodeNumber(f.name, false) != null || getMediaInfo(f, '{minutes}').toInteger() < 60))))
 }
 
-def forceAudio = { f ->
+def forceAudio(f) {
 	label =~ /^(?i:audio|music|music.video)/ || (f.isAudio() && !f.isVideo())
 }
 
-def forceIgnore = { f ->
-	label =~ /^(?i:games|ebook|other|ignore)/ || f.path.findMatch(ignore) != null
+def forceIgnore(f) {
+	label =~ /^(?i:games|ebook|other|ignore)/
 }
 
 
@@ -91,7 +86,7 @@ if (gmail || mail) { include('lib/ant') }
 
 
 // error reporting functions
-def sendEmailReport = { title, message, messagetype ->
+def sendEmailReport(title, message, messagetype) {
 	if (gmail) {
 		sendGmail(
 			subject: title, message: message, messagemimetype: messagetype,
@@ -108,7 +103,7 @@ def sendEmailReport = { title, message, messagetype ->
 	}
 }
 
-def fail = { message ->
+def fail(message) {
 	if (reportError) {
 		sendEmailReport('[FileBot] Failure', message, 'text/plain')
 	}
@@ -118,7 +113,7 @@ def fail = { message ->
 
 
 // sanity checks
-args.findAll{ !it.exists() }.each{ fail("File not found: $it") }
+args.findAll{ !it.exists() }.each{ fail("File does not exist: $it") }
 
 // check user-defined pre-condition
 if (tryQuietly{ !(ut_state ==~ ut_state_allow) }) {
@@ -135,105 +130,20 @@ if (args.any{ outputFolder.path.startsWith(it.canonicalPath) } || tryQuietly{ ou
 	fail("Illegal usage: input folder must not contain output folder: $outputFolder")
 }
 
-
-
-// define and load exclude list (e.g. to make sure files are only processed once)
-def excludePathSet = new FileSet()
-if (excludeList) {
-	if (excludeList.exists()) {
-		try {
-			excludePathSet.load(excludeList)
-		} catch(Exception e) {
-			fail("Failed to load excludeList: ${e}")
-		}
-		log.finest "Using excludes: ${excludeList} (${excludePathSet.size()})"
-	} else {
-		log.finest "Creating excludes: ${excludeList}"
-		if ((!excludeList.parentFile.isDirectory() && !excludeList.parentFile.mkdirs()) || (!excludeList.isFile() && !excludeList.createNewFile())) {
-			fail("Failed to create excludeList: ${excludeList}")
-		}
-	}
-}
-
-
-// specify how to resolve input folders, e.g. grab files from all folders except disk folders and already processed folders (i.e. folders with movie/tvshow nfo files)
-def resolveInput(f) {
-	if (f.isDirectory()) {
-		// ignore system and hidden folders
-		if (f.isHidden() || f.name ==~ /[.@].+|bin|initrd|opt|sbin|var|dev|lib|proc|sys|var.defaults|etc|lost.found|root|tmp|etc.defaults|mnt|run|usr|System.Volume.Information/) {
-			log.finest "Ignore hidden folder: $f"
-			return []
-		}
-
-		// resolve folder recursively, except disk folders
-		if (f.isDisk()) {
-			return f
-		}
-
-		// resolve folder recursively
-		def files = f.listFiles() as List ?: []
-		return files.findResults{ resolveInput(it) }
-	}
-
-	// ignore non-standard files
-	if (f.isFile() && !f.isHidden()) {
-		return f
-	}
-	return []
-}
-
 // collect input fileset as specified by the given --def parameters
-def roots = []
-if (args.empty) {
+roots = args
+
+if (args.size() == 0) {
 	// assume we're called with utorrent parameters (account for older and newer versions of uTorrents)
 	if (ut_kind == 'single' || (ut_kind != 'multi' && ut_dir && ut_file)) {
-		roots += new File(ut_dir, ut_file) // single-file torrent
+		roots = [new File(ut_dir, ut_file).getCanonicalFile()] // single-file torrent
 	} else {
-		roots += new File(ut_dir) // multi-file torrent
+		roots = [new File(ut_dir).getCanonicalFile()] // multi-file torrent
 	}
-} else {
-	// assume we're called normally with arguments
-	roots += args
 }
-
-// sanitize input
-roots = roots.findAll{ it?.exists() }.collect{ it.canonicalFile }.unique() // roots could be folders as well as files
-
-// flatten nested file structure
-input = roots.flatten{ f -> resolveInput(f) }
-
-// ignore archives that are on the exclude path list
-input = input.findAll{ f -> !excludePathSet.contains(f.path) }
-
-// extract archives (zip, rar, etc) that contain at least one video file
-def extractedArchives = []
-def tempFiles = []
-input = input.flatten{ f ->
-	if (!skipExtract && (f.isArchive() || f.hasExtension('001'))) {
-		def extractDir = new File(extractFolder ?: f.dir, f.nameWithoutExtension)
-		def extractFiles = extract(file: f, output: new File(extractDir, f.dir.name), conflict: 'auto', filter: { it.isArchive() || it.isVideo() || it.isSubtitle() || (music && it.isAudio()) }, forceExtractAll: true) ?: []
-
-		extractedArchives += f
-		tempFiles += extractDir
-		tempFiles += extractFiles
-
-		return extractFiles
-	}
-	return f
-}
-
-
-// ignore files that are on the exclude path list
-input = input.findAll{ f -> !excludePathSet.contains(f.path) }
-
-// update exclude list with all input that will be processed during this run
-if (excludeList && !isTest) {
-	excludePathSet.append(excludeList, extractedArchives, input)
-}
-
 
 // helper function to work with the structure relative path rather than the whole absolute path
-def relativeInputPath = { f ->
+def relativeInputPath(f) {
 	def r = roots.find{ r -> f.path.startsWith(r.path) && r.isDirectory() && f.isFile() }
 	if (r != null) {
 		return f.path.substring(r.path.length() + 1)
@@ -242,30 +152,139 @@ def relativeInputPath = { f ->
 }
 
 
-// keep original input around so we can print excluded files later
-def originalInputSet = new LinkedHashSet(input)
 
-// process only media files
-input = input.findAll{ f -> (f.isVideo() && !tryQuietly{ f.hasExtension('iso') && !f.isDisk() }) || f.isSubtitle() || (f.isDirectory() && f.isDisk()) || (music && f.isAudio()) }
+// define and load exclude list (e.g. to make sure files are only processed once)
+excludePathSet = new FileSet()
 
-// ignore clutter files
-input = input.findAll{ f -> !(relativeInputPath(f) =~ /(?<=\b|_)(?i:sample|trailer|extras|music.video|scrapbook|behind.the.scenes|extended.scenes|deleted.scenes|mini.series|s\d{2}c\d{2}|S\d+EXTRA|\d+xEXTRA|NCED|NCOP|(OP|ED)\d+|Formula.1.\d{4})(?=\b|_)/) }
+if (excludeList) {
+	if (excludeList.exists()) {
+		try {
+			excludePathSet.load(excludeList)
+		} catch(Exception e) {
+			fail("Failed to load excludeList: $e")
+		}
+		log.finest "Using excludes: $excludeList (${excludePathSet.size()})"
+	} else {
+		log.finest "Creating excludes: $excludeList"
+		if ((!excludeList.parentFile.isDirectory() && !excludeList.parentFile.mkdirs()) || (!excludeList.isFile() && !excludeList.createNewFile())) {
+			fail("Failed to create excludeList: $excludeList")
+		}
+	}
+}
 
-// ignore video files that don't conform with the file-size and video-length limits
-input = input.findAll{ f -> !(f.isVideo() && ((minFileSize > 0 && f.length() < minFileSize) || (minLengthMS > 0 && tryQuietly{ getMediaInfo(f, '{duration}').toLong() < minLengthMS }))) }
 
-// ignore subtitles files that are not stored in the same folder as the movie
-input = input.findAll{ f -> !(f.isSubtitle() && !input.findAll{ it.isVideo() }.any{ v -> f.isDerived(v) || f.path.startsWith(v.parentFile.path) }) }
+extractedArchives = []
+temporaryFiles = []
 
-// ensure that the final input set is sorted
-input = input.sort()
+def extract(f) {
+	def folder = new File(extractFolder ?: f.dir, f.nameWithoutExtension)
+	def files = extract(file: f, output: folder.resolve(f.dir.name), conflict: 'auto', filter: { it.isArchive() || it.isVideo() || it.isSubtitle() || (music && it.isAudio()) }, forceExtractAll: true) ?: []
+
+	extractedArchives += f
+	temporaryFiles += folder
+	temporaryFiles += files
+
+	return files
+}
+
+
+def acceptFile(f) {
+	if (f.isHidden()) {
+		log.finest "Ignore hidden: $f"
+		return false
+	}
+
+	if (f.name ==~ /[.@].+|bin|initrd|opt|sbin|var|dev|lib|proc|sys|var.defaults|etc|lost.found|root|tmp|etc.defaults|mnt|run|usr|System.Volume.Information/) {
+		log.finest "Ignore system path: $f"
+		return false
+	}
+
+	if (f.name =~ /(?<=\b|_)(?i:sample|trailer|extras|music.video|scrapbook|behind.the.scenes|extended.scenes|deleted.scenes|mini.series|s\d{2}c\d{2}|S\d+EXTRA|\d+xEXTRA|NCED|NCOP|(OP|ED)\d+|Formula.1.\d{4})(?=\b|_)/) {
+		log.finest "Ignore extra: $f"
+		return false
+	}
+
+	// ignore if the user-defined ignore pattern matches
+	if (f.path.findMatch(ignore)) {
+		log.finest "Ignore pattern: $f"
+		return false
+	}
+
+	// ignore archives that are on the exclude path list
+	if (excludePathSet.contains(f)) {
+		return false
+	}
+
+	// accept archives if the extract feature is enabled
+	if (f.isArchive() || f.hasExtension('001')) {
+		return !skipExtract
+	}
+
+	// ignore iso images that do not contain a video disk structure
+	if (f.hasExtension('iso') && !f.isDisk()) {
+		log.finest "Ignore disk image: $f"
+		return false
+	}
+
+	// ignore small video files
+	if (minFileSize > 0 && f.isVideo() && f.length() < minFileSize) {
+		log.finest "Skip small video file: $f"
+		return false
+	}
+
+	// ignore short videos
+	if (minLengthMS > 0 && f.isVideo() && any{ getMediaInfo(f, '{duration}').toLong() < minLengthMS }{ true /* default if MediaInfo fails */ }) {
+		log.finest "Skip short video: $f"
+		return false
+	}
+
+	// accept audio files only if music mode is enabled
+	if (music && f.isAudio()) {
+		log.finest "Skip music: $f"
+		return false
+	}
+
+	// process only media files
+	return f.isDirectory() || f.isVideo() || f.isSubtitle()
+}
+
+
+// specify how to resolve input folders, e.g. grab files from all folders except disk folders and already processed folders (i.e. folders with movie/tvshow nfo files)
+def resolveInput(f) {
+	// resolve folder recursively, except disk folders
+	if (f.isDirectory()) {
+		if (f.isDisk()) {
+			return f
+		}
+		return f.listFiles{ acceptFile(it) }.collect{ resolveInput(it) }
+	}
+
+	if (f.isArchive() || f.hasExtension('001')) {
+		return extract(f).findAll{ acceptFile(it) }.collect{ resolveInput(it) }
+	}
+
+	return f
+}
+
+
+// flatten nested file structure
+def input = roots.findAll{ acceptFile(it) }.flatten{ resolveInput(it) }
+
+// ignore subtitle files that are not stored alongside a corresponding video file
+// input = input.findAll{ f -> !(f.isSubtitle() && !input.findAll{ it.isVideo() }.any{ f.isDerived(it) || f.path.startsWith(it.dir.path) }) }
+
+// update exclude list with all input that will be processed during this run
+if (excludeList && !testRun) {
+	excludePathSet.append(excludeList, extractedArchives, input)
+}
 
 // print exclude and input sets for logging
-input.each{ f -> log.finer("Input: $f") }
-(originalInputSet - input).each{ f -> log.finest("Exclude: $f") }
+input.each{ log.fine "Input: $it" }
 
 // early abort if there is nothing to do
-if (input.size() == 0) die("No files selected for processing")
+if (input.size() == 0) {
+	die("No files selected for processing")
+}
 
 
 
@@ -365,18 +384,17 @@ groups.each{ group, files ->
 	// fetch subtitles (but not for anime)
 	if (group.anime == null && subtitles != null && files.findAll{ it.isVideo() }.size() > 0) {
 		subtitles.each{ languageCode ->
-			def subtitleFiles = getMissingSubtitles(file:files, lang:languageCode, strict:true, output:'srt', encoding:'UTF-8', format:'MATCH_VIDEO_ADD_LANGUAGE_TAG') ?: []
+			def subtitleFiles = getMissingSubtitles(file: files, lang: languageCode, strict: true, output: 'srt', encoding: 'UTF-8', format: 'MATCH_VIDEO_ADD_LANGUAGE_TAG') ?: []
 			files += subtitleFiles
 			input += subtitleFiles // make sure subtitles are added to the exclude list and other post processing operations
-			tempFiles += subtitleFiles // if downloaded for temporarily extraced files delete later
+			temporaryFiles += subtitleFiles // if downloaded for temporarily extraced files delete later
 		}
 	}
 
 	// EPISODE MODE
 	if ((group.tvs || group.anime) && !group.mov) {
-		// choose series / anime config
-		def config = group.tvs ? [name:group.tvs, format:format.tvs, db:'TheTVDB'] : [name:group.anime, format:format.anime, db:'AniDB']
-		def dest = rename(file: files, format: config.format, db: config.db)
+		// choose series / anime
+		def dest = group.tvs ? rename(file: files, format: seriesFormat, db: 'TheTVDB') : rename(file: files, format: animeFormat, db: 'AniDB')
 
 		if (dest != null) {
 			if (artwork) {
@@ -390,7 +408,7 @@ groups.each{ group, files ->
 				}
 			}
 		} else if (failOnError) {
-			fail("Failed to rename series: $config.name")
+			fail("Failed to process group: $group")
 		} else {
 			unsortedFiles += files
 		}
@@ -398,7 +416,7 @@ groups.each{ group, files ->
 
 	// MOVIE MODE
 	else if (group.mov && !group.tvs && !group.anime) {
-		def dest = rename(file:files, format:format.mov, db:'TheMovieDB')
+		def dest = rename(file: files, format: movieFormat, db: 'TheMovieDB')
 
 		if (dest != null) {
 			if (artwork) {
@@ -412,7 +430,7 @@ groups.each{ group, files ->
 				}
 			}
 		} else if (failOnError) {
-			fail("Failed to rename movie: $group.mov")
+			fail("Failed to process group: $group")
 		} else {
 			unsortedFiles += files
 		}
@@ -420,12 +438,12 @@ groups.each{ group, files ->
 
 	// MUSIC MODE
 	else if (group.music) {
-		def dest = rename(file:files, format:format.music, db:'ID3')
+		def dest = rename(file: files, format: musicFormat, db: 'ID3')
 
 		if (dest != null) {
 			// music artwork not supported
 		} else if (failOnError) {
-			fail("Failed to rename music: $group.music")
+			fail("Failed to process group: $group")
 		} else {
 			unsortedFiles += files
 		}
@@ -445,8 +463,8 @@ if (unsorted) {
 	if (unsortedFiles.size() > 0) {
 		log.info "Processing ${unsortedFiles.size()} unsorted files"
 		rename(map: unsortedFiles.collectEntries{ original ->
-			def destination = getMediaInfo(original, format.unsorted) as File
-			return [original, destination.isAbsolute() ? destination : new File(outputFolder, destination as String)]
+			def destination = getMediaInfo(original, unsortedFormat) as File
+			return [original, destination.isAbsolute() ? destination : outputFolder.resolve(destination.path)]
 		})
 	}
 }
@@ -473,8 +491,8 @@ if (getRenameLog().size() > 0) {
 		kodi.each{ instance ->
 			log.info "Notify Kodi: ${instance.host}:${instance.port}"
 			tryLogCatch{
-				showNotification(instance.host, instance.port, getNotificationTitle(), getNotificationMessage(), 'http://app.filebot.net/icon.png')
-				scanVideoLibrary(instance.host, instance.port)
+				showNotification(instance.host, instance.port ?: 8080, getNotificationTitle(), getNotificationMessage(), 'http://app.filebot.net/icon.png')
+				scanVideoLibrary(instance.host, instance.port ?: 8080)
 			}
 		}
 	}
@@ -567,8 +585,8 @@ if (getRenameLog().size() > 0) {
 
 	// store processing report
 	if (storeReport) {
-		def reportFolder = new File(Settings.getApplicationFolder(), 'reports').getCanonicalFile()
-		def reportFile = getReportMessage().saveAs(new File(reportFolder, "AMC ${now.format('''[yyyy-MM-dd HH'h'mm'm']''')} ${getReportSubject().take(50).trim()}.html".validateFileName()))
+		def reportFolder = Settings.getApplicationFolder().resolve('reports').getCanonicalFile()
+		def reportFile = getReportMessage().saveAs(reportFolder.resolve("AMC ${now.format('''[yyyy-MM-dd HH'h'mm'm']''')} ${getReportSubject().take(50).trim()}.html".validateFileName()))
 		log.finest("Saving report as ${reportFile}")
 	}
 
@@ -576,7 +594,7 @@ if (getRenameLog().size() > 0) {
 	if (pushbullet) {
 		log.info 'Sending PushBullet report'
 		tryLogCatch {
-			PushBullet(pushbullet).sendFile(getNotificationTitle(), getReportMessage(), 'text/html', getNotificationMessage(), tryQuietly{ mailto })
+			PushBullet(pushbullet).sendFile(getNotificationTitle(), getReportMessage(), 'text/html', getNotificationMessage(), any{ mailto }{ null })
 		}
 	}
 
@@ -606,27 +624,29 @@ if (deleteAfterExtract) {
 
 // clean empty folders, clutter files, etc after move
 if (clean) {
-	if (['DUPLICATE', 'COPY', 'HARDLINK'].any{ it.equalsIgnoreCase(_args.action) } && tempFiles.size() > 0) {
+	if (['DUPLICATE', 'COPY', 'HARDLINK'].any{ it.equalsIgnoreCase(_args.action) } && temporaryFiles.size() > 0) {
 		log.info 'Clean temporary extracted files'
 		// delete extracted files
-		tempFiles.findAll{ it.isFile() }.sort().each{
+		temporaryFiles.findAll{ it.isFile() }.sort().each{
 			log.finest "Delete $it"
 			it.delete()
 		}
 		// delete remaining empty folders
-		tempFiles.findAll{ it.isDirectory() }.sort().reverse().each{
+		temporaryFiles.findAll{ it.isDirectory() }.sort().reverse().each{
 			log.finest "Delete $it"
-			if (it.getFiles().isEmpty()) it.deleteDir()
+			if (it.getFiles().size() == 0) {
+				it.deleteDir()
+			}
 		}
 	}
 
 	// deleting remaining files only makes sense after moving files
 	if ('MOVE'.equalsIgnoreCase(_args.action)) {
-		def cleanerInput = !args.empty ? args : ut_kind == 'multi' && ut_dir ? [ut_dir as File] : []
+		def cleanerInput = args.size() > 0 ? args : ut_kind == 'multi' && ut_dir ? [ut_dir as File] : []
 		cleanerInput = cleanerInput.findAll{ f -> f.exists() }
 		if (cleanerInput.size() > 0) {
 			log.info 'Clean clutter files and empty folders'
-			executeScript('cleaner', args.empty ? [root:true, ignore: ignore] : [root:false, ignore: ignore], cleanerInput)
+			executeScript('cleaner', args.size() == 0 ? [root:true, ignore: ignore] : [root:false, ignore: ignore], cleanerInput)
 		}
 	}
 }
