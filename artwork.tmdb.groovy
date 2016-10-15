@@ -13,14 +13,14 @@ args.eachMediaFolder{ dir ->
 		return
 	}
 
-	def videos = dir.listFiles{ it.isVideo() } as List
+	def videos = dir.listFiles{ it.isVideo() }
 	def query = _args.query
 	def options = []
 
 	if (query) {
 		// manual search & sort by relevance
 		options = TheMovieDB.searchMovie(query, _args.locale).sortBySimilarity(query, { it.name })
-	} else if (videos?.size() > 0) {
+	} else if (videos.size() > 0) {
 		// run movie auto-detection for video files
 		options = MediaDetection.detectMovie(videos[0], TheMovieDB, _args.locale, true)
 	}
