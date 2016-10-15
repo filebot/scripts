@@ -2,9 +2,9 @@
 
 
 // log input parameters
-log.fine("Run script [${_args.script}] at [${now}]")
-_def.each{ n, v -> log.finer('Parameter: ' + [n, n =~ /plex|kodi|pushover|pushbullet|mail|myepisodes/ ? '*****' : v].join(' = ')) }
-args.each{ log.finer("Argument: $it") }
+log.fine("Run script [$_args.script] at [$now]")
+_def.each{ n, v -> log.finest('Parameter: ' + [n, n =~ /plex|kodi|pushover|pushbullet|mail|myepisodes/ ? '*****' : v].join(' = ')) }
+args.each{ log.finest("Argument: $it") }
 
 // initialize variables
 failOnError = _args.conflict.equalsIgnoreCase('fail')
