@@ -41,8 +41,8 @@ storeReport        = tryQuietly{ storeReport.toBoolean() }
 reportError        = tryQuietly{ reportError.toBoolean() }
 
 // user-defined filters
-label       = any{ ut_label }{ null }
-ignore      = any{ ignore }{ null }
+label       = any{ _args.mode }{ ut_label }{ null }
+ignore      = any{ ~ignore }{ null }
 minFileSize = any{ minFileSize.toLong() }{ 50 * 1000L * 1000L }
 minLengthMS = any{ minLengthMS.toLong() }{ 10 * 60 * 1000L }
 
@@ -112,33 +112,43 @@ def fail(message) {
 
 
 
+// input parameters
+def ut = _def.findAll{ k, v -> k.startsWith('ut_') }.collectEntries{ k, v ->
+	if (v ==~ /%[A-Z]|\p{Punct}/) {
+		log.warning "Bad $k value: $v"
+		v = null
+	}
+	return [k.substring(3), v]
+}
+
+if (ut.dir) {
+	if (ut.state_allow && !(ut.state ==~ ut.state_allow)) {
+		fail("Illegal state: $ut.state != $ut.state_allow")
+	}
+	if (args.size() > 0) {
+		fail("Illegal usage: use either script parameters $ut or file arguments $args but not both")
+	}
+	if (outputFolder.path.startsWith(ut.dir)) {
+		fail("Illegal usage: input [$ut.dir] must not contain output folder [$outputFolder]")
+	}
+} else if (args.any{ outputFolder.path.startsWith(it.path) }) {
+	fail("Illegal usage: input $args must not contain output folder [$outputFolder]")
+} else if (args.size() == 0) {
+	fail("Illegal usage: no input")
+}
+
 // sanity checks
 args.findAll{ !it.exists() }.each{ fail("File does not exist: $it") }
-
-// check user-defined pre-condition
-if (tryQuietly{ !(ut_state ==~ ut_state_allow) }) {
-	fail("Illegal state: ut_state = $ut_state (expected $ut_state_allow)")
-}
-
-// check ut mode vs standalone mode
-if ((tryQuietly{ ut_dir } == '/') || (tryQuietly{ ut_dir } == '%D') || (args.size() > 0 && (tryQuietly{ ut_dir }?.size() > 0 || tryQuietly{ ut_file }?.size() > 0)) || (args.size() == 0 && (tryQuietly{ ut_dir } == null && tryQuietly{ ut_file } == null))) {
-	fail("Illegal usage: bad file arguments or ut_dir/ut_file parameters")
-}
-
-// make sure input and output folders do not overlap
-if (args.any{ outputFolder.path.startsWith(it.canonicalPath) } || tryQuietly{ outputFolder.path.startsWith(ut_dir) } ) {
-	fail("Illegal usage: input folder must not contain output folder: $outputFolder")
-}
 
 // collect input fileset as specified by the given --def parameters
 roots = args
 
 if (args.size() == 0) {
 	// assume we're called with utorrent parameters (account for older and newer versions of uTorrents)
-	if (ut_kind == 'single' || (ut_kind != 'multi' && ut_dir && ut_file)) {
-		roots = [new File(ut_dir, ut_file).getCanonicalFile()] // single-file torrent
+	if (ut.kind == 'single' || (ut.kind != 'multi' && ut.dir && ut.file)) {
+		roots = [new File(ut.dir, ut.file).getCanonicalFile()] // single-file torrent
 	} else {
-		roots = [new File(ut_dir).getCanonicalFile()] // multi-file torrent
+		roots = [new File(ut.dir).getCanonicalFile()] // multi-file torrent
 	}
 }
 
@@ -483,13 +493,19 @@ if (exec) {
 
 if (getRenameLog().size() > 0) {
 	// messages used for kodi / plex / emby pushover notifications
-	def getNotificationTitle = { "FileBot finished processing ${getRenameLog().values().findAll{ !it.isSubtitle() }.size()} files" }.memoize()
-	def getNotificationMessage = { prefix = '• ', postfix = '\n' -> tryQuietly{ ut_title } ?: (input.any{ !it.isSubtitle() } ? input.findAll{ !it.isSubtitle() } : input).collect{ relativeInputPath(it) as File }*.getRoot()*.getNameWithoutExtension().unique().sort{ it.toLowerCase() }.collect{ prefix + it }.join(postfix).trim() }.memoize()
+	def getNotificationTitle = {
+		def count = getRenameLog().count{ k, v -> !v.isSubtitle() }
+		return "FileBot finished processing $count files"
+	}.memoize()
+
+	def getNotificationMessage = { prefix = '• ', postfix = '\n' -> 
+		return ut.title ?: (input.findAll{ !it.isSubtitle() } ?: input).collect{ relativeInputPath(it) as File }.root.nameWithoutExtension.unique().collect{ prefix + it }.join(postfix).trim()
+	}.memoize()
 
 	// make Kodi scan for new content and display notification message
 	if (kodi) {
 		kodi.each{ instance ->
-			log.info "Notify Kodi: ${instance.host}:${instance.port}"
+			log.info "Notify Kodi: $instance"
 			tryLogCatch{
 				showNotification(instance.host, instance.port ?: 8080, getNotificationTitle(), getNotificationMessage(), 'http://app.filebot.net/icon.png')
 				scanVideoLibrary(instance.host, instance.port ?: 8080)
@@ -500,7 +516,7 @@ if (getRenameLog().size() > 0) {
 	// make Plex scan for new content
 	if (plex) {
 		plex.each{ instance ->
-			log.info "Notify Plex: ${instance.host}"
+			log.info "Notify Plex: $instance"
 			tryLogCatch {
 				refreshPlexLibrary(instance.host, 32400, instance.token)
 			}
@@ -510,7 +526,7 @@ if (getRenameLog().size() > 0) {
 	// make Emby scan for new content
 	if (emby) {
 		emby.each{ instance ->
-			log.info "Notify Emby: ${instance.host}"
+			log.info "Notify Emby: $instance"
 			tryLogCatch {
 				refreshEmbyLibrary(instance.host, 8096, instance.token)
 			}
@@ -577,7 +593,7 @@ if (getRenameLog().size() > 0) {
 							tr { [from.name, to.name, to.parent].each{ cell -> td(cell) } }
 						}
 					}
-					hr(); small("// Generated by ${Settings.getApplicationIdentifier()} on ${InetAddress.localHost.hostName} at ${now}")
+					hr(); small("// Generated by ${Settings.applicationIdentifier} on ${InetAddress.localHost.hostName} at ${now}")
 				}
 			}
 		}
@@ -642,7 +658,7 @@ if (clean) {
 
 	// deleting remaining files only makes sense after moving files
 	if ('MOVE'.equalsIgnoreCase(_args.action)) {
-		def cleanerInput = args.size() > 0 ? args : ut_kind == 'multi' && ut_dir ? [ut_dir as File] : []
+		def cleanerInput = args.size() > 0 ? args : ut.kind == 'multi' && ut.dir ? [ut.dir as File] : []
 		cleanerInput = cleanerInput.findAll{ f -> f.exists() }
 		if (cleanerInput.size() > 0) {
 			log.info 'Clean clutter files and empty folders'
