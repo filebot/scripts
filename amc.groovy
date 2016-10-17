@@ -248,14 +248,8 @@ def acceptFile(f) {
 		return false
 	}
 
-	// accept audio files only if music mode is enabled
-	if (music && f.isAudio()) {
-		log.finest "Skip music: $f"
-		return false
-	}
-
-	// process only media files
-	return f.isDirectory() || f.isVideo() || f.isSubtitle()
+	// process only media files (accept audio files only if music mode is enabled)
+	return f.isDirectory() || f.isVideo() || f.isSubtitle() || (music && f.isAudio())
 }
 
 
