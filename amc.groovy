@@ -596,7 +596,8 @@ if (getRenameLog().size() > 0) {
 	// store processing report
 	if (storeReport) {
 		def reportFolder = Settings.getApplicationFolder().resolve('reports').getCanonicalFile()
-		def reportFile = getReportMessage().saveAs(reportFolder.resolve("AMC ${now.format('''[yyyy-MM-dd HH'h'mm'm']''')} ${getReportSubject().take(50).trim()}.html".validateFileName()))
+		def reportName = [now.format(/[yyyy-MM-dd HH mm]/), getReportSubject().take(50)].join(' ').validateFileName().space('_')
+		def reportFile = getReportMessage().saveAs(reportFolder.resolve(reportName))
 		log.finest("Saving report as ${reportFile}")
 	}
 
