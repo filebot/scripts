@@ -500,7 +500,7 @@ if (getRenameLog().size() > 0) {
 	if (kodi) {
 		kodi.each{ instance ->
 			log.fine "Notify Kodi: $instance"
-			tryLogCatch{
+			tryLogCatch {
 				showNotification(instance.host, instance.port ?: 8080, getNotificationTitle(), getNotificationMessage(), 'http://app.filebot.net/icon.png')
 				scanVideoLibrary(instance.host, instance.port ?: 8080)
 			}

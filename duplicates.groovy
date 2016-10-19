@@ -11,7 +11,7 @@ args.getFiles{ it.isVideo() }.groupBy{ it.metadata }.each{ m, fs ->
 				log.fine "[-] ${i+1}. $f"
 
 				if ('delete' == _args.action) {
-					log.finest "[DELETE] $f"
+					log.info "[DELETE] $f"
 					Files.delete(f.toPath())
 				}
 			}

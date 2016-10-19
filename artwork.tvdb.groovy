@@ -7,7 +7,7 @@ include('lib/htpc')
 args.eachMediaFolder{ dir ->
 	// fetch only missing artwork by default
 	if (dir.hasFile{it.name == 'banner.jpg'}) {
-		println "Skipping $dir"
+		log.finest "Skipping $dir"
 		return
 	}
 
@@ -19,10 +19,10 @@ args.eachMediaFolder{ dir ->
 		query = dir.dir.hasFile{ it.name =~ /Season/ && it.isDirectory() } ? dir.dir.name : dir.name
 	}
 
-	println "$dir => Search by $query"
+	log.finest "$dir => Search by $query"
 	def options = TheTVDB.search(query, _args.locale)
 	if (options.isEmpty()) {
-		println "TV Series not found: $query"
+		log.warning "TV Series not found: $query"
 		return
 	}
 
@@ -35,13 +35,17 @@ args.eachMediaFolder{ dir ->
 	// maybe require user input
 	if (options.size() != 1 && !_args.nonStrict && !java.awt.GraphicsEnvironment.headless) {
 		series = javax.swing.JOptionPane.showInputDialog(null, 'Please select TV Show:', dir.name, 3, null, options.toArray(), series)
-		if (series == null) return
+		if (series == null) {
+			return
+		}
 	}
 
 	// auto-detect structure
 	def seriesDir = [dir.dir, dir].sortBySimilarity(series.name, { it.name })[0]
 	def season = sxe && sxe.season > 0 ? sxe.season : 1
 
-	println "$dir => $series"
-	fetchSeriesArtworkAndNfo(seriesDir, dir, series.id, season, false, _args.locale ?: Locale.ENGLISH)
+	log.fine "$dir => $series"
+	tryLogCatch {
+		fetchSeriesArtworkAndNfo(seriesDir, dir, series.id, season, false, _args.locale ?: Locale.ENGLISH)
+	}
 }

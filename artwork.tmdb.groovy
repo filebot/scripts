@@ -9,7 +9,7 @@ include('lib/htpc')
 args.eachMediaFolder{ dir ->
 	// fetch only missing artwork by default
 	if (dir.hasFile{it.name == 'movie.nfo'} && dir.hasFile{it.name == 'poster.jpg'} && dir.hasFile{it.name == 'fanart.jpg'}) {
-		println "Skipping $dir"
+		log.finest "Skipping $dir"
 		return
 	}
 
@@ -26,7 +26,7 @@ args.eachMediaFolder{ dir ->
 	}
 
 	if (options.isEmpty()) {
-		println "$dir ${videos.name} => movie not found"
+		log.warning "$dir ${videos.name} => movie not found"
 		return
 	}
 
@@ -36,13 +36,13 @@ args.eachMediaFolder{ dir ->
 	// maybe require user input
 	if (options.size() != 1 && !_args.nonStrict && !java.awt.GraphicsEnvironment.headless) {
 		movie = javax.swing.JOptionPane.showInputDialog(null, 'Please select Movie:', dir.name, 3, null, options.toArray(), movie)
-		if (movie == null) return null
+		if (movie == null) {
+			return null
+		}
 	}
 
-	println "$dir => $movie"
-	try {
+	log.fine "$dir => $movie"
+	tryLogCatch {
 		fetchMovieArtworkAndNfo(dir, movie, dir.getFiles{ it.isVideo() }.sort{ it.length() }.reverse().findResult{ it }, extras, false, _args.locale ?: Locale.ENGLISH)
-	} catch(e) {
-		println "${e.class.simpleName}: ${e.message}"
 	}
 }

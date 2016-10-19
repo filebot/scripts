@@ -74,7 +74,7 @@ def accept = { f ->
  * Get subtitles for all your media files  
  */
 args.getFiles{ it.isVideo() && accept(it) }.groupBy{ it.dir }.each{ dir, files ->
-	log.info "Fetch subtitles for [$dir]"
+	log.fine "Fetch subtitles for [$dir]"
 	languages.each{
 		getMissingSubtitles(lang: it, file: files, output: 'srt', encoding: 'UTF-8')
 	}

@@ -5,7 +5,7 @@ def prefs = java.util.prefs.Preferences.userRoot()
 
 
 def printPreferences = {
-	log.info "Print $prefs"
+	log.fine "Print $prefs"
 	def buffer = new ByteArrayOutputStream()
 	prefs.exportSubtree(buffer)
 	println buffer.toString('UTF-8')
@@ -13,19 +13,19 @@ def printPreferences = {
 
 
 def importPreferences = { f ->
-	log.info "Import $prefs from $f"
+	log.fine "Import $prefs from $f"
 	prefs.importPreferences(f.newInputStream())
 }
 
 
 def exportPreferences = { f ->
-	log.info "Export $prefs to $f"
+	log.fine "Export $prefs to $f"
 	prefs.exportSubtree(f.newOutputStream())
 }
 
 
 def clearPreferences = {
-	log.info "Clear $prefs"
+	log.fine "Clear $prefs"
 	prefs.childrenNames().each{ prefs.node(it).removeNode() }
 	prefs.clear();
 }
