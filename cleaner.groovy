@@ -39,7 +39,7 @@ def isClutter = { f ->
 
 
 def clean = { f ->
-	println "Delete $f"
+	log.info "Delete $f"
 
 	// do a dry run via --action test
 	if (_args.action == 'test') {

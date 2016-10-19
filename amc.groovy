@@ -173,9 +173,9 @@ if (excludeList) {
 		} catch(Exception e) {
 			fail("Failed to load excludeList: $e")
 		}
-		log.finest "Using excludes: $excludeList (${excludePathSet.size()})"
+		log.fine "Use excludes: $excludeList (${excludePathSet.size()})"
 	} else {
-		log.finest "Creating excludes: $excludeList"
+		log.fine "Use excludes: $excludeList"
 		if ((!excludeList.parentFile.isDirectory() && !excludeList.parentFile.mkdirs()) || (!excludeList.isFile() && !excludeList.createNewFile())) {
 			fail("Failed to create excludeList: $excludeList")
 		}
@@ -232,19 +232,19 @@ def acceptFile(f) {
 
 	// ignore iso images that do not contain a video disk structure
 	if (f.hasExtension('iso') && !f.isDisk()) {
-		log.finest "Ignore disk image: $f"
+		log.fine "Ignore disk image: $f"
 		return false
 	}
 
 	// ignore small video files
 	if (minFileSize > 0 && f.isVideo() && f.length() < minFileSize) {
-		log.finest "Skip small video file: $f"
+		log.fine "Skip small video file: $f"
 		return false
 	}
 
 	// ignore short videos
 	if (minLengthMS > 0 && f.isVideo() && any{ getMediaInfo(f, '{duration}').toLong() < minLengthMS }{ false /* default if MediaInfo fails */ }) {
-		log.finest "Skip short video: $f"
+		log.fine "Skip short video: $f"
 		return false
 	}
 
@@ -465,7 +465,7 @@ groups.each{ group, files ->
 // deal with remaining files that cannot be sorted automatically
 if (unsorted) {
 	if (unsortedFiles.size() > 0) {
-		log.info "Processing ${unsortedFiles.size()} unsorted files"
+		log.fine "Processing ${unsortedFiles.size()} unsorted files"
 		rename(map: unsortedFiles.collectEntries{ original ->
 			def destination = getMediaInfo(original, unsortedFormat) as File
 			return [original, destination.isAbsolute() ? destination : outputFolder.resolve(destination.path)]
@@ -499,7 +499,7 @@ if (getRenameLog().size() > 0) {
 	// make Kodi scan for new content and display notification message
 	if (kodi) {
 		kodi.each{ instance ->
-			log.info "Notify Kodi: $instance"
+			log.fine "Notify Kodi: $instance"
 			tryLogCatch{
 				showNotification(instance.host, instance.port ?: 8080, getNotificationTitle(), getNotificationMessage(), 'http://app.filebot.net/icon.png')
 				scanVideoLibrary(instance.host, instance.port ?: 8080)
@@ -510,7 +510,7 @@ if (getRenameLog().size() > 0) {
 	// make Plex scan for new content
 	if (plex) {
 		plex.each{ instance ->
-			log.info "Notify Plex: $instance"
+			log.fine "Notify Plex: $instance"
 			tryLogCatch {
 				refreshPlexLibrary(instance.host, 32400, instance.token)
 			}
@@ -520,7 +520,7 @@ if (getRenameLog().size() > 0) {
 	// make Emby scan for new content
 	if (emby) {
 		emby.each{ instance ->
-			log.info "Notify Emby: $instance"
+			log.fine "Notify Emby: $instance"
 			tryLogCatch {
 				refreshEmbyLibrary(instance.host, 8096, instance.token)
 			}
@@ -529,14 +529,14 @@ if (getRenameLog().size() > 0) {
 
 	// mark episodes as 'acquired'
 	if (myepisodes) {
-		log.info 'Update MyEpisodes'
+		log.fine 'Update MyEpisodes'
 		tryLogCatch {
 			executeScript('update-mes', [login:myepisodes.join(':'), addshows:true], getRenameLog().values())
 		}
 	}
 
 	if (pushover) {
-		log.info 'Sending Pushover notification'
+		log.fine 'Sending Pushover notification'
 		tryLogCatch {
 			Pushover(pushover[0], pushover[1] ?: 'wcckDz3oygHSU2SdIptvnHxJ92SQKK').send(getNotificationTitle(), getNotificationMessage())
 		}
@@ -603,7 +603,7 @@ if (getRenameLog().size() > 0) {
 
 	// send pushbullet report
 	if (pushbullet) {
-		log.info 'Sending PushBullet report'
+		log.fine 'Sending PushBullet report'
 		tryLogCatch {
 			PushBullet(pushbullet).sendFile(getNotificationTitle(), getReportMessage(), 'text/html', getNotificationMessage(), any{ mailto }{ null })
 		}
@@ -636,7 +636,7 @@ if (deleteAfterExtract) {
 // clean empty folders, clutter files, etc after move
 if (clean) {
 	if (['DUPLICATE', 'COPY', 'HARDLINK'].any{ it.equalsIgnoreCase(_args.action) } && temporaryFiles.size() > 0) {
-		log.info 'Clean temporary extracted files'
+		log.fine 'Clean temporary extracted files'
 		// delete extracted files
 		temporaryFiles.findAll{ it.isFile() }.sort().each{
 			log.finest "Delete $it"
@@ -656,7 +656,7 @@ if (clean) {
 		def cleanerInput = args.size() > 0 ? args : ut.kind == 'multi' && ut.dir ? [ut.dir as File] : []
 		cleanerInput = cleanerInput.findAll{ f -> f.exists() }
 		if (cleanerInput.size() > 0) {
-			log.info 'Clean clutter files and empty folders'
+			log.fine 'Clean clutter files and empty folders'
 			executeScript('cleaner', args.size() == 0 ? [root:true, ignore: ignore] : [root:false, ignore: ignore], cleanerInput)
 		}
 	}
