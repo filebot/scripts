@@ -89,7 +89,7 @@ def fetchSeriesFanart(outputFile, seriesId, type, season, override, locale) {
 }
 
 def fetchSeriesNfo(outputFile, i, locale) {
-	log.fine "Generate Series NFO: $i.name [$i.id]"
+	log.finest "Generate Series NFO: $i.name [$i.id]"
 	def xml = XML {
 		tvshow {
 			title(i.name)
@@ -214,7 +214,7 @@ def fetchMovieFanart(outputFile, movieInfo, type, diskType, override, locale) {
 }
 
 def fetchMovieNfo(outputFile, i, movieFile) {
-	log.fine "Generate Movie NFO: $i.name [$i.id]"
+	log.finest "Generate Movie NFO: $i.name [$i.id]"
 	def mi = tryLogCatch{ movieFile ? MediaInfo.snapshot(movieFile) : null }
 	def xml = XML {
 		movie {
