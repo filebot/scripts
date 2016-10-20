@@ -204,7 +204,7 @@ def acceptFile(f) {
 		return false
 	}
 
-	if (f.name ==~ /[.@].+|bin|initrd|opt|sbin|var|dev|lib|proc|sys|var.defaults|etc|lost.found|root|tmp|etc.defaults|mnt|run|usr|System.Volume.Information/) {
+	if (f.isDirectory() && f.name ==~ /[.@].+|bin|initrd|opt|sbin|var|dev|lib|proc|sys|var.defaults|etc|lost.found|root|tmp|etc.defaults|mnt|run|usr|System.Volume.Information/) {
 		log.finest "Ignore system path: $f"
 		return false
 	}
@@ -272,7 +272,7 @@ def resolveInput(f) {
 
 
 // flatten nested file structure
-def input = roots.findAll{ acceptFile(it) }.flatten{ resolveInput(it) }
+def input = roots.findAll{ acceptFile(it) }.flatten{ resolveInput(it) }.toSorted()
 
 // ignore subtitle files that are not stored alongside a corresponding video file
 // input = input.findAll{ f -> !(f.isSubtitle() && !input.findAll{ it.isVideo() }.any{ f.isDerived(it) || f.path.startsWith(it.dir.path) }) }
