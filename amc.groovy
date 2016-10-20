@@ -65,7 +65,7 @@ def forceSeries(f) {
 }
 
 def forceAnime(f) {
-	label =~ /^(?i:Anime)/ || f.dir.listPath().any{ it.name ==~ /(?i:Anime)/ } || (f.isVideo() && (f.name =~ /(?i:HorribleSubs)/ || f.name =~ /[\(\[]\p{XDigit}{8}[\]\)]/ || (getMediaInfo(f, '''{media.AudioLanguageList} {media.TextCodecList}''').tokenize().containsAll(['Japanese', 'ASS']) && (parseEpisodeNumber(f.name, false) != null || getMediaInfo(f, '{minutes}').toInteger() < 60))))
+	label =~ /^(?i:Anime)/ || f.dir.listPath().any{ it.name ==~ /(?i:Anime)/ } || (f.isVideo() && (f.name =~ /(?i:HorribleSubs)/ || f.name =~ /[\(\[]\p{XDigit}{8}[\]\)]/ || any{ getMediaInfo(f, '{media.AudioLanguageList} {media.TextCodecList}').tokenize().containsAll(['Japanese', 'ASS']) && (parseEpisodeNumber(f.name, false) != null || getMediaInfo(f, '{minutes}').toInteger() < 60) }{ false }))
 }
 
 def forceAudio(f) {
