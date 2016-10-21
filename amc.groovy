@@ -106,7 +106,7 @@ def sendEmailReport(title, message, messagetype) {
 
 def fail(message) {
 	if (reportError) {
-		sendEmailReport('[FileBot] Failure', message, 'text/plain')
+		sendEmailReport('[FileBot] Failure', message as String, 'text/plain')
 	}
 	die(message)
 }
@@ -115,7 +115,7 @@ def fail(message) {
 
 // check input parameters
 def ut = _def.findAll{ k, v -> k.startsWith('ut_') }.collectEntries{ k, v ->
-	if (v ==~ /%[A-Z]|\p{Punct}/) {
+	if (v ==~ /[%$]\p{Alnum}|\p{Punct}/) {
 		log.warning "Bad $k value: $v"
 		v = null
 	}
@@ -126,23 +126,23 @@ def ut = _def.findAll{ k, v -> k.startsWith('ut_') }.collectEntries{ k, v ->
 
 // sanity checks
 if (outputFolder == null || !outputFolder.isDirectory()) {
-	fail("Illegal usage: output folder must be a valid folder: $outputFolder")
+	fail "Illegal usage: output folder must be a valid folder: $outputFolder"
 }
 
 if (ut.dir) {
 	if (ut.state_allow && !(ut.state ==~ ut.state_allow)) {
-		fail("Illegal state: $ut.state != $ut.state_allow")
+		fail "Illegal state: $ut.state != $ut.state_allow"
 	}
 	if (args.size() > 0) {
-		fail("Illegal usage: use either script parameters $ut or file arguments $args but not both")
+		fail "Illegal usage: use either script parameters $ut or file arguments $args but not both"
 	}
 	if (outputFolder.path.startsWith(ut.dir)) {
-		fail("Illegal usage: input [$ut.dir] must not contain output folder [$outputFolder]")
+		fail "Illegal usage: input [$ut.dir] must not contain output folder [$outputFolder]"
 	}
 } else if (args.any{ outputFolder.path.startsWith(it.path) }) {
-	fail("Illegal usage: input $args must not contain output folder [$outputFolder]")
+	fail "Illegal usage: input $args must not contain output folder [$outputFolder]"
 } else if (args.size() == 0) {
-	fail("Illegal usage: no input")
+	fail "Illegal usage: no input"
 }
 
 
@@ -178,13 +178,13 @@ if (excludeList) {
 		try {
 			excludePathSet.load(excludeList)
 		} catch(Exception e) {
-			fail("Failed to load excludeList: $e")
+			fail "Failed to load excludeList: $e"
 		}
 		log.fine "Use excludes: $excludeList (${excludePathSet.size()})"
 	} else {
 		log.fine "Use excludes: $excludeList"
 		if ((!excludeList.parentFile.isDirectory() && !excludeList.parentFile.mkdirs()) || (!excludeList.isFile() && !excludeList.createNewFile())) {
-			fail("Failed to create excludeList: $excludeList")
+			fail "Failed to create excludeList: $excludeList"
 		}
 	}
 }
@@ -294,7 +294,7 @@ input.each{ log.fine "Input: $it" }
 
 // early abort if there is nothing to do
 if (input.size() == 0) {
-	die("No files selected for processing")
+	die "No files selected for processing"
 }
 
 
@@ -321,7 +321,7 @@ def groups = input.groupBy{ f ->
 
 	def tvs = detectSeriesName(f)
 	def mov = detectMovie(f, false)
-	log.fine("$f.name [series: $tvs, movie: $mov]")
+	log.fine "$f.name [series: $tvs, movie: $mov]"
 
 	// DECIDE EPISODE VS MOVIE (IF NOT CLEAR)
 	if (tvs && mov) {
@@ -357,10 +357,10 @@ def groups = input.groupBy{ f ->
 				score.mov += it.mov
 
 				if (score.tvs >= 1 && score.mov <= -1) {
-					log.fine("Exclude Movie: $mov")
+					log.fine "Exclude Movie: $mov"
 					mov = null
 				} else if (score.mov >= 1 && score.tvs <= -1) {
-					log.fine("Exclude Series: $tvs")
+					log.fine "Exclude Series: $tvs"
 					tvs = null
 				}
 			}
@@ -371,9 +371,9 @@ def groups = input.groupBy{ f ->
 	// CHECK CONFLICT
 	if (((mov && tvs) || (!mov && !tvs))) {
 		if (failOnError) {
-			fail("Media detection failed")
+			fail 'Media detection failed'
 		} else {
-			log.fine("Unable to differentiate: [$f.name] => [$tvs] VS [$mov]")
+			log.fine "Unable to differentiate: [$f.name] => [$tvs] VS [$mov]"
 			return [:]
 		}
 	}
@@ -385,7 +385,7 @@ def groups = input.groupBy{ f ->
 groups = groups.groupBy{ group, files -> group.collectEntries{ type, query -> [type, query ? query.toString().ascii().normalizePunctuation().lower() : null] } }.collectEntries{ group, maps -> [group, maps.values().flatten()] }
 
 // log movie/series/anime detection results
-groups.each{ group, files -> log.finest("Group: $group => ${files*.name}") }
+groups.each{ group, files -> log.finest "Group: $group => ${files*.name}" }
 
 // keep track of unsorted files or files that could not be processed for some reason
 def unsortedFiles = []
@@ -419,7 +419,7 @@ groups.each{ group, files ->
 				}
 			}
 		} else if (failOnError) {
-			fail("Failed to process group: $group")
+			fail "Failed to process group: $group"
 		} else {
 			unsortedFiles += files
 		}
@@ -441,7 +441,7 @@ groups.each{ group, files ->
 				}
 			}
 		} else if (failOnError) {
-			fail("Failed to process group: $group")
+			fail "Failed to process group: $group"
 		} else {
 			unsortedFiles += files
 		}
@@ -454,7 +454,7 @@ groups.each{ group, files ->
 		if (dest != null) {
 			// music artwork not supported
 		} else if (failOnError) {
-			fail("Failed to process group: $group")
+			fail "Failed to process group: $group"
 		} else {
 			unsortedFiles += files
 		}
@@ -482,9 +482,9 @@ if (unsorted) {
 
 // run program on newly processed files
 if (exec) {
-	getRenameLog().collect{ from, to -> getMediaInfo(to, exec) }.unique().each{
-		log.finest("Execute: $it")
-		execute(it)
+	getRenameLog().collect{ from, to -> getMediaInfo(to, exec) }.unique().each{ command ->
+		log.fine "Execute: $command"
+		execute(command)
 	}
 }
 
@@ -605,7 +605,7 @@ if (getRenameLog().size() > 0) {
 		def reportFolder = Settings.getApplicationFolder().resolve('reports').getCanonicalFile()
 		def reportName = [now.format(/[yyyy-MM-dd HH mm]/), getReportSubject().take(50)].join(' ').validateFileName().space('_')
 		def reportFile = getReportMessage().saveAs(reportFolder.resolve(reportName))
-		log.finest("Saving report as ${reportFile}")
+		log.finest "Saving report as ${reportFile}"
 	}
 
 	// send pushbullet report
@@ -631,10 +631,10 @@ if (getRenameLog().size() > 0) {
 // clean up temporary files that may be left behind after extraction
 if (deleteAfterExtract) {
 	extractedArchives.each{ a ->
-		log.finest("Delete archive $a")
+		log.finest "Delete archive $a"
 		a.delete()
 		a.dir.listFiles().toList().findAll{ v -> v.name.startsWith(a.nameWithoutExtension) && v.extension ==~ /r\d+/ }.each{ v ->
-			log.finest("Delete archive volume $v")
+			log.finest "Delete archive volume $v"
 			v.delete()
 		}
 	}
@@ -670,4 +670,7 @@ if (clean) {
 }
 
 
-if (getRenameLog().size() == 0) fail("Finished without processing any files")
+
+if (getRenameLog().size() == 0) {
+	fail "Finished without processing any files"
+}
