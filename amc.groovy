@@ -255,6 +255,12 @@ def acceptFile(f) {
 		return false
 	}
 
+	// ignore subtitle files without matching video file
+	if (f.isSubtitle() && !f.dir.listFiles{ it.isVideo() && f.isDerived(it) }) {
+		log.fine "Ignore orphaned subtitles: $f"
+		return false	
+	}
+
 	// process only media files (accept audio files only if music mode is enabled)
 	return f.isDirectory() || f.isVideo() || f.isSubtitle() || (music && f.isAudio())
 }
@@ -278,11 +284,9 @@ def resolveInput(f) {
 }
 
 
+
 // flatten nested file structure
 def input = roots.findAll{ acceptFile(it) }.flatten{ resolveInput(it) }.toSorted()
-
-// ignore subtitle files that are not stored alongside a corresponding video file
-// input = input.findAll{ f -> !(f.isSubtitle() && !input.findAll{ it.isVideo() }.any{ f.isDerived(it) || f.path.startsWith(it.dir.path) }) }
 
 // update exclude list with all input that will be processed during this run
 if (excludeList && !testRun) {
