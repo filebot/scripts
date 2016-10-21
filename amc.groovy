@@ -4,14 +4,15 @@
 // log input parameters
 log.fine("Run script [$_args.script] at [$now]")
 _def.each{ n, v -> log.finest('Parameter: ' + [n, n =~ /plex|kodi|pushover|pushbullet|mail|myepisodes/ ? '*****' : v].join(' = ')) }
-args.each{ log.finest("Argument: $it") }
+args.withIndex().each{ f, i -> if (f.exists()) { log.finest "Argument[$i]: $f" } else { log.warning "Argument[$i]: File does not exist: $f" } }
+
 
 // initialize variables
 failOnError = _args.conflict.equalsIgnoreCase('fail')
 testRun = _args.action.equalsIgnoreCase('test')
 
 // --output folder must be a valid folder
-outputFolder = new File(_args.output ?: '.').getCanonicalFile()
+outputFolder = any{ _args.output }{ '.' } as File
 
 // enable/disable features as specified via --def parameters
 unsorted  = tryQuietly{ unsorted.toBoolean() }
@@ -23,12 +24,12 @@ clean     = tryQuietly{ clean.toBoolean() }
 exec      = tryQuietly{ exec.toString() }
 
 // array of kodi/plex/emby hosts
-kodi = tryQuietly{ any{kodi}{xbmc}.split(/[ ,|]+/)*.split(/:(?=\d+$)/).collect{ it.length >= 2 ? [host: it[0], port: it[1] as int] : [host: it[0]] } }
+kodi = tryQuietly{ any{kodi}{xbmc}.split(/[ ,;|]+/)*.split(/:(?=\d+$)/).collect{ it.length >= 2 ? [host: it[0], port: it[1] as int] : [host: it[0]] } }
 plex = tryQuietly{ plex.split(/[ ,;|]+/)*.split(/:/).collect{ it.length >= 2 ? [host: it[0], token: it[1]] : [host: it[0]] } }
 emby = tryQuietly{ emby.split(/[ ,;|]+/)*.split(/:/).collect{ it.length >= 2 ? [host: it[0], token: it[1]] : [host: it[0]] } }
 
 // extra options, myepisodes updates and email notifications
-extractFolder      = tryQuietly{ extractFolder.toString() }
+extractFolder      = tryQuietly{ extractFolder as File }
 skipExtract        = tryQuietly{ skipExtract.toBoolean() }
 deleteAfterExtract = tryQuietly{ deleteAfterExtract.toBoolean() }
 excludeList        = tryQuietly{ def f = excludeList as File; f.isAbsolute() ? f : outputFolder.resolve(f.path) }
@@ -112,13 +113,20 @@ def fail(message) {
 
 
 
-// input parameters
+// check input parameters
 def ut = _def.findAll{ k, v -> k.startsWith('ut_') }.collectEntries{ k, v ->
 	if (v ==~ /%[A-Z]|\p{Punct}/) {
 		log.warning "Bad $k value: $v"
 		v = null
 	}
 	return [k.substring(3), v]
+}
+
+
+
+// sanity checks
+if (outputFolder == null || !outputFolder.isDirectory()) {
+	fail("Illegal usage: output folder must be a valid folder: $outputFolder")
 }
 
 if (ut.dir) {
@@ -137,8 +145,7 @@ if (ut.dir) {
 	fail("Illegal usage: no input")
 }
 
-// sanity checks
-args.findAll{ !it.exists() }.each{ fail("File does not exist: $it") }
+
 
 // collect input fileset as specified by the given --def parameters
 roots = args
