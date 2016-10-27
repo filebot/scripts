@@ -9,11 +9,11 @@
 		<tstamp>
 			<format property="build-date" pattern="yyyy-MM-dd" />
 		</tstamp>
-		<exec executable="git" outputproperty="build-revision">
+		<exec executable="git" outputproperty="build-revision" failonerror="yes">
 			<arg line="rev-list --count master" />
 		</exec>
 
-		<jar destfile="release/${milestone}.jar">
+		<jar destfile="release/${milestone}.jar" compress="no">
 			<fileset dir=".." includes="**/*.groovy" />
 			<manifest>
 				<attribute name="Build-Date" value="${build-date}" />
@@ -22,12 +22,16 @@
 		</jar>
 
 		<signjar jar="release/${milestone}.jar" alias="repository" keystore="repository.jks" storepass="${repository.storepass}" keypass="${repository.keypass}" />
+
+		<exec executable="xz" failonerror="yes">
+			<arg value="release/${milestone}.jar" />
+		</exec>
 	</target>
 
 
-	<target name="deploy" depends="repository">
+	<target name="deploy">
 		<scp todir="${deploy.website}" trust="yes" verbose="true" sftp="true" keyfile="${deploy.keyfile}">
-			<fileset dir="release" includes="**/*.jar" />
+			<fileset dir="release" includes="**/*.jar.*" />
 		</scp>
 	</target>
 
