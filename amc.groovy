@@ -137,7 +137,7 @@ if (ut.dir) {
 		fail "Illegal usage: use either script parameters $ut or file arguments $args but not both"
 	}
 	if (outputFolder.path.startsWith(ut.dir)) {
-		fail "Illegal usage: input [$ut.dir] must not contain output folder [$outputFolder]"
+		fail "Illegal usage: input $ut must not contain output folder [$outputFolder]"
 	}
 } else if (args.any{ outputFolder.path.startsWith(it.path) }) {
 	fail "Illegal usage: input $args must not contain output folder [$outputFolder]"
