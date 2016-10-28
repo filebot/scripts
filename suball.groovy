@@ -11,8 +11,8 @@ setDefaultValues(
 )
 
 
-def languages = any{ _args.lang.split(/\W+/) }{ ['en'] } as List
 
+def languages = any{ _args.lang.split(/\W+/) }{ ['en'] } as List
 
 def minFileSize = minFileSize as long
 def minLengthMS = minLengthMS as long
@@ -22,10 +22,12 @@ def maxAgeTimeStamp = any{ now.time - ((maxAgeDays as double) * 24 * 60 * 60 * 1
 def maxAgeDaysLimit = any{ maxAgeDaysLimit.toBoolean() }{ true }
 
 
-def ignore = { f, m ->
-	log.finest "Ignore [$f.name]: $m"
-	return false
+
+// sanity check
+if (maxAgeDaysLimit && (maxAgeDays == null || maxAgeDays.toDouble() > 30)) {
+	die "maxAgeDays must be between 0 and 30: $maxAgeDays"
 }
+
 
 
 def accept = { f ->
@@ -33,41 +35,43 @@ def accept = { f ->
 
 	// ignore files that are too old
 	if (maxAgeTimeStamp != null && creationDate < maxAgeTimeStamp) {
-		return ignore(f, 'File creation date is too far in the past')
+		log.finest "Ignore old: $f"
+		return false
 	}
 
 	// ignore files that are too young
 	if (minAgeTimeStamp != null && creationDate > minAgeTimeStamp) {
-		return ignore(f, 'File creation date is too recent')
+		log.finest "Ignore young: $f"
+		return false
 	}
 
 	// ignore files that match the give ignore pattern
 	if (ignore != null && f.path =~ ignore) {
-		return ignore(f, 'File path matches the ignore pattern')
+		log.finest "Ignore pattern: $f"
+		return false
 	}
 
 	// ignore files that are too small	
 	if (minFileSize > 0 && f.length() < minFileSize) {
-		return ignore(f, 'File size is too small')
+		log.fine "Ignore small: $f"
+		return false
 	}
 
 	// ignore files that are too short
-	if (minLengthMS > 0 && ((getMediaInfo(f, '{duration}') ?: minLengthMS) as double) < minLengthMS) {
-		return ignore(f, 'Video duration is too short')
+	if (minLengthMS > 0 && any{ getMediaInfo(f, '{duration}').toDouble() < minLengthMS }{ false }) {
+		log.fine "Ignore short: $f"
+		return false
 	}
 
 	// ignore files that already have subtitles
-	if (ignoreTextLanguage != null && getMediaInfo(f, '{media.TextLanguageList}').findMatch(ignoreTextLanguage) != null) {
-		return ignore(f, 'Video file already contains embedded subtitles')
-	}
-
-	// sanity check
-	if (maxAgeDaysLimit && (maxAgeDays == null || maxAgeDays.toDouble() > 30)) {
-		return ignore(f, "Your maxAgeDays limit ($maxAgeDays) is unreasonable")
+	if (ignoreTextLanguage != null && any{ getMediaInfo(f, '{media.TextLanguageList}').findMatch(ignoreTextLanguage) != null }{ false }) {
+		log.fine "Ignore text language: $f"
+		return false
 	}
 
 	return true
 }
+
 
 
 /*
