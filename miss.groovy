@@ -13,6 +13,13 @@ args.getFiles().each{ f ->
 		if (episode != null && show != null) {
 			episodes << episode
 			shows << show
+
+			// Multi-Episodes
+			if (episode instanceof MultiEpisode){
+				episode.getEpisodes().each{ep ->
+					episodes << ep
+				}
+			}
 		}
 	}
 }
