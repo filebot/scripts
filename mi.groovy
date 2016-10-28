@@ -30,9 +30,10 @@ if (csvFile.name.endsWith('.csv')) {
 			output.write(mi)
 			output.write('\n')
 		}
-	}	
+	}
 } else {
 	// pipe usage
-	getMediaInfo(args.getFiles{ it.isVideo() }, template).each{ println it }
-	System.exit(0)
+	getMediaInfo(file: args.getFiles{ it.isVideo() }, format: template).each{
+		println it
+	}
 }
