@@ -1,31 +1,48 @@
 // filebot -script fn:miss /path/to/media
 
+def specials = any{ specials.toBoolean() }{ false }
+
 def episodes = []
 def shows = []
 
 args.getFiles().each{ f ->
 	if (f.isVideo()) {
 		def episode = f.metadata
-		def show = episode?.seriesInfo
+		def seriesInfo = any{ episode.seriesInfo }{ null }
 
-		log.finest "$show | $episode | $f"
+		if (episode instanceof Episode && seriesInfo instanceof SeriesInfo) {
+			log.finest "$seriesInfo | $episode | $f"
 
-		if (episode != null && show != null) {
-			episodes << episode
-			shows << show
+			shows += seriesInfo
+
+			if (episode instanceof MultiEpisode) {
+				episodes += episode.episodes
+			} else {
+				episodes += episode
+			}
 		}
 	}
 }
 
 
-def episodeList = shows.collectMany{
-	return WebServices.getEpisodeListProvider(it.database).getEpisodeList(it.id, it.order as SortOrder, new Locale(it.language))
+def queries = shows.collect{
+	[id: it.id, database: it.database, order: it.order as SortOrder, language: it.language.toLocale()]
 } as LinkedHashSet
 
-episodeList.removeAll(episodes)
+def episodeList = queries.collectMany{
+	WebServices.getEpisodeListProvider(it.database).getEpisodeList(it.id, it.order, it.language)
+} as LinkedHashSet
+
+
+// ignore specials
+if (!specials) {
+	episodeList = episodeList.findAll{ it.special == null }
+}
 
 
 // print missing episodes
-episodeList.each{
+def missingEpisodes = episodeList - episodes
+
+missingEpisodes.each{
 	println it
 }
