@@ -1,24 +1,17 @@
 // filebot -script dev:suball /path/to/media -non-strict --def maxAgeDays=7
 
 
-setDefaultValues(
-	minAgeDays: null,
-	maxAgeDays: 30,
-	minFileSize: 50 * 1000 * 1000L,
-	minLengthMS: 10 * 60 * 1000L,
-	ignore: null,
-	ignoreTextLanguage: '.+'
-)
-
-
-
 def languages = any{ _args.lang.split(/\W+/) }{ ['en'] } as List
 
-def minFileSize = minFileSize as long
-def minLengthMS = minLengthMS as long
+def minAgeDays = { minAgeDays.toDouble() }{  0d }
+def maxAgeDays = { maxAgeDays.toDouble() }{ 30d }
 
-def minAgeTimeStamp = any{ now.time - ((minAgeDays as double) * 24 * 60 * 60 * 1000L) as long }{ null }
-def maxAgeTimeStamp = any{ now.time - ((maxAgeDays as double) * 24 * 60 * 60 * 1000L) as long }{ null }
+def minFileSize = any{ minFileSize.toLong() }{ 50 * 1000 * 1000L }
+def minLengthMS = any{ minLengthMS.toLong() }{ 10 *   60 * 1000L }
+def ignoreTextLanguage = any{ ignoreTextLanguage }{ languages.join('|') }
+
+def minAgeTimeStamp = now.time - (minAgeDays.toDouble() * 24 * 60 * 60 * 1000L) as long
+def maxAgeTimeStamp = now.time - (maxAgeDays.toDouble() * 24 * 60 * 60 * 1000L) as long
 def maxAgeDaysLimit = any{ maxAgeDaysLimit.toBoolean() }{ true }
 
 
@@ -64,7 +57,7 @@ def accept = { f ->
 	}
 
 	// ignore files that already have subtitles
-	if (ignoreTextLanguage != null && any{ getMediaInfo(f, '{media.TextLanguageList}').findMatch(ignoreTextLanguage) != null }{ false }) {
+	if (ignoreTextLanguage != null && any{ getMediaInfo(f, '{textLanguages}').findMatch(ignoreTextLanguage) != null }{ false }) {
 		log.fine "Ignore text language: $f"
 		return false
 	}
