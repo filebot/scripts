@@ -10,6 +10,7 @@ def maxAgeDaysLimit = any{ maxAgeDaysLimit.toBoolean() }{ true }
 def minFileSize = any{ minFileSize.toLong() }{ 50 * 1000 * 1000L }
 def minLengthMS = any{ minLengthMS.toLong() }{ 10 *   60 * 1000L }
 
+def ignore = any{ ~ignore }{ null }
 def ignoreTextLanguage = any{ ignoreTextLanguage }{ languages.join('|') }
 
 def minAgeTimeStamp = now.time - (minAgeDays.toDouble() * 24 * 60 * 60 * 1000L) as long
