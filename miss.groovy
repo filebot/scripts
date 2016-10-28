@@ -1,7 +1,8 @@
-// filebot -script fn:miss /path/to/media
+// filebot -script fn:miss /path/to/media --def specials=y
 
 def episodes = []
 def shows = []
+specials  = tryQuietly{ specials.toBoolean() }
 
 args.getFiles().each{ f ->
 	if (f.isVideo()) {
@@ -34,5 +35,9 @@ episodeList.removeAll(episodes)
 
 // print missing episodes
 episodeList.each{
+	if (it.getSpecial()){
+		if (specials) {println it}
+	}else{
 	println it
+	}
 }
