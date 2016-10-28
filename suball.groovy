@@ -25,7 +25,7 @@ def maxAgeDaysLimit = any{ maxAgeDaysLimit.toBoolean() }{ true }
 
 // sanity check
 if (maxAgeDaysLimit && (maxAgeDays == null || maxAgeDays.toDouble() > 30)) {
-	die "maxAgeDays must be between 0 and 30: $maxAgeDays"
+	die "maxAgeDays must be between 0 and 30. $maxAgeDays not reasonable."
 }
 
 
