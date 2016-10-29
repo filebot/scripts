@@ -115,7 +115,7 @@ def fail(message) {
 
 // check input parameters
 def ut = _def.findAll{ k, v -> k.startsWith('ut_') }.collectEntries{ k, v ->
-	if (v ==~ /[%$]\p{Alnum}/) {
+	if (v ==~ /[%$]\p{Alnum}|\p{Punct}+/) {
 		log.warning "Bad $k value: $v"
 		v = null
 	}
