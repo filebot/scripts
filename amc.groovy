@@ -43,7 +43,7 @@ reportError        = tryQuietly{ reportError.toBoolean() }
 
 // user-defined filters
 label       = any{ _args.mode }{ ut_label }{ null }
-ignore      = any{ ~ignore }{ null }
+ignore      = any{ ignore }{ null }
 minFileSize = any{ minFileSize.toLong() }{ 50 * 1000L * 1000L }
 minLengthMS = any{ minLengthMS.toLong() }{ 10 * 60 * 1000L }
 
