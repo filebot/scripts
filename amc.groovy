@@ -136,13 +136,18 @@ if (ut.dir) {
 	if (args.size() > 0) {
 		fail "Illegal usage: use either script parameters $ut or file arguments $args but not both"
 	}
+	if (ut.dir == '/') {
+		fail "Illegal usage: No! Are you insane? You can't just pass in the entire filesystem. Think long and hard about what you just tried to do."
+	}
 	if (outputFolder.path.startsWith(ut.dir)) {
 		fail "Illegal usage: input $ut must not contain output folder [$outputFolder]"
 	}
-} else if (args.any{ outputFolder.path.startsWith(it.path) }) {
-	fail "Illegal usage: input $args must not contain output folder [$outputFolder]"
 } else if (args.size() == 0) {
 	fail "Illegal usage: no input"
+} else if (args.any{ f -> outputFolder.path.startsWith(f.path) }) {
+	fail "Illegal usage: input $args must not contain output folder [$outputFolder]"
+} else if (args.any{ f -> f in File.listRoots() }) {
+	fail "Illegal usage: input $args must not include a filesystem root"
 }
 
 
