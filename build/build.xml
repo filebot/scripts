@@ -33,7 +33,8 @@
 
 	<target name="deploy">
 		<scp todir="${deploy.website}" trust="yes" verbose="true" sftp="true" keyfile="${deploy.keyfile}">
-			<fileset dir="release" includes="**/*.jar.*" />
+			<fileset dir="release" includes="**/*.jar" />
+			<fileset dir="release" includes="**/*.jar.xz" />
 		</scp>
 	</target>
 
