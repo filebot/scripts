@@ -126,7 +126,7 @@ def ut = _def.findAll{ k, v -> k.startsWith('ut_') }.collectEntries{ k, v ->
 
 // sanity checks
 if (outputFolder == null || !outputFolder.isDirectory()) {
-	fail "Illegal usage: output folder must be a valid folder: $outputFolder"
+	fail "Illegal usage: output folder must exist and must be a directory: $outputFolder"
 }
 
 if (ut.dir) {
