@@ -19,5 +19,5 @@ def watchman = args[0].watch { changes ->
 watchman.commitDelay = 5 * 1000			// default = 5s
 watchman.commitPerFolder = true			// default = true
 
-println "Waiting for events"
-if (console) { console.readLine() } else { sleep(Long.MAX_VALUE) } // keep running and watch for changes
+println "Press ENTER to exit..."
+console.readLine()
