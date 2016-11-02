@@ -1,4 +1,4 @@
-// Usage: filebot -script fn:explain /path/to/files
+#!/usr/bin/env filebot -script
 
 
 args.getFiles{ it.isVideo() }.each{ f ->

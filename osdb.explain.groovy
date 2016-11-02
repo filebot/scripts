@@ -1,4 +1,5 @@
-// filebot -script fn:osdb.explain /path/to/video --def fetch=y
+#!/usr/bin/env filebot -script
+
 
 def lang = _args.locale.ISO3Language
 def strict = !_args.nonStrict

@@ -1,4 +1,5 @@
-// filebot -script fn:cleaner [--action test] /path/to/media/
+#!/usr/bin/env filebot -script
+
 
 def deleteRootFolder = any{ root.toBoolean() }{ false }
 

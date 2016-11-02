@@ -1,4 +1,5 @@
-// filebot -script fn:housekeeping /path/to/folder/ --output /output/folder/ --format <expression>
+#!/usr/bin/env filebot -script
+
 
 /*
  * Watch folder for new tv shows and automatically move/rename new episodes
@@ -14,12 +15,12 @@ Thread.startDaemon {
 		if (_args.extract) {
 			extract(file:args.getFiles{ it.isArchive() }, output:'.')
 		}
-		
+
 		// subtitles for all
 		if (_args.getSubtitles) {
 			getMissingSubtitles(file:args.getFiles{ it.isVideo() }, output:'srt')
 		}
-			
+
 		// rename all
 		if (_args.rename) {
 			args.eachMediaFolder {

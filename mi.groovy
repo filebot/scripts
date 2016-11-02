@@ -1,4 +1,5 @@
-// filebot -script fn:mi /path/to/media/ "MediaIndex.csv"
+#!/usr/bin/env filebot -script
+
 
 /*
  * Print media info of all video files to CSV file  

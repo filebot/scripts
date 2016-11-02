@@ -1,4 +1,5 @@
-// filebot -script fn:miss /path/to/media
+#!/usr/bin/env filebot -script
+
 
 def specials = any{ specials.toBoolean() }{ false }
 

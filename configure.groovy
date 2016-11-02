@@ -1,4 +1,5 @@
-// filebot -script fn:configure
+#!/usr/bin/env filebot -script
+
 
 osdbUser = any{ osdbUser }{ console.printf('Enter OpenSubtitles username: '); console.readLine() }
 osdbPwd = any{ osdbPwd }{ console.printf('Enter OpenSubtitles password: '); console.readLine() }

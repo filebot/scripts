@@ -1,4 +1,5 @@
-// filebot -script fn:xattr --action clear /path/to/files
+#!/usr/bin/env filebot -script
+
 
 args.getFiles{ f -> f.xattr.size() > 0 }.each{ f ->
 	println f

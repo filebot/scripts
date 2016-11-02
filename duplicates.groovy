@@ -1,4 +1,4 @@
-// filebot -script fn:duplicates --action delete /path/to/media
+#!/usr/bin/env filebot -script
 
 
 def delete = 'DELETE'.equalsIgnoreCase(_args.action)

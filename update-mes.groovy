@@ -1,4 +1,5 @@
-// filebot -script fn:update-mes "X:/path/to/episodes" --def login=user:pwd addshows=y tick=acquired
+#!/usr/bin/env filebot -script
+
 
 def mesacc = login.split(':')
 def mesadd = tryQuietly{ addshows.toBoolean() }

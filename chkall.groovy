@@ -1,4 +1,5 @@
-// filebot -script fn:chkall <folder>
+#!/usr/bin/env filebot -script
+
 
 /*
  * Check all sfv/md5/sha1 files and stop if a conflict is found

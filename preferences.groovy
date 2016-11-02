@@ -1,4 +1,4 @@
-// filebot -script fn:preferences
+#!/usr/bin/env filebot -script
 
 
 def prefs = java.util.prefs.Preferences.userRoot()

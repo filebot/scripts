@@ -1,4 +1,4 @@
-
+#!/usr/bin/env filebot -script
 
 
 def escapeShell(String arg) {

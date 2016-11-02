@@ -1,4 +1,5 @@
-// filebot -script fn:abs2sxe /path/to/files --log off
+#!/usr/bin/env filebot -script
+
 
 def stage0 = args.getFiles{ it.isVideo() }.sort()
 

@@ -1,4 +1,5 @@
-// filebot -script fn:sysinfo
+#!/usr/bin/env filebot -script
+
 
 // FileBot 2.62 (r993)
 println Settings.getApplicationIdentifier()

@@ -1,4 +1,4 @@
-// filebot -script "fn:amc" --output "X:/media" --action copy --conflict override --def subtitles=en music=y artwork=y "ut_dir=%D" "ut_file=%F" "ut_kind=%K" "ut_title=%N" "ut_label=%L" "ut_state=%S"
+#!/usr/bin/env filebot -script
 
 
 // log input parameters

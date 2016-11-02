@@ -1,4 +1,5 @@
-// filebot -script fn:verify /path/to/files
+#!/usr/bin/env filebot -script
+
 
 import java.util.concurrent.*
 import net.filebot.hash.*
@@ -16,7 +17,7 @@ executor.invokeAll(files.collect{ f ->
 	return {
 		def attr_hash = f.xattr[xattrkey]
 		def calc_hash = VerificationUtilities.computeHash(f, hashType)
-		
+
 		log.info "$attr_hash $calc_hash $f"
 
 		if (attr_hash == null) {

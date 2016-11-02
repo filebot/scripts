@@ -1,4 +1,5 @@
-// filebot -script fn:ed2k /path/to/anime
+#!/usr/bin/env filebot -script
+
 
 /**
  * Calculate ed2k for all video files and output as ed2k links for AniDB

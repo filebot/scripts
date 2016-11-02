@@ -1,4 +1,4 @@
-// filebot -script dev:suball /path/to/media -non-strict --def maxAgeDays=7
+#!/usr/bin/env filebot -script
 
 
 def languages = any{ _args.lang.split(/\W+/) }{ ['en'] } as List

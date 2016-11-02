@@ -1,4 +1,5 @@
-// filebot -script fn:history --format "$from => $to"
+#!/usr/bin/env filebot -script
+
 
 // use --format parameter to specify your own output format
 def format = _args.format ?: '''${from}\t${to}'''

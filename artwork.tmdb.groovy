@@ -1,4 +1,5 @@
-// filebot -script fn:artwork.tmdb /path/to/movies/
+#!/usr/bin/env filebot -script
+
 
 def extras = any{ extras.toBoolean() }{ false }
 

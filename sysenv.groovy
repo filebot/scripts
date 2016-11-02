@@ -1,4 +1,5 @@
-// filebot -script fn:sysenv
+#!/usr/bin/env filebot -script
+
 
 println '# Environment Variables #'
 _environment.each{

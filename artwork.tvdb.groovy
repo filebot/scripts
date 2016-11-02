@@ -1,4 +1,4 @@
-// filebot -script fn:artwork.tvdb /path/to/tv/
+#!/usr/bin/env filebot -script
 
 
 include('lib/htpc')
