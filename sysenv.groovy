@@ -14,7 +14,7 @@ _system.each{
 println '\n'
 
 println '# Arguments #'
-_args.array.eachWithIndex{ a, i ->
+_args.argumentArray.eachWithIndex{ a, i ->
 	println "args[$i] = $a"
 }
 println '\n'
