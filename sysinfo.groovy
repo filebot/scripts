@@ -117,9 +117,7 @@ println 'Data: ' + Settings.getApplicationFolder().getCanonicalFile()
 
 // print uname -a if available
 try {
-	print 'uname: '
-	def uname = ['uname', '-a'].execute().text.trim()
-	println uname
+	println 'uname: ' + ['uname', '-a'].execute().text.trim()
 } catch(Throwable error) {
 	// ignore
 }
