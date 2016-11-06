@@ -10,7 +10,7 @@ def maxAgeDaysLimit = any{ maxAgeDaysLimit.toBoolean() }{ true }
 def minFileSize = any{ minFileSize.toLong() }{ 50 * 1000 * 1000L }
 def minLengthMS = any{ minLengthMS.toLong() }{ 10 *   60 * 1000L }
 
-def ignore = any{ ~ignore }{ null }
+def ignore = any{ ignore }{ null }
 def ignoreTextLanguage = any{ ignoreTextLanguage }{ languages.join('|') }
 
 def minAgeTimeStamp = now.time - (minAgeDays.toDouble() * 24 * 60 * 60 * 1000L) as long
@@ -39,7 +39,7 @@ def accept = { f ->
 	}
 
 	// ignore files that match the give ignore pattern
-	if (ignore != null && f.path =~ ignore) {
+	if (f.path.findMatch(ignore)) {
 		log.finest "Ignore pattern: $f"
 		return false
 	}
@@ -57,7 +57,7 @@ def accept = { f ->
 	}
 
 	// ignore files that already have subtitles
-	if (ignoreTextLanguage != null && any{ getMediaInfo(f, '{textLanguages}').findMatch(ignoreTextLanguage) != null }{ false }) {
+	if (ignoreTextLanguage != null && any{ getMediaInfo(f, '{textLanguages}').findMatch(ignoreTextLanguage) }{ false }) {
 		log.fine "Ignore text language: $f"
 		return false
 	}
