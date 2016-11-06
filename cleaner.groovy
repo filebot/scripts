@@ -28,7 +28,7 @@ def isClutter = { f ->
 		return true
 
 	// NOTE: some smb filesystem implementations are buggy and known to incorrectly return filesize 0 for all files
-	if ((f.isVideo() || f.isAudio()) && fsize < minsize && fsize > 0)
+	if (f.isVideo() && fsize < minsize && fsize > 0)
 		return true
 
 	return false
