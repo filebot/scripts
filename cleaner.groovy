@@ -9,6 +9,10 @@ def terms   = any{ terms }{ /sample|trailer|extras|deleted.scenes|music.video|sc
 def minsize = any{ minsize.toLong() }{ 20 * 1024 * 1024 }
 def maxsize = any{ maxsize.toLong() }{ 100 * 1024 * 1024 }
 
+
+def testRun = _args.action.equalsIgnoreCase('test')
+
+
 /*
  * Delete orphaned "clutter" files like nfo, jpg, etc and sample files
  */
@@ -39,7 +43,7 @@ def clean = { f ->
 	log.info "Delete $f"
 
 	// do a dry run via --action test
-	if (_args.action == 'test') {
+	if (testRun) {
 		return false
 	}
 
