@@ -13,6 +13,8 @@
 			<arg line="rev-list --count master" />
 		</exec>
 
+		<echo message="Script Bundle: ${build-date} (${build-revision})" />
+
 		<jar destfile="release/${milestone}.jar" compress="no">
 			<fileset dir=".." includes="**/*.groovy" />
 			<manifest>
