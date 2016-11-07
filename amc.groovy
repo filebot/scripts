@@ -260,8 +260,8 @@ def acceptFile(f) {
 		return false
 	}
 
-	// ignore subtitle files without matching video file
-	if (f.isSubtitle() && !f.dir.listFiles{ it.isVideo() && f.isDerived(it) }) {
+	// ignore subtitle files without matching video file in the same or parent folder
+	if (f.isSubtitle() && ![f, f.dir].findResults{ it.dir }.any{ it.listFiles{ it.isVideo() && f.isDerived(it) }}) {
 		log.fine "Ignore orphaned subtitles: $f"
 		return false	
 	}
