@@ -34,7 +34,7 @@ try {
 		default:
 			print '7-Zip-JBinding: '
 			net.filebot.archive.SevenZipLoader.requireNativeLibraries() // try to load 7-Zip-JBinding native libs (default)
-			try { println net.filebot.archive.SevenZipLoader.getNativeVersion() } catch(MissingMethodException e) { println 'OK' }
+			println net.filebot.archive.SevenZipLoader.getNativeVersion()
 			break
 	}
 } catch(Throwable error) {
