@@ -55,7 +55,7 @@ try {
 	print 'Extended Attributes: '
 	if (Settings.useExtendedFileAttributes()){
 		// create new temp file
-		def f = new File(Settings.getApplicationFolder(), '.xattr')
+		def f = ApplicationFolder.AppData.resolve('.xattr')
 		f.createNewFile() && f.deleteOnExit()
 
 		// xattr write, read and verify
@@ -113,7 +113,7 @@ println String.format('OS: %s (%s)', System.getProperty('os.name'), System.getPr
 println 'Package: ' + Settings.getApplicationDeployment().toUpperCase()
 
 // Application Data folder
-println 'Data: ' + Settings.getApplicationFolder().getCanonicalFile()
+println 'Data: ' + ApplicationFolder.AppData.getFile()
 
 // print uname -a if available
 try {
