@@ -113,7 +113,7 @@ println String.format('OS: %s (%s)', System.getProperty('os.name'), System.getPr
 println 'Package: ' + Settings.getApplicationDeployment().toUpperCase()
 
 // Application Data folder
-println 'Data: ' + ApplicationFolder.AppData.getFile()
+println 'Data: ' + ApplicationFolder.AppData.get().getCanonicalPath()
 
 // print uname -a if available
 try {
