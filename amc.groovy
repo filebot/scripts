@@ -614,7 +614,7 @@ if (getRenameLog().size() > 0) {
 	if (storeReport) {
 		def reportFolder = ApplicationFolder.AppData.resolve('reports')
 		def reportName = [now.format(/[yyyy-MM-dd HH mm]/), getReportSubject().take(50)].join(' ').validateFileName().space('_')
-		def reportFile = getReportMessage().saveAs(reportFolder.resolve(reportName))
+		def reportFile = getReportMessage().saveAs(reportFolder.resolve(reportName + '.html'))
 		log.finest "Saving report as ${reportFile}"
 	}
 
