@@ -237,6 +237,11 @@ def acceptFile(f) {
 		return false
 	}
 
+	// accept folders right away and skip file sanity checks
+	if (f.isDirectory()) {
+		return true
+	}
+
 	// accept archives if the extract feature is enabled
 	if (f.isArchive() || f.hasExtension('001')) {
 		return !skipExtract
@@ -267,7 +272,7 @@ def acceptFile(f) {
 	}
 
 	// process only media files (accept audio files only if music mode is enabled)
-	return f.isDirectory() || f.isVideo() || f.isSubtitle() || (music && f.isAudio())
+	return f.isVideo() || f.isSubtitle() || (music && f.isAudio())
 }
 
 
