@@ -58,11 +58,11 @@ unsortedFormat = any{ unsortedFormat }{ 'Unsorted/{file.structurePathTail}' }
 
 // force Movie / TV Series / Anime behaviour
 def forceMovie(f) {
-	label =~ /^(?i:Movie|Film|Concert|UFC)/ || f.dir.listPath().any{ it.name ==~ /(?i:Movies)/ } || f.isMovie()
+	label =~ /^(?i:Movie|Film|Concert|UFC)/ || f.dir.listPath().any{ it.name ==~ /(?i:Movies|Movie)/ } || f.isMovie()
 }
 
 def forceSeries(f) {
-	label =~ /^(?i:TV|Show|Series|Documentary)/ || f.dir.listPath().any{ it.name ==~ /(?i:TV.Shows)/ } || f.path =~ /(?<=\b|_)(?i:tv[sp]-|Season\D?\d{1,2}|\d{4}.S\d{2})(?=\b|_)/ || parseEpisodeNumber(f.path, true) || parseDate(f.path)
+	label =~ /^(?i:TV|Show|Series|Documentary)/ || f.dir.listPath().any{ it.name ==~ /(?i:TV.Shows|TV.Series)/ } || f.path =~ /(?<=\b|_)(?i:tv[sp]-|Season\D?\d{1,2}|\d{4}.S\d{2})(?=\b|_)/ || parseEpisodeNumber(f.path, true) || parseDate(f.path)
 }
 
 def forceAnime(f) {
