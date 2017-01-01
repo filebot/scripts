@@ -490,7 +490,18 @@ if (unsorted) {
 		log.fine "Processing ${unsortedFiles.size()} unsorted files"
 		rename(map: unsortedFiles.collectEntries{ original ->
 			def destination = getMediaInfo(original, unsortedFormat) as File
-			return [original, destination.isAbsolute() ? destination : outputFolder.resolve(destination.path)]
+
+			// sanity check user-defined unsorted format
+			if (destination == null) {
+				fail("Illegal usage: unsorted format must yield valid file path")
+			}
+
+			// resolve relative paths
+			if (!destination.isAbsolute()) {
+				destination = outputFolder.resolve(destination.path)
+			}
+
+			return [original, destination]
 		})
 	}
 }
