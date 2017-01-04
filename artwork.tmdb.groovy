@@ -16,14 +16,15 @@ args.eachMediaFolder{ dir ->
 
 	def videos = dir.listFiles{ it.isVideo() }
 	def query = _args.query
+	def locale = any{ _args.language.locale }{ Locale.ENGLISH }
 	def options = []
 
 	if (query) {
 		// manual search & sort by relevance
-		options = TheMovieDB.searchMovie(query, _args.locale).sortBySimilarity(query, { it.name })
+		options = TheMovieDB.searchMovie(query, locale).sortBySimilarity(query, { it.name })
 	} else if (videos.size() > 0) {
 		// run movie auto-detection for video files
-		options = MediaDetection.detectMovie(videos[0], TheMovieDB, _args.locale, true)
+		options = MediaDetection.detectMovie(videos[0], TheMovieDB, locale, true)
 	}
 
 	if (options.isEmpty()) {
@@ -44,6 +45,6 @@ args.eachMediaFolder{ dir ->
 
 	log.fine "$dir => $movie"
 	tryLogCatch {
-		fetchMovieArtworkAndNfo(dir, movie, dir.getFiles{ it.isVideo() }.sort{ it.length() }.reverse().findResult{ it }, extras, false, _args.locale ?: Locale.ENGLISH)
+		fetchMovieArtworkAndNfo(dir, movie, dir.getFiles{ it.isVideo() }.sort{ it.length() }.reverse().findResult{ it }, extras, false, locale)
 	}
 }

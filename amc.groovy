@@ -429,7 +429,7 @@ groups.each{ group, files ->
 
 					fs.findResults{ it.metadata }.findAll{ it.seriesInfo.database == 'TheTVDB' }.collect{ [name: it.seriesName, season: it.special ? 0 : it.season, id: it.seriesInfo.id] }.unique().each{
 						log.fine "Fetching series artwork for [$it.name / Season $it.season] to [$dir]"
-						fetchSeriesArtworkAndNfo(hasSeasonFolder ? dir.parentFile : dir, dir, it.id, it.season, false, _args.locale)
+						fetchSeriesArtworkAndNfo(hasSeasonFolder ? dir.parentFile : dir, dir, it.id, it.season, false, _args.language.locale)
 					}
 				}
 			}
@@ -451,7 +451,7 @@ groups.each{ group, files ->
 					if (movieFile) {
 						def movieInfo = movieFile.metadata
 						log.fine "Fetching movie artwork for [$movieInfo] to [$dir]"
-						fetchMovieArtworkAndNfo(dir, movieInfo, movieFile, extras, false, _args.locale)
+						fetchMovieArtworkAndNfo(dir, movieInfo, movieFile, extras, false, _args.language.locale)
 					}
 				}
 			}

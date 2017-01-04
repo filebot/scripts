@@ -14,13 +14,14 @@ args.eachMediaFolder{ dir ->
 	def videos = dir.listFiles{ it.isVideo() }
 	def query = _args.query ?: detectSeriesName(videos)
 	def sxe = videos.findResult{ parseEpisodeNumber(it) }
+	def locale = any{ _args.language.locale }{ Locale.ENGLISH }
 
 	if (query == null) {
 		query = dir.dir.hasFile{ it.name =~ /Season/ && it.isDirectory() } ? dir.dir.name : dir.name
 	}
 
 	log.finest "$dir => Search by $query"
-	def options = TheTVDB.search(query, _args.locale)
+	def options = TheTVDB.search(query, locale)
 	if (options.isEmpty()) {
 		log.warning "TV Series not found: $query"
 		return
@@ -46,6 +47,6 @@ args.eachMediaFolder{ dir ->
 
 	log.fine "$dir => $series"
 	tryLogCatch {
-		fetchSeriesArtworkAndNfo(seriesDir, dir, series.id, season, false, _args.locale ?: Locale.ENGLISH)
+		fetchSeriesArtworkAndNfo(seriesDir, dir, series.id, season, false, locale)
 	}
 }
