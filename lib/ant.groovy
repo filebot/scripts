@@ -1,14 +1,14 @@
 
 /**
  * Log into a remote host and run a given command.
- * 
- * e.g. 
+ *
+ * e.g.
  * sshexec(command: "ps", host: "filebot.sf.net", username: "rednoah", password: "correcthorsebatterystaple")
  */
 def sshexec(param) {
 	param << [trust: true] // always trust remote hosts
 	param << [outputproperty: 'result'] // output as String
-	
+
 	tryLogCatch {
 		def antBuilder = ant()
 		antBuilder.sshexec(param)
@@ -19,18 +19,20 @@ def sshexec(param) {
 
 /**
  * Send email via smtp.
- * 
- * e.g. 
+ *
+ * e.g.
  * sendmail(mailhost:'smtp.gmail.com', mailport:'587', ssl:'no', enableStartTLS:'yes', user:'rednoah@gmail.com', password:'correcthorsebatterystaple', from:'rednoah@gmail.com', to:'someone@gmail.com', subject:'Hello Ant World', message:'Dear Ant, ...')
  */
 def sendmail(param) {
 	def sender    = param.remove('from')
 	def recipient = param.remove('to')
 
+	param << [enableStartTLS: 'yes']
+
 	tryLogCatch {
 		ant().mail(param) {
-			from(address:sender)
-			to(address:recipient)
+			from(address: sender)
+			to(address: recipient)
 		}
 	}
 }
@@ -47,7 +49,7 @@ def sendGmail(param) {
 		throw new IllegalArgumentException('Gmail password must be a 16-digit passcode: Application-specific password required')
 	}
 
-	param << [mailhost:'smtp.gmail.com', mailport:'587', ssl:'no', enableStartTLS:'yes']
+	param << [mailhost: 'smtp.gmail.com', mailport: '587', ssl: 'no', enableStartTLS: 'yes']
 	param << [from: param.user]
 
 	sendmail(param)
@@ -96,7 +98,7 @@ def scp(param) {
 			param_scp.file = remotePath(param.file)
 		}
 	}
-	
+
 	if (param.keyfile == null) {
 		param_scp.password = param.password as String 
 	} else {
@@ -107,7 +109,7 @@ def scp(param) {
 	param_scp.verbose = (param.verbose == null) ? 'no' : param.verbose as String
 	param_scp.trust = 'yes'
 	param_scp.sftp = 'true'
-	
+
 	tryLogCatch {
 		if (param_fileset) {
 			ant().scp(param_scp) { fileset(param_fileset) }
