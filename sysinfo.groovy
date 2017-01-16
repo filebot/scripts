@@ -89,7 +89,8 @@ try {
 
 	println 'OK'
 } catch(Throwable error) {
-	println "$error (${System.getProperty('sun.jnu.encoding')})"
+	println error
+	log.warning "sun.jnu.encoding = ${System.getProperty('sun.jnu.encoding')}"
 }
 
 
