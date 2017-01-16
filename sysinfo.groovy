@@ -80,11 +80,12 @@ try {
 
 // Unicode File Paths
 try {
-	print 'Unicode File Paths: '
+	print 'Unicode Filesystem: '
 
 	// create new temp file
-	def f = ApplicationFolder.AppData.resolve('你好')
-	f.createNewFile() && f.deleteOnExit()
+	def f = ApplicationFolder.AppData.resolve('你好').toPath()
+	Files.createFile(f)
+	Files.delete(f)
 
 	println 'OK'
 } catch(Throwable error) {
