@@ -78,12 +78,12 @@ try {
 }
 
 
-// Unicode File Paths
+// Unicode Filesystem
 try {
 	print 'Unicode Filesystem: '
 
 	// create new temp file
-	def f = ApplicationFolder.AppData.resolve('你好').toPath()
+	def f = ApplicationFolder.AppData.resolve('龍飛鳳舞').toPath()
 	Files.createFile(f)
 	Files.delete(f)
 
