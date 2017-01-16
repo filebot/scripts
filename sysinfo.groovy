@@ -4,6 +4,7 @@
 // FileBot 2.62 (r993)
 println Settings.getApplicationIdentifier()
 
+
 // JNA Native: 3.5.0
 try {
 	print 'JNA Native: '
@@ -12,6 +13,7 @@ try {
 	println error
 }
 
+
 // MediaInfo: MediaInfoLib - v0.7.48
 try {
 	print 'MediaInfo: '
@@ -19,6 +21,7 @@ try {
 } catch(Throwable error) {
 	println error
 }
+
 
 // 7-Zip-JBinding: OK
 try {
@@ -41,6 +44,7 @@ try {
 	println error
 }
 
+
 // chromaprint-tools
 try {
 	print 'Chromaprint: '
@@ -50,10 +54,11 @@ try {
 	println error
 }
 
+
 // Extended File Attributes
 try {
 	print 'Extended Attributes: '
-	if (Settings.useExtendedFileAttributes()){
+	if (Settings.useExtendedFileAttributes()) {
 		// create new temp file
 		def f = ApplicationFolder.AppData.resolve('.xattr')
 		f.createNewFile() && f.deleteOnExit()
@@ -72,6 +77,21 @@ try {
 	println error
 }
 
+
+// Unicode File Paths
+try {
+	print 'Unicode File Paths: '
+
+	// create new temp file
+	def f = ApplicationFolder.AppData.resolve('你好')
+	f.createNewFile() && f.deleteOnExit()
+
+	println 'OK'
+} catch(Throwable error) {
+	println "$error (${System.getProperty('sun.jnu.encoding')})"
+}
+
+
 // GIO and GVFS
 try {
 	if (Settings.useGVFS()) {
@@ -83,6 +103,7 @@ try {
 	println error
 }
 
+
 // Script Bundle: 2016-08-03 (r389)
 try {
 	print "Script Bundle: "
@@ -93,6 +114,7 @@ try {
 } catch(Throwable error) {
 	println error
 }
+
 
 // Groovy Engine: 2.1.7
 println 'Groovy: ' + groovy.lang.GroovySystem.getVersion()
