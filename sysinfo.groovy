@@ -10,7 +10,7 @@ try {
 	print 'JNA Native: '
 	println com.sun.jna.Native.getNativeVersion()
 } catch(Throwable error) {
-	printException(error)
+	println error
 }
 
 
@@ -19,7 +19,7 @@ try {
 	print 'MediaInfo: '
 	println MediaInfo.version().replaceAll(/[^\d_.]/, '')
 } catch(Throwable error) {
-	printException(error)
+	println error
 }
 
 
@@ -41,7 +41,7 @@ try {
 			break
 	}
 } catch(Throwable error) {
-	printException(error)
+	println error
 }
 
 
@@ -51,7 +51,7 @@ try {
 	def fpcalc = [AcoustID.getChromaprintCommand(), '-version']
 	println fpcalc.execute().text.replaceAll(/[^\d_.]/, '') ?: "$fpcalc failed"
 } catch(Throwable error) {
-	printException(error)
+	println error
 }
 
 
@@ -74,7 +74,7 @@ try {
 		println 'DISABLED'
 	}
 } catch(Throwable error) {
-	printException(error)
+	println error
 }
 
 
@@ -89,8 +89,8 @@ try {
 
 	println 'OK'
 } catch(Throwable error) {
-	printException(error)
-	log.warning("WARNING: sun.jnu.encoding = ${System.getProperty('sun.jnu.encoding')}")
+	println error
+	log.warning "WARNING: sun.jnu.encoding = ${System.getProperty('sun.jnu.encoding')}"
 }
 
 
@@ -102,7 +102,7 @@ try {
 		println 'OK'
 	}
 } catch(Throwable error) {
-	printException(error)
+	println error
 }
 
 
@@ -114,7 +114,7 @@ try {
 	def d = manifest['Build-Date']
 	println "$d (r$r)"
 } catch(Throwable error) {
-	printException(error)
+	println error
 }
 
 
