@@ -34,11 +34,12 @@ args.eachMediaFolder{ dir ->
 	def series = options[0]
 
 	// maybe require user input
-	if (options.size() != 1 && !_args.nonStrict && !java.awt.GraphicsEnvironment.headless) {
-		series = javax.swing.JOptionPane.showInputDialog(null, 'Please select TV Show:', dir.name, 3, null, options.toArray(), series)
-		if (series == null) {
-			return
-		}
+	if (options.size() > 1 && _args.strict) {
+		series = showInputDialog(options, query, 'Select TV Show:')
+	}
+
+	if (series == null) {
+		return null
 	}
 
 	// auto-detect structure
