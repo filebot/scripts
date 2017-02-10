@@ -96,7 +96,7 @@ try {
 
 // GIO and GVFS
 try {
-	if (Settings.useGVFS()) {
+	if (Settings.useGVFS() && !java.awt.GraphicsEnvironment.isHeadless()) {
 		print 'GVFS: '
 		assert net.filebot.gio.GVFS.getDefaultVFS() != null
 		println 'OK'
