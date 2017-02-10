@@ -24,10 +24,7 @@
 		</jar>
 
 		<signjar jar="release/${milestone}.jar" alias="repository" keystore="repository.jks" storepass="${repository.storepass}" keypass="${repository.keypass}" />
-
-		<exec executable="xz" failonerror="yes">
-			<arg value="release/${milestone}.jar" />
-		</exec>
+		<xz src="release/${milestone}.jar" destfile="release/${milestone}.jar.xz" />
 	</target>
 
 
