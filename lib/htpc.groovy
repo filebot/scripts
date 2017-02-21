@@ -53,6 +53,24 @@ def refreshEmbyLibrary(server, port, token) {
 
 
 /**
+ * Sonarr helpers
+ */
+def rescanSonarrSeries(server, port, apikey, seriesId) {
+	// use HTTPS if hostname is specified, use HTTP if IP is specified
+	def protocol = server ==~ /localhost|[0-9.:]+/ ? 'http' : 'https'
+	def url = new URL("$protocol://$server:$port")
+	def requestHeader = ['X-Api-Key': apikey]
+
+	def series = new JsonSlurper().parseText(new URL(url, '/api/series').get(requestHeader).text)
+	def id = series.find{ it.tvdbId == seriesId }?.id
+
+	def command = [name: 'rescanSeries', seriesId: id]
+	new URL(url, '/api/command').post(JsonOutput.toJson(command).getBytes('UTF-8'), 'application/json', requestHeader)
+}
+
+
+
+/**
  * TheTVDB artwork/nfo helpers
  */
 def fetchSeriesBanner(outputFile, seriesId, bannerType, bannerType2, season, override, locale) {
