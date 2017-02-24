@@ -71,6 +71,19 @@ def rescanSonarrSeries(server, port, apikey, seriesId) {
 
 
 /**
+ * Sickbeard helpers
+ */
+def rescanSickbeardSeries(server, port, apikey, seriesId) {
+	// use HTTPS if hostname is specified, use HTTP if IP is specified
+	def protocol = server ==~ /localhost|[0-9.:]+/ ? 'http' : 'https'
+	def url = "$protocol://$server:$port/api/$apikey?cmd=show.refresh&tvdbid=$seriesId"
+	log.finest "GET: $url"
+	new URL(url).get()
+}
+
+
+
+/**
  * TheTVDB artwork/nfo helpers
  */
 def fetchSeriesBanner(outputFile, seriesId, bannerType, bannerType2, season, override, locale) {
