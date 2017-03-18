@@ -27,8 +27,6 @@ def sendmail(param) {
 	def sender    = param.remove('from')
 	def recipient = param.remove('to')
 
-	param << [enableStartTLS: 'yes']
-
 	tryLogCatch {
 		ant().mail(param) {
 			from(address: sender)
