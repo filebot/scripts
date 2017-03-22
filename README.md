@@ -15,9 +15,13 @@ If you want to run scripts from a local file or if you want to make your own mod
 ```
 git clone https://github.com/filebot/scripts.git
 ```
-Update to the latest revision:
+Update to the latest revision and merge with local changes:
 ```
 git pull
+```
+See local changes:
+```
+git diff
 ```
 Discard local changes:
 ```
