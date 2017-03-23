@@ -98,8 +98,7 @@ try {
 try {
 	if (Settings.useGVFS() && !java.awt.GraphicsEnvironment.isHeadless()) {
 		print 'GVFS: '
-		assert net.filebot.gio.GVFS.getDefaultVFS() != null
-		println 'OK'
+		println net.filebot.platform.gnome.GVFS.getDefaultVFS()
 	}
 } catch(Throwable error) {
 	println error
