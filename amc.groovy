@@ -260,7 +260,7 @@ def acceptFile(f) {
 	}
 
 	// ignore short videos
-	if (minLengthMS > 0 && f.isVideo() && any{ getMediaInfo(f, '{duration}').toLong() < minLengthMS }{ false /* default if MediaInfo fails */ }) {
+	if (minLengthMS > 0 && f.isVideo() && any{ getMediaInfo(f, '{minutes}').toLong() * 60 * 1000L < minLengthMS }{ false /* default if MediaInfo fails */ }) {
 		log.fine "Skip short video: $f"
 		return false
 	}
