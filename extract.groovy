@@ -2,10 +2,8 @@
 
 
 /*
- * Auto-extract all zip and rar archives.
+ * Extract all zip and rar archives into their current location
  */
 args.getFiles{ it.isArchive() }.each {
-	def output = extract(file:it)
-
-	output.each{ println "Extracted: " + it.path }
+	extract(file: it, output: it.dir)
 }
