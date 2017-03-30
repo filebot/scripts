@@ -58,7 +58,7 @@ unsortedFormat = any{ unsortedFormat }{ 'Unsorted/{file.structurePathTail}' }
 
 // force Movie / TV Series / Anime behaviour
 def forceMovie(f) {
-	label =~ /^(?i:Movie|Film|Concert|UFC)/ || f.dir.listPath().any{ it.name ==~ /(?i:Movies|Movie)/ } || f.isMovie()
+	label =~ /^(?i:Movie|Film|Concert|UFC)/ || f.dir.listPath().any{ it.name ==~ /(?i:Movies|Movie)/ } || f.isMovie() || any{ f.isVideo() && !forceSeries(f) && getMediaInfo(f, '{minutes}').toInteger() >= 75 }{ false }
 }
 
 def forceSeries(f) {
