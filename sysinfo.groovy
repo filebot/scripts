@@ -135,9 +135,6 @@ println String.format('OS: %s (%s)', System.getProperty('os.name'), System.getPr
 // MAS
 println 'Package: ' + Settings.getApplicationDeployment().toUpperCase()
 
-// Application Data folder
-println 'Data: ' + ApplicationFolder.AppData.get().getCanonicalPath()
-
 // print uname -a if available
 try {
 	println 'uname: ' + ['uname', '-a'].execute().text.trim()
@@ -148,14 +145,12 @@ try {
 
 // check for updates
 try {
-	if ('skip' != System.getProperty('application.update')) {
-		def update = new XmlSlurper().parse('https://app.filebot.net/update.xml')
-		def rev = update.revision.text() as int
-		def app = update.name.text()
+	def update = new XmlSlurper().parse('https://app.filebot.net/update.xml')
+	def rev = update.revision.text() as int
+	def app = update.name.text()
 
-		if (rev > Settings.getApplicationRevisionNumber()) {
-			println '\n' + " UPDATE AVAILABLE: $app (r$rev) ".center(80, '-') + '\n'
-		}
+	if (rev > Settings.getApplicationRevisionNumber()) {
+		println '\n' + " UPDATE AVAILABLE: $app (r$rev) ".center(80, '-') + '\n'
 	}
 } catch(Throwable error) {
 	printException(error)
