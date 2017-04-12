@@ -402,6 +402,9 @@ groups = groups.groupBy{ group, files -> group.collectEntries{ type, query -> [t
 // log movie/series/anime detection results
 groups.each{ group, files -> log.finest "Group: $group => ${files*.name}" }
 
+// keep track of files that have been processed successfully
+def destinationFiles = []
+
 // keep track of unsorted files or files that could not be processed for some reason
 def unsortedFiles = []
 
@@ -423,6 +426,8 @@ groups.each{ group, files ->
 		def dest = group.tvs ? rename(file: files, format: seriesFormat, db: 'TheTVDB') : rename(file: files, format: animeFormat, db: 'AniDB')
 
 		if (dest != null) {
+			destinationFiles += dest
+
 			if (artwork) {
 				dest.mapByFolder().each{ dir, fs ->
 					def hasSeasonFolder = any{ dir =~ /Specials|Season.\d+/ || dir.parentFile.structurePathTail.listPath().size() > 0 }{ false }	// MAY NOT WORK FOR CERTAIN FORMATS
@@ -445,6 +450,8 @@ groups.each{ group, files ->
 		def dest = rename(file: files, format: movieFormat, db: 'TheMovieDB')
 
 		if (dest != null) {
+			destinationFiles += dest
+
 			if (artwork) {
 				dest.mapByFolder().each{ dir, fs ->
 					def movieFile = fs.findAll{ it.isVideo() || it.isDisk() }.sort{ it.length() }.reverse().findResult{ it }
@@ -467,7 +474,7 @@ groups.each{ group, files ->
 		def dest = rename(file: files, format: musicFormat, db: 'ID3')
 
 		if (dest != null) {
-			// music artwork not supported
+			destinationFiles += dest
 		} else if (failOnError) {
 			fail "Failed to process group: $group"
 		} else {
@@ -697,6 +704,6 @@ if (clean) {
 
 
 
-if (getRenameLog().size() == 0) {
+if (destinationFiles.size() == 0) {
 	fail "Finished without processing any files"
 }
