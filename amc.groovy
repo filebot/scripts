@@ -495,7 +495,8 @@ groups.each{ group, files ->
 if (unsorted) {
 	if (unsortedFiles.size() > 0) {
 		log.fine "Processing ${unsortedFiles.size()} unsorted files"
-		rename(map: unsortedFiles.collectEntries{ original ->
+
+		def dest = rename(map: unsortedFiles.collectEntries{ original ->
 			def destination = getMediaInfo(original, unsortedFormat) as File
 
 			// sanity check user-defined unsorted format
@@ -510,12 +511,16 @@ if (unsorted) {
 
 			return [original, destination]
 		})
+
+		if (dest != null) {
+			destinationFiles += dest
+		}
 	}
 }
 
 // run program on newly processed files
 if (exec) {
-	getRenameLog().collect{ from, to -> getMediaInfo(to, exec) }.unique().each{ command ->
+	destinationFiles.collect{ getMediaInfo(it, exec) }.unique().each{ command ->
 		log.fine "Execute: $command"
 		execute(command)
 	}
