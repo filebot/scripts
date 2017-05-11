@@ -15,7 +15,7 @@ def model = [
 	'Audio Languages': 'audioLanguages',
 	'Subtitle Languages': 'textLanguages',
 	'Duration': 'hours',
-	'File Size': 'bytes',
+	'File Size': 'megabytes',
 	'Path': 'f.canonicalPath',
 	'Original Name': 'original',
 	'Extended Attributes': 'json'
