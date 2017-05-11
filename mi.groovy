@@ -2,39 +2,49 @@
 
 
 /*
- * Print media info of all video files to CSV file  
+ * Print media info of all video files to TSV file  
  */
-def model    = '''Name;Container;Resolution;Video Codec;Video Format;Audio Codec;Audio Format;Audio Language(s);Subtitle Language(s);Duration;File Size;Folder Size;Folder Count;Path'''
-def template = '''{fn};{cf};{resolution};{vc};{vf};{ac};{af};{media.AudioLanguageList};{media.TextLanguageList};{media.DurationString3};{file.length()};{folder.listFiles().sum{ it.length() }};{folder.listFiles().sum{ it.isFile() ? 1 : 0 }};{file.getCanonicalPath()}'''
+def model = [
+	'Name': 'fn',
+	'Container': 'cf',
+	'Resolution': 'resolution',
+	'Video Codec': 'vc',
+	'Video Format': 'vf',
+	'Audio Codec': 'ac',
+	'Audio Channels': 'channels',
+	'Audio Language(s)': 'audioLanguages',
+	'Subtitle Language(s)': 'textLanguages',
+	'Duration': 'hours',
+	'File Size': 'bytes',
+	'Path': 'f.canonicalPath',
+	'Original Name': 'original',
+	'Extended Attributes': 'json'
+]
 
-def csvFile  = args[-1] as File
+def separator = '\t'
+def header = model.keySet().join(separator)
+def format = model.values().collect{ "{$it}" }.join(separator)
 
-if (csvFile.name.endsWith('.csv')) {
-	// open destination file (writing files requires -trust-script)
-	csvFile.withWriter('UTF-8'){ output ->
+// use last argument as output file
+def outputFile = any{ _args.output }{ 'MediaIndex.tsv' }.toFile().getCanonicalFile()
+
+// open destination file (writing files requires -trust-script)
+outputFile.withWriter('UTF-8'){ output ->
+	// print to console
+	log.finest "Writing TSV file [$outputFile]"
+	log.config header
+
+	// print header
+	output.println(header)
+
+	// print info for each video file
+	args.getFiles{ it.isVideo() }.each{
+		def mi = getMediaInfo(it, format)
+
 		// print to console
-		println "Writing CSV file [$csvFile]"
-		println model
+		log.info mi
 
-		// print header
-		output.write(model)
-		output.write('\n')
-
-		// print info for each video file (sorted by filename)
-		args.getFiles{ it.isVideo() }.sort{ a, b -> a.name.compareToIgnoreCase(b.name) }.each{
-			def mi = getMediaInfo(it, template)
-
-			// print to console
-			println mi
-
-			// append to file
-			output.write(mi)
-			output.write('\n')
-		}
-	}
-} else {
-	// pipe usage
-	getMediaInfo(file: args.getFiles{ it.isVideo() }, format: template).each{
-		println it
+		// append to file
+		output.println(mi)
 	}
 }
