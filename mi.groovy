@@ -12,8 +12,8 @@ def model = [
 	'Video Format': 'vf',
 	'Audio Codec': 'ac',
 	'Audio Channels': 'channels',
-	'Audio Language(s)': 'audioLanguages',
-	'Subtitle Language(s)': 'textLanguages',
+	'Audio Languages': 'audioLanguages',
+	'Subtitle Languages': 'textLanguages',
 	'Duration': 'hours',
 	'File Size': 'bytes',
 	'Path': 'f.canonicalPath',
@@ -25,10 +25,9 @@ def separator = '\t'
 def header = model.keySet().join(separator)
 def format = model.values().collect{ "{$it}" }.join(separator)
 
-// use last argument as output file
+// open output file
 def outputFile = any{ _args.output }{ 'MediaIndex.tsv' }.toFile().getCanonicalFile()
 
-// open destination file (writing files requires -trust-script)
 outputFile.withWriter('UTF-8'){ output ->
 	// print to console
 	log.finest "Writing TSV file [$outputFile]"
