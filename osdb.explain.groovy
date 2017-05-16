@@ -1,7 +1,7 @@
 #!/usr/bin/env filebot -script
 
 
-def lang = _args.locale.ISO3Language
+def lang = _args.language.ISO3
 def strict = !_args.nonStrict
 
 def fetch = any{ fetch as boolean }{ false }
