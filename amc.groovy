@@ -588,7 +588,7 @@ if (getRenameLog().size() > 0) {
 	}
 
 	// messages used for email / pushbullet reports
-	def getReportSubject = { getNotificationMessage('', ' | ') }
+	def getReportSubject = { getNotificationTitle('', ' | ') }
 	def getReportTitle = { '[FileBot] ' + getReportSubject() }
 	def getReportMessage = { 
 		def renameLog = getRenameLog()
