@@ -139,12 +139,12 @@ if (ut.dir) {
 	if (ut.dir == '/') {
 		fail "Illegal usage: No! Are you insane? You can't just pass in the entire filesystem. Think long and hard about what you just tried to do."
 	}
-	if (outputFolder.path.startsWith(ut.dir)) {
+	if (outputFolder in ut.dir.toFile().listPath()) {
 		fail "Illegal usage: output folder [$outputFolder] must be separate from input folder $ut"
 	}
 } else if (args.size() == 0) {
 	fail "Illegal usage: no input"
-} else if (args.any{ f -> outputFolder.path.startsWith(f.path) }) {
+} else if (args.any{ f -> outputFolder in f.listPath() }) {
 	fail "Illegal usage: output folder [$outputFolder] must be separate from input arguments $args"
 } else if (args.any{ f -> f in File.listRoots() }) {
 	fail "Illegal usage: input $args must not include a filesystem root"
