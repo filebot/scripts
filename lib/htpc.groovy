@@ -314,13 +314,7 @@ def fetchMovieNfo(outputFile, i, movieFile) {
 			imdb(id:"tt" + (i.imdbId ?: 0).pad(7), "http://www.imdb.com/title/tt" + (i.imdbId ?: 0).pad(7))
 			tmdb(id:i.id, "http://www.themoviedb.org/movie/${i.id}")
 
-			/** <trailer> element not supported due to lack of specification on acceptable values for both Plex and Kodi
-			i.trailers.each{ t ->
-				t.sources.each { s, v ->
-					trailer(type:t.type, name:t.name, size:s, v)
-				}
-			}
-			**/
+			/** <trailer> element not supported due to lack of specification on acceptable values for both Plex and Kodi **/
 		}
 	}
 	xml.saveAs(outputFile)
