@@ -553,7 +553,6 @@ if (getRenameLog().size() > 0) {
 				hostAuth.userpass = hostAuthList[1]
 				hostName = instanceHost[1]
 			} else {
-				hostAuth = [null, null]
 				hostName = instanceHost[0]
 			}
 			
