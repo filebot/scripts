@@ -545,9 +545,20 @@ if (getRenameLog().size() > 0) {
 	if (kodi) {
 		kodi.each{ instance ->
 			log.fine "Notify Kodi: $instance"
+			def instanceHost = instance.host.split(/@/) 
+			def hostAuth = [username:null, userpass:null]
+			if ( instanceHost.length == 2) {
+				hostAuthList = instanceHost[0].split(/:/)
+				hostAuth.username = hostAuthList[0]
+				hostAuth.userpass = hostAuthList[1]
+				hostName = instanceHost[1]
+			} else {
+				hostName = instanceHost[0]
+			}
+			
 			tryLogCatch {
-				showNotification(instance.host, instance.port ?: 8080, getNotificationTitle(), getNotificationMessage(), 'https://app.filebot.net/icon.png')
-				scanVideoLibrary(instance.host, instance.port ?: 8080)
+				showNotification(hostName, instance.port ?: 8080, hostAuth.username, hostAuth.userpass,  getNotificationTitle(), getNotificationMessage(), 'https://app.filebot.net/icon.png')
+				scanVideoLibrary(hostName, instance.port ?: 8080, hostAuth.username, hostAuth.userpass)
 			}
 		}
 	}

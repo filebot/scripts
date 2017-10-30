@@ -2,20 +2,24 @@
 /**
  * Kodi helper functions
  */
-def scanVideoLibrary(host, port) {
+def scanVideoLibrary(host, port, user, pass) {
 	def json = [jsonrpc: '2.0', method: 'VideoLibrary.Scan', id: 1]
 	def url = "http://$host:$port/jsonrpc?request=" + URLEncoder.encode(JsonOutput.toJson(json), 'UTF-8')
+	def authString = "$user:$pass".getBytes().encodeBase64().toString()
+        def requestProperties = [Authorization: 'Basic ' + authString]
 
 	log.finest "GET: $url"
-	new URL(url).get()
+	new URL(url).get(requestProperties)
 }
 
-def showNotification(host, port, title, message, image) {
+def showNotification(host, port, user, pass, title, message, image) {
 	def json = [jsonrpc:'2.0', method:'GUI.ShowNotification', params: [title: title, message: message, image: image], id: 1]
 	def url = "http://$host:$port/jsonrpc?request=" + URLEncoder.encode(JsonOutput.toJson(json), 'UTF-8')
+	def authString = "$user:$pass".getBytes().encodeBase64().toString()
+        def requestProperties = [Authorization: 'Basic ' + authString]
 
 	log.finest "GET: $url"
-	new URL(url).get()
+	new URL(url).get(requestProperties)
 }
 
 
