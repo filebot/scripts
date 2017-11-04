@@ -4,18 +4,20 @@
  */
 def scanVideoLibrary(host, port) {
 	def json = [jsonrpc: '2.0', method: 'VideoLibrary.Scan', id: 1]
-	def url = "http://$host:$port/jsonrpc?request=" + URLEncoder.encode(JsonOutput.toJson(json), 'UTF-8')
-
-	log.finest "GET: $url"
-	new URL(url).get()
+	postKodiRPC(host, port, json)
 }
 
 def showNotification(host, port, title, message, image) {
 	def json = [jsonrpc:'2.0', method:'GUI.ShowNotification', params: [title: title, message: message, image: image], id: 1]
-	def url = "http://$host:$port/jsonrpc?request=" + URLEncoder.encode(JsonOutput.toJson(json), 'UTF-8')
+	postKodiRPC(host, port, json)
+}
 
-	log.finest "GET: $url"
-	new URL(url).get()
+def postKodiRPC(host, port, json) {
+	def url = "http://$host:$port/jsonrpc")
+	def bytes = JsonOutput.toJson(json).getBytes('UTF-8')
+
+	log.finest "POST: $url"
+	new URL(url).post(bytes, 'application/json', [:])
 }
 
 
@@ -46,7 +48,7 @@ def refreshEmbyLibrary(server, port, token) {
 	if (token) {
 		url += "?api_key=$token"
 	}
-	log.finest "GET: $url"
+	log.finest "POST: $url"
 	new URL(url).post([:], [:])
 }
 
