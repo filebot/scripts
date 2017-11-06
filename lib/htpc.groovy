@@ -14,10 +14,10 @@ def showNotification(host, port, title, message, image) {
 
 def postKodiRPC(host, port, json) {
 	def url = "http://$host:$port/jsonrpc"
-	def bytes = JsonOutput.toJson(json).getBytes('UTF-8')
+	def data = JsonOutput.toJson(json)
 
-	log.finest "POST: $url"
-	new URL(url).post(bytes, 'application/json', [:])
+	log.finest "POST: $url $data"
+	new URL(url).post(data.getBytes('UTF-8'), 'application/json', [:])
 }
 
 
