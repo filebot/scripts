@@ -650,7 +650,7 @@ if (getRenameLog().size() > 0) {
 	if (pushbullet) {
 		log.fine 'Sending PushBullet report'
 		tryLogCatch {
-			PushBullet(pushbullet).sendFile(getNotificationTitle(), getReportMessage(), 'text/html', getNotificationMessage(), any{ mailto }{ null })
+			PushBullet(pushbullet).sendFile(getNotificationTitle() + '.html', getReportMessage(), 'text/html', getNotificationMessage(), any{ mailto }{ null })
 		}
 	}
 
