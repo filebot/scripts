@@ -58,7 +58,7 @@ unsortedFormat = any{ unsortedFormat }{ 'Unsorted/{file.structurePathTail}' }
 
 // force Movie / TV Series / Anime behaviour
 def forceMovie(f) {
-	label =~ /^(?i:Movie|Film|Concert|UFC)/ || f.dir.listPath().any{ it.name ==~ /(?i:Movies|Movie)/ } || f.isMovie() || any{ f.isVideo() && !forceSeries(f) && getMediaInfo(f, '{minutes}').toInteger() >= 100 }{ false }
+	label =~ /^(?i:Movie|Film|Concert|UFC)/ || f.dir.listPath().any{ it.name ==~ /(?i:Movies|Movie)/ } || f.isMovie() || any{ (f.isVideo() || f.isSubtitle()) && !forceSeries(f) && getMediaInfo(f, '{minutes}').toInteger() >= 100 }{ false }
 }
 
 def forceSeries(f) {
@@ -66,7 +66,7 @@ def forceSeries(f) {
 }
 
 def forceAnime(f) {
-	label =~ /^(?i:Anime)/ || f.dir.listPath().any{ it.name ==~ /(?i:Anime)/ } || (f.isVideo() && (f.name =~ /[\(\[]\p{XDigit}{8}[\]\)]/ || any{ getMediaInfo(f, '{media.AudioLanguageList} {media.TextCodecList}').tokenize().containsAll(['Japanese', 'ASS']) && (parseEpisodeNumber(f.name, false) != null || getMediaInfo(f, '{minutes}').toInteger() < 60) }{ false }))
+	label =~ /^(?i:Anime)/ || f.dir.listPath().any{ it.name ==~ /(?i:Anime)/ } || ((f.isVideo() || f.isSubtitle()) && (f.name =~ /[\(\[]\p{XDigit}{8}[\]\)]/ || any{ getMediaInfo(f, '{media.AudioLanguageList} {media.TextCodecList}').tokenize().containsAll(['Japanese', 'ASS']) && (parseEpisodeNumber(f.name, false) != null || getMediaInfo(f, '{minutes}').toInteger() < 60) }{ false }))
 }
 
 def forceAudio(f) {
