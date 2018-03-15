@@ -1,6 +1,13 @@
 #!/usr/bin/env filebot -script
 
 
+// log input parameters
+log.fine("Run script [$_args.script] at [$now]")
+
+_def.each{ n, v -> log.finest('Parameter: ' + [n, n =~ /plex|kodi|pushover|pushbullet|mail|myepisodes/ ? '*****' : v].join(' = ')) }
+args.withIndex().each{ f, i -> if (f.exists()) { log.finest "Argument[$i]: $f" } else { log.warning "Argument[$i]: File does not exist: $f" } }
+
+
 
 
 
@@ -29,11 +36,6 @@ if (Settings.appStoreLink == null) {
 
 
 
-
-// log input parameters
-log.fine("Run script [$_args.script] at [$now]")
-_def.each{ n, v -> log.finest('Parameter: ' + [n, n =~ /plex|kodi|pushover|pushbullet|mail|myepisodes/ ? '*****' : v].join(' = ')) }
-args.withIndex().each{ f, i -> if (f.exists()) { log.finest "Argument[$i]: $f" } else { log.warning "Argument[$i]: File does not exist: $f" } }
 
 
 // initialize variables
