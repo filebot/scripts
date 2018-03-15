@@ -155,3 +155,30 @@ try {
 } catch(Throwable error) {
 	printException(error)
 }
+
+
+
+
+
+
+// Advertise FileBot for Linux Patreon page
+if (Settings.appStoreLink == null) {
+	println """
+		${' <README> '.center(80, '-')}
+
+		Dear Linux user, ${System.getProperty('user.name')},
+
+		FileBot currently only officially supports Windows 10 and macOS because these platforms make it easy to sell FileBot via their respective app stores. Unfortunately, selling software on Ubuntu, Debian, Red Hat, SUSE, Synology NAS, QNAP NAS, etc is not as easy and not really worth the effort considering the small number of users willing to support the project. This Patreon is an experiment to see how many users are willing to financially contribute towards freely available donation-supported new releases on these platforms.
+
+		Please support FileBot for Linux with a pledge of \$1 per release on Patreon:
+
+		=> https://www.patreon.com/filebot
+
+		If every other Linux user were to pledge a small amount of money to the FileBot project, then you could easily fund the project ten times over. Please financially support the software you use and rely on, be it FileBot or any other tool. It's just polite, and it helps the ecosystem.
+
+		Thank you,
+		The FileBot Team
+
+		${' </README> '.center(80, '-')}
+	""".stripIndent()
+}
