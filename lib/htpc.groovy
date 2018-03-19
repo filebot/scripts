@@ -1,3 +1,9 @@
+htpc = [
+	kodi: [ http: 8080 ],
+	plex: [ http: 32400],
+	emby: [ http: 8096, https: 8920 ]
+]
+
 
 /**
  * Kodi helper functions
@@ -13,7 +19,7 @@ def showNotification(host, port, title, message, image) {
 }
 
 def postKodiRPC(host, port, json) {
-	def url = "http://$host:$port/jsonrpc"
+	def url = "http://$host:${port ?: htpc.kodi.http}/jsonrpc"
 	def data = JsonOutput.toJson(json)
 
 	log.finest "POST: $url $data"
@@ -28,7 +34,7 @@ def postKodiRPC(host, port, json) {
 def refreshPlexLibrary(server, port, token) {
 	// use HTTPS if hostname is specified, use HTTP if IP is specified
 	def protocol = server ==~ /localhost|[0-9.:]+/ ? 'http' : 'https'
-	def url = "$protocol://$server:$port/library/sections/all/refresh"
+	def url = "${protocol}://${server}:${port ?: htpc.plex.http}/library/sections/all/refresh"
 	if (token) {
 		url += "?X-Plex-Token=$token"
 	}
@@ -44,7 +50,7 @@ def refreshPlexLibrary(server, port, token) {
 def refreshEmbyLibrary(server, port, token) {
 	// use HTTPS if hostname is specified, use HTTP if IP is specified
 	def protocol = server ==~ /localhost|[0-9.:]+/ ? 'http' : 'https'
-	def url = "$protocol://$server:$port/Library/Refresh"
+	def url = "${protocol}://${server}:${port ?: htpc.emby[protocol]}/Library/Refresh"
 	if (token) {
 		url += "?api_key=$token"
 	}

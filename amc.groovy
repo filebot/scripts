@@ -577,8 +577,8 @@ if (getRenameLog().size() > 0) {
 		kodi.each{ instance ->
 			log.fine "Notify Kodi: $instance"
 			tryLogCatch {
-				showNotification(instance.host, instance.port ?: 8080, getNotificationTitle(), getNotificationMessage(), 'https://app.filebot.net/icon.png')
-				scanVideoLibrary(instance.host, instance.port ?: 8080)
+				showNotification(instance.host, instance.port, getNotificationTitle(), getNotificationMessage(), 'https://app.filebot.net/icon.png')
+				scanVideoLibrary(instance.host, instance.port)
 			}
 		}
 	}
@@ -588,7 +588,7 @@ if (getRenameLog().size() > 0) {
 		plex.each{ instance ->
 			log.fine "Notify Plex: $instance"
 			tryLogCatch {
-				refreshPlexLibrary(instance.host, 32400, instance.token)
+				refreshPlexLibrary(instance.host, null, instance.token)
 			}
 		}
 	}
@@ -598,7 +598,7 @@ if (getRenameLog().size() > 0) {
 		emby.each{ instance ->
 			log.fine "Notify Emby: $instance"
 			tryLogCatch {
-				refreshEmbyLibrary(instance.host, 8096, instance.token)
+				refreshEmbyLibrary(instance.host, null, instance.token)
 			}
 		}
 	}
