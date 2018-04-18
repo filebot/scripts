@@ -85,7 +85,10 @@ movieFormat    = any{ movieFormat    }{ '{plex}' }
 musicFormat    = any{ musicFormat    }{ '{plex}' }
 unsortedFormat = any{ unsortedFormat }{ 'Unsorted/{file.structurePathTail}' }
 
-
+// allow users to specify what databases to use
+tvDatabase    = any{ tvDatabase }{ 'TheTVDB' }
+movieDatabase = any{ movieDatabase }{ 'TheMovieDB' }
+musicDatabase = any{ musicDatabase }{ 'ID3' }
 
 // force Movie / TV Series / Anime behaviour
 def forceMovie(f) {
@@ -454,7 +457,7 @@ groups.each{ group, files ->
 	// EPISODE MODE
 	if ((group.tvs || group.anime) && !group.mov) {
 		// choose series / anime
-		def dest = group.tvs ? rename(file: files, format: seriesFormat, db: 'TheTVDB') : rename(file: files, format: animeFormat, db: 'AniDB')
+		def dest = group.tvs ? rename(file: files, format: seriesFormat, db: tvDatabase) : rename(file: files, format: animeFormat, db: 'AniDB')
 
 		if (dest != null) {
 			destinationFiles += dest
@@ -478,7 +481,7 @@ groups.each{ group, files ->
 
 	// MOVIE MODE
 	else if (group.mov && !group.tvs && !group.anime) {
-		def dest = rename(file: files, format: movieFormat, db: 'TheMovieDB')
+		def dest = rename(file: files, format: movieFormat, db: movieDatabase)
 
 		if (dest != null) {
 			destinationFiles += dest
@@ -502,7 +505,7 @@ groups.each{ group, files ->
 
 	// MUSIC MODE
 	else if (group.music) {
-		def dest = rename(file: files, format: musicFormat, db: 'ID3')
+		def dest = rename(file: files, format: musicFormat, db: musicDatabase)
 
 		if (dest != null) {
 			destinationFiles += dest
