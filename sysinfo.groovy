@@ -144,6 +144,7 @@ try {
 
 
 // check for updates
+/*
 try {
 	def update = new XmlSlurper().parse('https://app.filebot.net/update.xml')
 	def rev = update.revision.text() as int
@@ -155,6 +156,7 @@ try {
 } catch(Throwable error) {
 	printException(error)
 }
+*/
 
 
 
