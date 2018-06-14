@@ -2,7 +2,7 @@
 <project name="filebot-scripts" default="repository">
 	<property file="build.properties" />
 
-	<property name="milestone" value="scripts/m1" />
+	<property name="milestone" value="api/v4/script/fn" />
 
 
 	<target name="repository">
