@@ -129,19 +129,18 @@ println String.format('JVM: %d-bit %s', com.sun.jna.Platform.is64Bit() ? 64 : 32
 // CPU/MEM: 4 Core / 1 GB Max Memory / 15 MB Used Memory
 println String.format('CPU/MEM: %s Core / %s Max Memory / %s Used Memory', Runtime.runtime.availableProcessors(), org.apache.commons.io.FileUtils.byteCountToDisplaySize(Runtime.runtime.maxMemory()), org.apache.commons.io.FileUtils.byteCountToDisplaySize(Runtime.runtime.totalMemory() - Runtime.runtime.freeMemory()))
 
+// print uname -a if available
+try {
+	println 'HW: ' + ['uname', '-a'].execute().text.trim()
+} catch(Throwable error) {
+	// ignore
+}
+
 // Windows 7 (x86)
 println String.format('OS: %s (%s)', System.getProperty('os.name'), System.getProperty('os.arch'))
 
 // MAS
 println 'Package: ' + Settings.getApplicationDeployment().toUpperCase()
-
-// print uname -a if available
-try {
-	println 'uname: ' + ['uname', '-a'].execute().text.trim()
-} catch(Throwable error) {
-	// ignore
-}
-
 
 // check for updates
 if (Settings.LICENSE.isFile()) {
