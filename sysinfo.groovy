@@ -132,6 +132,7 @@ println String.format('CPU/MEM: %s Core / %s Max Memory / %s Used Memory', Runti
 // print uname -a if available
 try {
 	println 'HW: ' + ['uname', '-a'].execute().text.trim()
+	println 'DATA: ' + ApplicationFolder.AppData.get()
 } catch(Throwable error) {
 	// ignore
 }
