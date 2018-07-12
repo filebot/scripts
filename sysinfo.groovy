@@ -132,26 +132,29 @@ println String.format('CPU/MEM: %s Core / %s Max Memory / %s Used Memory', Runti
 // Windows 7 (x86)
 println String.format('OS: %s (%s)', System.getProperty('os.name'), System.getProperty('os.arch'))
 
-// print uname -a if available
+
+// Linux diskstation 3.2.40 #23739 Fri Jun 8 12:48:05 CST 2018 armv7l GNU/Linux synology_armada370_213j
 try {
 	println 'HW: ' + ['uname', '-a'].execute().text.trim()
 	println 'DATA: ' + ApplicationFolder.AppData.get()
 } catch(Throwable error) {
-	// ignore
+	// silently fail on non-Unix platforms
 }
 
-// MAS
+// SPK
 println 'Package: ' + Settings.getApplicationDeployment().toUpperCase()
 
-// check for updates
-if (Settings.LICENSE.isFile()) {
-	try {
-		print 'License: '
-		println Settings.LICENSE.check()
-	} catch(Throwable error) {
-		println error.getMessage()
-	}
+// FileBot License T1000 (Valid-Until: 2019-06-20)
+try {
+	print 'License: '
+	println Settings.LICENSE.check()
+} catch(Throwable error) {
+	println error.getMessage()
+}
 
+
+// CHECK FOR UPDATES
+if (!Settings.isAutoUpdateEnabled()) {
 	try {
 		def update = new XmlSlurper().parse('https://app.filebot.net/update.xml')
 		def rev = update.revision.text() as int
