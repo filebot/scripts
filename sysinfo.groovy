@@ -45,24 +45,24 @@ try {
 }
 
 
-// chromaprint-tools
+// FFprobe: 3.2.4
 try {
-	print 'Chromaprint: '
-	def fpcalc = [AcoustID.getChromaprintCommand(), '-version']
-	println fpcalc.execute().text.replaceAll(/[^\d_.]/, '') ?: "$fpcalc failed"
+	if (MediaCharacteristicsParser.getDefault() =~ /ffprobe/) {
+		print 'FFprobe: '
+		def ffprobe = System.getProperty('net.filebot.media.ffprobe', 'ffprobe')
+		def version = [ffprobe, '-show_program_version' ,'-hide_banner'].execute().text
+		println version.match(/version=(\S+)/).trim()
+	}
 } catch(Throwable error) {
 	println error
 }
 
 
-// ffprobe
+// chromaprint-tools
 try {
-	if (MediaCharacteristicsParser.getDefault() =~ /ffprobe/) {
-		print 'ffprobe: '
-		def ffprobe = System.getProperty('net.filebot.media.ffprobe', 'ffprobe')
-		def version = [ffprobe, '-show_program_version' ,'-hide_banner'].execute().text
-		println version.match(/version=(\S+)/).trim()
-	}
+	print 'Chromaprint: '
+	def fpcalc = [AcoustID.getChromaprintCommand(), '-version']
+	println fpcalc.execute().text.replaceAll(/[^\d_.]/, '') ?: "$fpcalc failed"
 } catch(Throwable error) {
 	println error
 }
