@@ -55,6 +55,19 @@ try {
 }
 
 
+// ffprobe
+try {
+	if (MediaCharacteristicsParser.getDefault() =~ /ffprobe/) {
+		print 'ffprobe: '
+		def ffprobe = System.getProperty('net.filebot.media.ffprobe', 'ffprobe')
+		def version = [ffprobe, '-show_program_version' ,'-hide_banner'].execute().text
+		println version.match(/version=(\S+)/).trim()
+	}
+} catch(Throwable error) {
+	println error
+}
+
+
 // Extended File Attributes
 try {
 	print 'Extended Attributes: '
