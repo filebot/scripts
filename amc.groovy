@@ -301,7 +301,8 @@ def resolveInput(f) {
 def input = roots.findAll{ acceptFile(it) }.flatten{ resolveInput(it) }.toSorted()
 
 // update exclude list with all input that will be processed during this run
-if (excludeList && !testRun) {
+// TODO: use checkLicense()
+if (excludeList && !testRun && Settings.LICENSE.check() != null) {
 	excludePathSet.append(excludeList, extractedArchives, input)
 }
 
