@@ -11,7 +11,7 @@ args.withIndex().each{ f, i -> if (f.exists()) { log.finest "Argument[$i]: $f" }
 
 // initialize variables
 failOnError = _args.conflict.equalsIgnoreCase('fail')
-testRun = _args.action.equalsIgnoreCase('test')
+testRun = license == null || _args.action.equalsIgnoreCase('test')
 
 // --output folder must be a valid folder
 outputFolder = tryLogCatch{ any{ _args.output }{ '.' }.toFile().getCanonicalFile() }
@@ -201,14 +201,15 @@ extractedArchives = []
 temporaryFiles = []
 
 def extract(f) {
-	def folder = new File(extractFolder ?: f.dir, f.nameWithoutExtension)
-	def files = extract(file: f, output: folder.resolve(f.dir.name), conflict: 'auto', filter: { it.isArchive() || it.isVideo() || it.isSubtitle() || (music && it.isAudio()) }, forceExtractAll: true) ?: []
+	def folder = new File(extractFolder ?: f.dir, f.nameWithoutExtension).resolve(f.dir.name)
+	def files = extract(file: f, output: folder, conflict: 'auto', filter: { it.isArchive() || it.isVideo() || it.isSubtitle() || (music && it.isAudio()) }, forceExtractAll: true) ?: []
 
 	extractedArchives += f
 	temporaryFiles += folder
 	temporaryFiles += files
 
-	return files
+	// resolve newly extracted files and deal with disk folders and hidden files correctly
+	return resolveInput(folder)
 }
 
 
@@ -301,8 +302,7 @@ def resolveInput(f) {
 def input = roots.findAll{ acceptFile(it) }.flatten{ resolveInput(it) }.toSorted()
 
 // update exclude list with all input that will be processed during this run
-// TODO: use checkLicense()
-if (excludeList && !testRun && Settings.LICENSE.check() != null) {
+if (excludeList && !testRun) {
 	excludePathSet.append(excludeList, extractedArchives, input)
 }
 
