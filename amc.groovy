@@ -209,7 +209,7 @@ def extract(f) {
 	temporaryFiles += files
 
 	// resolve newly extracted files and deal with disk folders and hidden files correctly
-	return resolveInput(folder)
+	return folder
 }
 
 
@@ -290,7 +290,7 @@ def resolveInput(f) {
 	}
 
 	if (f.isArchive() || f.hasExtension('001')) {
-		return extract(f).findAll{ acceptFile(it) }.collect{ resolveInput(it) }
+		return resolveInput(extract(f))
 	}
 
 	return f
