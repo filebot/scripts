@@ -148,11 +148,6 @@ def fetchSeriesNfo(outputFile, i, locale) {
 			status(i.status)
 			studio(i.network)
 			tvdb(id:i.id, "http://www.thetvdb.com/?tab=series&id=${i.id}")
-
-			/** Kodi requires an <episodeguide> element with a TheTVDB API (v1) Series Record XML URL **/
-			episodeguide {
-				url(cache:"${i.id}.xml", "http://www.thetvdb.com/api/1D62F2F90030C444/series/${i.id}/all/${locale.language}.zip")
-			}
 		}
 	}
 	xml.saveAs(outputFile)
