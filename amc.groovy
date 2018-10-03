@@ -201,8 +201,8 @@ extractedArchives = []
 temporaryFiles = []
 
 def extract(f) {
-	def folder = new File(extractFolder ?: f.dir, f.nameWithoutExtension).resolve(f.dir.name)
-	def files = extract(file: f, output: folder, conflict: 'auto', filter: { it.isArchive() || it.isVideo() || it.isSubtitle() || (music && it.isAudio()) }, forceExtractAll: true) ?: []
+	def folder = new File(extractFolder ?: f.dir, f.nameWithoutExtension)
+	def files = extract(file: f, output: folder.resolve(f.dir.name), conflict: 'auto', filter: { it.isArchive() || it.isVideo() || it.isSubtitle() || (music && it.isAudio()) }, forceExtractAll: true) ?: []
 
 	extractedArchives += f
 	temporaryFiles += folder
