@@ -224,8 +224,8 @@ def acceptFile(f) {
 		return false
 	}
 
-	if (f.name =~ /(?<=\b|_)(?i:Sample|Trailer|Extras|Extra.Episodes|Bonus.Features|Music.Video|Scrapbook|Behind.the.Scenes|Extended.Scenes|Deleted.Scenes|Mini.Series|s\d{2}c\d{2}|S\d+EXTRA|\d+xEXTRA|NCED|NCOP|(OP|ED)\d+|Formula.1.\d{4})(?=\b|_)/) {
-		log.finest "Ignore extra: $f"
+	if (f.isVideo() && f.name =~ /(?<=\b|_)(?i:Sample|Trailer|Extras|Extra.Episodes|Bonus.Features|Music.Video|Scrapbook|Behind.the.Scenes|Extended.Scenes|Deleted.Scenes|Mini.Series|s\d{2}c\d{2}|S\d+EXTRA|\d+xEXTRA|NCED|NCOP|(OP|ED)\d+|Formula.1.\d{4})(?=\b|_)/) {
+		log.finest "Ignore video extra: $f"
 		return false
 	}
 
