@@ -290,7 +290,10 @@ def resolveInput(f) {
 	}
 
 	if (f.isArchive() || f.hasExtension('001')) {
-		return resolveInput(extract(f))
+		def folder = extract(f)
+		if (folder.isDirectory()) {
+			return resolveInput(folder)
+		}
 	}
 
 	return f
