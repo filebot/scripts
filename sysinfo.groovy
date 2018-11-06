@@ -7,7 +7,7 @@ println Settings.getApplicationIdentifier()
 
 // JNA Native: 3.5.0
 try {
-	print 'JNA Native: '
+	print 'JNA Native: '
 	println com.sun.jna.Native.getNativeVersion()
 } catch(Throwable error) {
 	println error
@@ -27,7 +27,7 @@ try {
 try {
 	switch (System.getProperty('net.filebot.Archive.extractor')) {
 		case 'ApacheVFS':
-			print 'Apache Commons VFS: '
+			print 'Apache Commons VFS: '
 			println org.apache.commons.vfs2.VFS.manager.schemes.findAll{ !(it =~ /file|gz|bz2|par|res|sar|war|tmp|ear|ejb3|jar|ram|ftp/) }
 			break
 		case 'SevenZipExecutable':
@@ -70,7 +70,7 @@ try {
 
 // Extended File Attributes
 try {
-	print 'Extended Attributes: '
+	print 'Extended Attributes: '
 	if (Settings.useExtendedFileAttributes()) {
 		// create new temp file
 		def f = ApplicationFolder.AppData.resolve('.xattr')
@@ -93,7 +93,7 @@ try {
 
 // Unicode Filesystem
 try {
-	print 'Unicode Filesystem: '
+	print 'Unicode Filesystem: '
 
 	// create new temp file
 	def f = ApplicationFolder.AppData.resolve('龍飛鳳舞').toPath()
@@ -120,7 +120,7 @@ try {
 
 // Script Bundle: 2016-08-03 (r389)
 try {
-	print 'Script Bundle: '
+	print 'Script Bundle: '
 	def manifest = net.filebot.cli.ScriptSource.GITHUB_STABLE.getScriptProvider(null).getManifest()
 	def r = manifest['Build-Revision']
 	def d = manifest['Build-Date']
