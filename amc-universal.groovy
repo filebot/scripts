@@ -244,7 +244,7 @@ def acceptFile(f) {
 	}
 
 	// ignore short videos
-	if (minLengthMS > 0 && f.isVideo() && any{ getMediaInfo(f, '{minutes}').toLong() * 60 * 1000L < minLengthMS }{ false /* default if MediaInfo fails */ }) {
+	if (minLengthMS > 0 && f.isVideo() && any{ /* TODO: f.mediaCharacteristics.duration.toMinutes() */ getMediaInfo(f, '{minutes}').toLong() * 60 * 1000L < minLengthMS }{ false /* default if MediaInfo fails */ }) {
 		log.fine "Skip short video: $f"
 		return false
 	}
@@ -348,6 +348,7 @@ def unsortedFiles = []
 
 // process each batch
 groups.each{ group, files ->
+	/* TODO: group.series | group.movie | group.anime | group.music */
 	def tvs = AutoDetection.Type.Series in group.types()
 	def mov = AutoDetection.Type.Movie in group.types()
 	def anime = AutoDetection.Type.Anime in group.types()
