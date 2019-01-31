@@ -244,7 +244,7 @@ def acceptFile(f) {
 	}
 
 	// ignore short videos
-	if (minLengthMS > 0 && f.isVideo() && any{ /* TODO: f.mediaCharacteristics.duration.toMinutes() */ getMediaInfo(f, '{minutes}').toLong() * 60 * 1000L < minLengthMS }{ false /* default if MediaInfo fails */ }) {
+	if (minLengthMS > 0 && f.isVideo() && any{ f.mediaCharacteristics.duration.toMinutes() < minLengthMS }{ false }) {
 		log.fine "Skip short video: $f"
 		return false
 	}
@@ -308,13 +308,13 @@ if (input.size() == 0) {
 def forceGroup() {
 	switch(label) {
 		case ~/^(?i:Movie|Film|Concert|UFC)/:
-			return new AutoDetection.Group().movie([new Movie(0)])
+			return new AutoDetection.Group().setMovie()
 		case ~ /^(?i:TV|Show|Series|Documentary)/:
-			return new AutoDetection.Group().series([''])
+			return new AutoDetection.Group().setSeries()
 		case ~ /^(?i:Anime)/:
-			return new AutoDetection.Group().anime([''])
+			return new AutoDetection.Group().setAnime()
 		case ~/^(?i:audio|music|music.video)/:
-			return new AutoDetection.Group().music(['' as File])
+			return new AutoDetection.Group().setMusic()
 		case ~/^(?i:games|ebook|other|ignore)/:
 			return new AutoDetection.Group()
 		default:
@@ -348,14 +348,8 @@ def unsortedFiles = []
 
 // process each batch
 groups.each{ group, files ->
-	/* TODO: group.series | group.movie | group.anime | group.music */
-	def tvs = AutoDetection.Type.Series in group.types()
-	def mov = AutoDetection.Type.Movie in group.types()
-	def anime = AutoDetection.Type.Anime in group.types()
-	def music = AutoDetection.Type.Music in group.types()
-
 	// fetch subtitles (but not for anime)
-	if (anime && subtitles != null && files.findAll{ it.isVideo() }.size() > 0) {
+	if (group.isAnime() && subtitles != null && files.findAll{ it.isVideo() }.size() > 0) {
 		subtitles.each{ languageCode ->
 			def subtitleFiles = getMissingSubtitles(file: files, lang: languageCode, strict: true, output: 'srt', encoding: 'UTF-8', format: 'MATCH_VIDEO_ADD_LANGUAGE_TAG') ?: []
 			files += subtitleFiles
@@ -365,9 +359,9 @@ groups.each{ group, files ->
 	}
 
 	// EPISODE MODE
-	if ((tvs || anime) && !mov) {
+	if ((group.isSeries() || group.isAnime()) && !group.isMovie()) {
 		// choose series / anime
-		def dest = tvs ? rename(file: files, format: seriesFormat, db: 'TheTVDB') : rename(file: files, format: animeFormat, db: 'AniDB')
+		def dest = group.isSeries() ? rename(file: files, format: seriesFormat, db: 'TheTVDB') : rename(file: files, format: animeFormat, db: 'AniDB')
 
 		if (dest != null) {
 			destinationFiles += dest
@@ -390,7 +384,7 @@ groups.each{ group, files ->
 	}
 
 	// MOVIE MODE
-	else if (mov && !tvs && !anime) {
+	else if (group.isMovie() && !group.isSeries() && !group.isAnime()) {
 		def dest = rename(file: files, format: movieFormat, db: 'TheMovieDB')
 
 		if (dest != null) {
@@ -414,7 +408,7 @@ groups.each{ group, files ->
 	}
 
 	// MUSIC MODE
-	else if (music) {
+	else if (group.isMusic()) {
 		def dest = rename(file: files, format: musicFormat, db: 'ID3')
 
 		if (dest != null) {
