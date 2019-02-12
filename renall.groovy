@@ -8,6 +8,9 @@ def target = tryQuietly{ target } ?: 'file'
 def byfile = tryQuietly{ byfile.toBoolean() }
 
 
+args.withIndex().each{ f, i -> if (f.isDirectory()) { log.finest "Argument[$i]: $f" } else { log.warning "Argument[$i]: Path must be a directory: $f" } }
+
+
 args.eachMediaFolder {
 	if (it.isDisk()) {
 		return rename(file:it) // rename disk folders instead of files regardless of mode
