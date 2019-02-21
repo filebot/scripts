@@ -89,7 +89,7 @@ def sendEmailReport(title, message, messagetype) {
 
 def fail(message) {
 	if (reportError) {
-		sendEmailReport('[FileBot] Failure', message as String, 'text/plain')
+		sendEmailReport("[FileBot] $message", "Execute:\n$_args\n\nError:\n$message", 'text/plain')
 	}
 	die(message)
 }
@@ -114,7 +114,7 @@ if (outputFolder == null || !outputFolder.isDirectory()) {
 
 if (ut.dir) {
 	if (ut.state_allow && !(ut.state ==~ ut.state_allow)) {
-		fail "Illegal state: $ut.state != $ut.state_allow"
+		die "Illegal state: $ut.state != $ut.state_allow", ExitCode.NOOP
 	}
 	if (args.size() > 0) {
 		fail "Illegal usage: use either script parameters $ut or file arguments $args but not both"
@@ -298,8 +298,7 @@ input.each{ f -> if (f.metadata) log.finest "xattr: [$f.name] => [$f.metadata]" 
 
 // early abort if there is nothing to do
 if (input.size() == 0) {
-	log.warning "No files selected for processing"
-	return
+	die "No files selected for processing", ExitCode.NOOP
 }
 
 
@@ -439,7 +438,7 @@ if (unsorted) {
 
 			// sanity check user-defined unsorted format
 			if (destination == null) {
-				fail("Illegal usage: unsorted format must yield valid file path")
+				fail "Illegal usage: unsorted format must yield valid file path"
 			}
 
 			// resolve relative paths
