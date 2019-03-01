@@ -58,26 +58,7 @@ unsortedFormat = any{ unsortedFormat }{ 'Unsorted/{file.structurePathTail}' }
 
 
 
-// force Movie / TV Series / Anime behaviour
-def forceMovie(f) {
-	label =~ /^(?i:Movie|Film|Concert|UFC)/ || f.dir.listPath().any{ it.name ==~ /(?i:Movies|Movie)/ } || f.isMovie() || any{ (f.isVideo() || f.isSubtitle()) && !forceSeries(f) && getMediaInfo(f, '{minutes}').toInteger() >= 100 }{ false }
-}
 
-def forceSeries(f) {
-	label =~ /^(?i:TV|Show|Series|Documentary)/ || f.dir.listPath().any{ it.name ==~ /(?i:TV.Shows|TV.Series)/ } || f.path =~ /(?<=\b|_)(?i:tv[sp]-|Season\D?\d{1,2}|\d{4}.S\d{2})(?=\b|_)/ || parseEpisodeNumber(f.path, true) || parseDate(f.path)
-}
-
-def forceAnime(f) {
-	label =~ /^(?i:Anime)/ || f.dir.listPath().any{ it.name ==~ /(?i:Anime)/ } || ((f.isVideo() || f.isSubtitle()) && (f.name =~ /[\(\[]\p{XDigit}{8}[\]\)]/ || any{ getMediaInfo(f, '{media.AudioLanguageList} {media.TextCodecList}').tokenize().containsAll(['Japanese', 'ASS']) && (parseEpisodeNumber(f.name, false) != null || getMediaInfo(f, '{minutes}').toInteger() < 60) }{ false }))
-}
-
-def forceAudio(f) {
-	label =~ /^(?i:audio|music|music.video)/ || (f.isAudio() && !f.isVideo())
-}
-
-def forceIgnore(f) {
-	label =~ /^(?i:games|ebook|other|ignore)/
-}
 
 
 
@@ -108,7 +89,7 @@ def sendEmailReport(title, message, messagetype) {
 
 def fail(message) {
 	if (reportError) {
-		sendEmailReport('[FileBot] Failure', message as String, 'text/plain')
+		sendEmailReport("[FileBot] $message", "Execute:\n$_args\n\nError:\n$message", 'text/plain')
 	}
 	die(message)
 }
@@ -133,7 +114,7 @@ if (outputFolder == null || !outputFolder.isDirectory()) {
 
 if (ut.dir) {
 	if (ut.state_allow && !(ut.state ==~ ut.state_allow)) {
-		fail "Illegal state: $ut.state != $ut.state_allow"
+		die "Illegal state: $ut.state != $ut.state_allow", ExitCode.NOOP
 	}
 	if (args.size() > 0) {
 		fail "Illegal usage: use either script parameters $ut or file arguments $args but not both"
@@ -263,7 +244,7 @@ def acceptFile(f) {
 	}
 
 	// ignore short videos
-	if (minLengthMS > 0 && f.isVideo() && any{ getMediaInfo(f, '{minutes}').toLong() * 60 * 1000L < minLengthMS }{ false /* default if MediaInfo fails */ }) {
+	if (minLengthMS > 0 && f.isVideo() && any{ f.mediaCharacteristics.duration.toMillis() < minLengthMS }{ false }) {
 		log.fine "Skip short video: $f"
 		return false
 	}
@@ -310,100 +291,50 @@ if (excludeList && !testRun) {
 }
 
 // print exclude and input sets for logging
-input.each{ log.fine "Input: $it" }
+input.each{ f -> log.fine "Input: $f" }
+
+// print xattr metadata
+input.each{ f -> if (f.metadata) log.finest "xattr: [$f.name] => [$f.metadata]" }
 
 // early abort if there is nothing to do
 if (input.size() == 0) {
-	log.warning "No files selected for processing"
-	return
+	die "No files selected for processing", ExitCode.NOOP
 }
 
 
 
-// group episodes/movies and rename according to Plex standards
-def groups = input.groupBy{ f ->
-	// print xattr metadata
-	if (f.metadata) {
-		log.finest "xattr: [$f.name] => [$f.metadata]"
+// force Movie / TV Series / Anime behaviour
+def forceGroup() {
+	switch(label) {
+		case ~/^(?i:Movie|Film|Concert|UFC)/:
+			return new AutoDetection.Group().setMovie()
+		case ~ /^(?i:TV|Show|Series|Documentary)/:
+			return new AutoDetection.Group().setSeries()
+		case ~ /^(?i:Anime)/:
+			return new AutoDetection.Group().setAnime()
+		case ~/^(?i:audio|music|music.video)/:
+			return new AutoDetection.Group().setMusic()
+		case ~/^(?i:games|ebook|other|ignore)/:
+			return new AutoDetection.Group()
+		default:
+			return null
 	}
-
-	// skip auto-detection if possible
-	if (forceIgnore(f))
-		return []
-	if (music && forceAudio(f)) // process audio only if music mode is enabled
-		return [music: f.dir.name]
-	if (forceMovie(f))
-		return [mov:   detectMovie(f, false)]
-	if (forceSeries(f))
-		return [tvs:   detectSeriesName(f) ?: detectSeriesName(input.findAll{ s -> f.dir == s.dir && s.isVideo() })]
-	if (forceAnime(f))
-		return [anime: detectAnimeName(f) ?: detectAnimeName(input.findAll{ s -> f.dir == s.dir && s.isVideo() })]
-
-
-	def tvs = detectSeriesName(f)
-	def mov = detectMovie(f, false)
-	log.fine "$f.name [series: $tvs, movie: $mov]"
-
-	// DECIDE EPISODE VS MOVIE (IF NOT CLEAR)
-	if (tvs && mov) {
-		def norm = { s -> s.ascii().normalizePunctuation().lower().space(' ') }
-		def dn = norm(guessMovieFolder(f)?.name ?: '')
-		def fn = norm(f.nameWithoutExtension)
-		def sn = norm(tvs)
-		def mn = norm(mov.name)
-		def my = mov.year as String
-
-		// S00E00 | 2012.07.21 | One Piece 217 | Firefly - Serenity | [Taken 1, Taken 2, Taken 3, Taken 4, ..., Taken 10]
-		def metrics = [
-			[tvs: -1, mov:  0, fun: { mn == fn } ],
-			[tvs: -1, mov:  0, fun: { mov.year >= 1950 && f.listPath().reverse().take(3).find{ it.name.contains(my) && parseEpisodeNumber(it.name.after(my), false) == null } } ],
-			[tvs: -1, mov:  0, fun: { mn =~ sn && [dn, fn].find{ it =~ /\b(19|20)\d{2}\b/ && parseEpisodeNumber(it.after(/\b(19|20)\d{2}\b/), false) == null } } ],
-			[tvs:  5, mov: -1, fun: { parseEpisodeNumber(fn, true) || parseDate(fn) } ],
-			[tvs:  5, mov: -1, fun: { f.dir.listFiles{ it.isVideo() && (dn =~ sn || norm(it.name) =~ sn) && it.name =~ /\d{1,3}/}.findResults{ it.name.matchAll(/\d{1,3}/) as Set }.unique().size() >= 10 } ],
-			[tvs:  1, mov: -1, fun: { fn.after(sn) ==~ /.{0,3}\s-\s.+/ && matchMovie(fn) == null } ],
-			[tvs:  1, mov: -1, fun: { [dn, fn].find{ it =~ sn && matchMovie(it) == null } && (parseEpisodeNumber(stripReleaseInfo(fn.after(sn), false), false) || stripReleaseInfo(fn.after(sn), false) =~ /\D\d{1,2}\D{1,3}\d{1,2}\D/) && matchMovie(fn) == null } ],
-			[tvs: -1, mov:  1, fun: { fn =~ /tt\d{7}/ } ],
-			[tvs: -1, mov:  1, fun: { f.nameWithoutExtension ==~ /[\D\s_.]+/ } ],
-			[tvs: -1, mov:  5, fun: { detectMovie(f, true) && [dn, fn].find{ it =~ /(19|20)\d{2}/ } != null } ],
-			[tvs: -1, mov:  1, fun: { fn.contains(mn) && parseEpisodeNumber(fn.after(mn), false) == null } ],
-			[tvs: -1, mov:  1, fun: { mn.getSimilarity(fn) >= 0.8 || [dn, fn].find{ it.findAll( ~/\d{4}/ ).findAll{ y -> [mov.year-1, mov.year, mov.year+1].contains(y.toInteger()) }.size() > 0 } != null } ],
-			[tvs: -1, mov:  1, fun: { [dn, fn].find{ it =~ mn && !(it.after(mn) =~ /\b\d{1,3}\b/) && (it.getSimilarity(mn) > 0.2 + it.getSimilarity(sn)) } != null } ],
-			[tvs: -1, mov:  1, fun: { detectMovie(f, false).aliasNames.find{ fn.contains(norm(it)) } } ]
-		]
-
-		def score = [tvs: 0, mov: 0]		
-		metrics.each{
-			if (tvs && mov && it.fun()) {
-				score.tvs += it.tvs
-				score.mov += it.mov
-
-				if (score.tvs >= 1 && score.mov <= -1) {
-					log.fine "Exclude Movie: $mov"
-					mov = null
-				} else if (score.mov >= 1 && score.tvs <= -1) {
-					log.fine "Exclude Series: $tvs"
-					tvs = null
-				}
-			}
-		}
-
-	}
-
-	// CHECK CONFLICT
-	if (((mov && tvs) || (!mov && !tvs))) {
-		if (failOnError) {
-			fail 'Media detection failed'
-		} else {
-			log.fine "Unable to differentiate: [$f.name] => [$tvs] VS [$mov]"
-			return [:]
-		}
-	}
-
-	return [tvs: tvs, mov: mov]
 }
 
-// group entries by unique tvs/mov descriptor
-groups = groups.groupBy{ group, files -> group.collectEntries{ type, query -> [type, query ? query.toString().ascii().normalizePunctuation().lower() : null] } }.collectEntries{ group, maps -> [group, maps.values().flatten()] }
+
+def group(files) {
+	def singleGroupKey = forceGroup()
+	if (singleGroupKey) {
+		return [(singleGroupKey): files]
+	}
+
+	return new AutoDetection(files, false, _args.language.locale).group()
+}
+
+
+
+// group episodes / movies
+def groups = group(input)
 
 // log movie/series/anime detection results
 groups.each{ group, files -> log.finest "Group: $group => ${files*.name}" }
@@ -417,7 +348,7 @@ def unsortedFiles = []
 // process each batch
 groups.each{ group, files ->
 	// fetch subtitles (but not for anime)
-	if (group.anime == null && subtitles != null && files.findAll{ it.isVideo() }.size() > 0) {
+	if (group.isAnime() && subtitles != null && files.findAll{ it.isVideo() }.size() > 0) {
 		subtitles.each{ languageCode ->
 			def subtitleFiles = getMissingSubtitles(file: files, lang: languageCode, strict: true, output: 'srt', encoding: 'UTF-8', format: 'MATCH_VIDEO_ADD_LANGUAGE_TAG') ?: []
 			files += subtitleFiles
@@ -427,9 +358,9 @@ groups.each{ group, files ->
 	}
 
 	// EPISODE MODE
-	if ((group.tvs || group.anime) && !group.mov) {
+	if ((group.isSeries() || group.isAnime()) && !group.isMovie()) {
 		// choose series / anime
-		def dest = group.tvs ? rename(file: files, format: seriesFormat, db: 'TheTVDB') : rename(file: files, format: animeFormat, db: 'AniDB')
+		def dest = group.isSeries() ? rename(file: files, format: seriesFormat, db: 'TheTVDB') : rename(file: files, format: animeFormat, db: 'AniDB')
 
 		if (dest != null) {
 			destinationFiles += dest
@@ -452,7 +383,7 @@ groups.each{ group, files ->
 	}
 
 	// MOVIE MODE
-	else if (group.mov && !group.tvs && !group.anime) {
+	else if (group.isMovie() && !group.isSeries() && !group.isAnime()) {
 		def dest = rename(file: files, format: movieFormat, db: 'TheMovieDB')
 
 		if (dest != null) {
@@ -476,7 +407,7 @@ groups.each{ group, files ->
 	}
 
 	// MUSIC MODE
-	else if (group.music) {
+	else if (group.isMusic()) {
 		def dest = rename(file: files, format: musicFormat, db: 'ID3')
 
 		if (dest != null) {
@@ -507,7 +438,7 @@ if (unsorted) {
 
 			// sanity check user-defined unsorted format
 			if (destination == null) {
-				fail("Illegal usage: unsorted format must yield valid file path")
+				fail "Illegal usage: unsorted format must yield valid file path"
 			}
 
 			// resolve relative paths
