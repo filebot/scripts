@@ -17,7 +17,7 @@ try {
 // MediaInfo: MediaInfoLib - v0.7.48
 try {
 	print 'MediaInfo: '
-	println MediaInfo.version().replaceAll(/[^\d_.]/, '')
+	println MediaInfo.version().removeAll(/[^\d_.]/)
 } catch(Throwable error) {
 	println error
 }
@@ -51,9 +51,7 @@ try {
 try {
 	if (MediaCharacteristicsParser.getDefault() =~ /ffprobe/) {
 		print 'FFprobe: '
-		def ffprobe = System.getProperty('net.filebot.media.ffprobe', 'ffprobe')
-		def version = [ffprobe, '-show_program_version' ,'-hide_banner'].execute().text
-		println version.match(/version=(\S+)/).trim()
+		println new net.filebot.media.FFProbe().version().match(/version=(\S+)/)
 	}
 } catch(Throwable error) {
 	println error
@@ -63,8 +61,7 @@ try {
 // chromaprint-tools
 try {
 	print 'Chromaprint: '
-	def fpcalc = [AcoustID.getChromaprintCommand(), '-version']
-	println fpcalc.execute().text.replaceAll(/[^\d_.]/, '') ?: "$fpcalc failed"
+	println AcoustID.version()
 } catch(Throwable error) {
 	println error
 }
