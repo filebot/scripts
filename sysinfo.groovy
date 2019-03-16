@@ -136,7 +136,12 @@ println 'Groovy: ' + groovy.lang.GroovySystem.getVersion()
 println 'JRE: ' + Settings.getJavaRuntimeIdentifier()
 
 // 32-bit Java HotSpot(TM) Client VM
-println String.format('JVM: %d-bit %s', com.sun.jna.Platform.is64Bit() ? 64 : 32, System.getProperty('java.vm.name'))
+try {
+	print 'JVM: '
+	println "${com.sun.jna.Platform.is64Bit()}-bit ${System.getProperty('java.vm.name')}"
+} catch(Throwable error) {
+	println error
+}
 
 // CPU/MEM: 4 Core / 1 GB Max Memory / 15 MB Used Memory
 println String.format('CPU/MEM: %s Core / %s Max Memory / %s Used Memory', Runtime.runtime.availableProcessors(), org.apache.commons.io.FileUtils.byteCountToDisplaySize(Runtime.runtime.maxMemory()), org.apache.commons.io.FileUtils.byteCountToDisplaySize(Runtime.runtime.totalMemory() - Runtime.runtime.freeMemory()))
