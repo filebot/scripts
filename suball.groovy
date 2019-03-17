@@ -51,13 +51,13 @@ def accept = { f ->
 	}
 
 	// ignore files that are too short
-	if (minLengthMS > 0 && any{ getMediaInfo(f, '{duration}').toDouble() < minLengthMS }{ false }) {
+	if (minLengthMS > 0 && any{ f.mediaCharacteristics.duration.toMillis() < minLengthMS }{ false }) {
 		log.fine "Ignore short: $f"
 		return false
 	}
 
 	// ignore files that already have subtitles
-	if (ignoreTextLanguage != null && any{ getMediaInfo(f, '{textLanguages}').findMatch(ignoreTextLanguage) }{ false }) {
+	if (ignoreTextLanguage != null && any{ f.mediaCharacteristics.subtitleLanguage.findMatch(ignoreTextLanguage) }{ false }) {
 		log.fine "Ignore text language: $f"
 		return false
 	}
