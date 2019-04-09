@@ -138,7 +138,7 @@ println 'JRE: ' + Settings.getJavaRuntimeIdentifier()
 // 32-bit Java HotSpot(TM) Client VM
 try {
 	print 'JVM: '
-	println "${com.sun.jna.Platform.is64Bit()}-bit ${System.getProperty('java.vm.name')}"
+	println "${com.sun.jna.Platform.is64Bit() ? 64 : 32}-bit ${System.getProperty('java.vm.name')}"
 } catch(Throwable error) {
 	println error
 }
