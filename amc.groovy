@@ -348,7 +348,7 @@ def unsortedFiles = []
 // process each batch
 groups.each{ group, files ->
 	// fetch subtitles (but not for anime)
-	if (group.isAnime() && subtitles != null && files.findAll{ it.isVideo() }.size() > 0) {
+	if ((group.isMovie() || group.isSeries()) && subtitles != null && files.findAll{ it.isVideo() }.size() > 0) {
 		subtitles.each{ languageCode ->
 			def subtitleFiles = getMissingSubtitles(file: files, lang: languageCode, strict: true, output: 'srt', encoding: 'UTF-8', format: 'MATCH_VIDEO_ADD_LANGUAGE_TAG') ?: []
 			files += subtitleFiles
