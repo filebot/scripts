@@ -153,6 +153,10 @@ def fetchSeriesNfo(outputFile, i, locale) {
 			}
 		}
 	}
+
+	// unnecessarily HTML escape double quotes to make Kodi happy
+	xml = xml.replace('"', '&quot;')
+
 	xml.saveAs(outputFile)
 }
 
