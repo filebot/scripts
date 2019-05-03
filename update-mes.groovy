@@ -80,7 +80,8 @@ class MyEpisodesScraper {
 			shows = ['other', 'A'..'Z'].flatten().findResults{ section ->
 				get("http://myepisodes.com/shows.php?list=${section}").select('a').findResults{ a ->
 					try {
-						return [id:a.absUrl('href').match(/showid=(\d+)/).toInteger(), name:a.text().trim()]
+						// e.g. http://www.myepisodes.com/epsbyshow/491/The%20A-Team
+						return [id:a.absUrl('href').match(/\/(\d+)\//).toInteger(), name:a.text().trim()]
 					} catch(e) {
 						return null
 					}
