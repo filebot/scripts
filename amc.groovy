@@ -360,7 +360,7 @@ groups.each{ group, files ->
 	// EPISODE MODE
 	if ((group.isSeries() || group.isAnime()) && !group.isMovie()) {
 		// choose series / anime
-		def dest = group.isSeries() ? rename(file: files, format: seriesFormat, db: 'TheTVDB') : rename(file: files, format: animeFormat, db: 'AniDB')
+		def dest = group.isSeries() ? rename(file: files, format: seriesFormat, db: 'TheTVDB') : Settings.applicationRevisionNumber >= 6385 ? rename(file: files, format: animeFormat, order: 'Absolute', db: 'TheTVDB') : rename(file: files, format: animeFormat, db: 'AniDB')
 
 		if (dest != null) {
 			destinationFiles += dest
