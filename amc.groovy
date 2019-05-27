@@ -49,6 +49,9 @@ ignore      = any{ ignore }{ null }
 minFileSize = any{ minFileSize.toLong() }{ 50 * 1000L * 1000L }
 minLengthMS = any{ minLengthMS.toLong() }{ 10 * 60 * 1000L }
 
+// database preferences
+anidb = any{ Settings.applicationRevisionNumber < 6385 || anidb.toBoolean() }{ false }
+
 // series/anime/movie format expressions
 seriesFormat   = any{ seriesFormat   }{ _args.format }{ '{plex}' }
 animeFormat    = any{ animeFormat    }{ _args.format }{ '{plex}' }
@@ -360,7 +363,7 @@ groups.each{ group, files ->
 	// EPISODE MODE
 	if ((group.isSeries() || group.isAnime()) && !group.isMovie()) {
 		// choose series / anime
-		def dest = group.isSeries() ? rename(file: files, format: seriesFormat, db: 'TheTVDB') : Settings.applicationRevisionNumber >= 6385 ? rename(file: files, format: animeFormat, order: 'Absolute', db: 'TheTVDB') : rename(file: files, format: animeFormat, db: 'AniDB')
+		def dest = group.isSeries() ? rename(file: files, format: seriesFormat, db: 'TheTVDB') : rename(file: files, format: animeFormat, order: 'Absolute', db: anidb ? 'AniDB' : 'TheTVDB')
 
 		if (dest != null) {
 			destinationFiles += dest
