@@ -50,9 +50,12 @@ minFileSize = any{ minFileSize.toLong() }{ 50 * 1000L * 1000L }
 minLengthMS = any{ minLengthMS.toLong() }{ 10 * 60 * 1000L }
 
 // database preferences
-anidb = any{ Settings.applicationRevisionNumber < 6385 || anidb.toBoolean() }{ false }
+seriesDB = any{ seriesDB }{ 'TheTVDB' }
+animeDB = any{ animeDB }{ 'AniDB' }
+movieDB = any{ movieDB }{ 'TheMovieDB' }
+musicDB = any{ musicDB }{ 'ID3' }
 
-// series/anime/movie format expressions
+// series / anime / movie format expressions
 seriesFormat   = any{ seriesFormat   }{ _args.format }{ '{plex}' }
 animeFormat    = any{ animeFormat    }{ _args.format }{ '{plex}' }
 movieFormat    = any{ movieFormat    }{ _args.format }{ '{plex}' }
@@ -363,7 +366,7 @@ groups.each{ group, files ->
 	// EPISODE MODE
 	if ((group.isSeries() || group.isAnime()) && !group.isMovie()) {
 		// choose series / anime
-		def dest = group.isSeries() ? rename(file: files, format: seriesFormat, db: 'TheTVDB') : rename(file: files, format: animeFormat, order: 'Absolute', db: anidb ? 'AniDB' : 'TheTVDB')
+		def dest = group.isSeries() ? rename(file: files, format: seriesFormat, db: seriesDB) : rename(file: files, format: animeFormat, order: 'Absolute', db: animeDB)
 
 		if (dest != null) {
 			destinationFiles += dest
@@ -387,7 +390,7 @@ groups.each{ group, files ->
 
 	// MOVIE MODE
 	else if (group.isMovie() && !group.isSeries() && !group.isAnime()) {
-		def dest = rename(file: files, format: movieFormat, db: 'TheMovieDB')
+		def dest = rename(file: files, format: movieFormat, db: movieDB)
 
 		if (dest != null) {
 			destinationFiles += dest
@@ -411,7 +414,7 @@ groups.each{ group, files ->
 
 	// MUSIC MODE
 	else if (group.isMusic()) {
-		def dest = rename(file: files, format: musicFormat, db: 'ID3')
+		def dest = rename(file: files, format: musicFormat, db: musicDB)
 
 		if (dest != null) {
 			destinationFiles += dest
