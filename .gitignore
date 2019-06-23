@@ -1,9 +1,1 @@
-*.jar
-*.jar.xz
-
-*.properties
-*.key
-
-*.DS_Store
-*.sublime-project
-*.sublime-workspace
+build
