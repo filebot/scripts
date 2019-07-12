@@ -188,6 +188,11 @@ extractedArchives = []
 temporaryFiles = []
 
 def extract(f) {
+	// avoid cyclical archives that extract to the same output folder over and over
+	if (f in extractedArchives) {
+		return []
+	}
+
 	def folder = new File(extractFolder ?: f.dir, f.nameWithoutExtension)
 	def files = extract(file: f, output: folder.resolve(f.dir.name), conflict: 'auto', filter: { it.isArchive() || it.isVideo() || it.isSubtitle() || (music && it.isAudio()) }, forceExtractAll: true) ?: []
 
@@ -196,7 +201,7 @@ def extract(f) {
 	temporaryFiles += files
 
 	// resolve newly extracted files and deal with disk folders and hidden files correctly
-	return folder
+	return [folder]
 }
 
 
@@ -277,10 +282,7 @@ def resolveInput(f) {
 	}
 
 	if (f.isArchive() || f.hasExtension('001')) {
-		def folder = extract(f)
-		if (folder.isDirectory()) {
-			return resolveInput(folder)
-		}
+		return extract(f).collect{ resolveInput(it) }
 	}
 
 	return f
