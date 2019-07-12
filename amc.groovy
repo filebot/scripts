@@ -282,7 +282,7 @@ def resolveInput(f) {
 	}
 
 	if (f.isArchive() || f.hasExtension('001')) {
-		return extract(f).collect{ resolveInput(it) }
+		return extract(f).findAll{ acceptFile(it) }.collect{ resolveInput(it) }
 	}
 
 	return f
