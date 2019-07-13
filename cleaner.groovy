@@ -58,7 +58,7 @@ def hasMediaFiles = { dir -> dir.isDirectory() && dir.getFiles().find{ (it.isVid
 args.getFiles{ isClutter(it) && !hasMediaFiles(it.dir) }.each{ clean(it) }
 
 // delete empty folders but exclude given args
-args.getFolders().sort().reverse().each{
+args.getFolders().toSorted().reverse().each{
 	if (it.isDirectory() && !it.hasFile{ it.isDirectory() || !isClutter(it) }) {
 		if (deleteRootFolder || !args.contains(it))
 			clean(it)

@@ -399,7 +399,7 @@ groups.each{ group, files ->
 
 			if (artwork) {
 				dest.mapByFolder().each{ dir, fs ->
-					def movieFile = fs.findAll{ it.isVideo() || it.isDisk() }.sort{ it.length() }.reverse().findResult{ it }
+					def movieFile = fs.findAll{ it.isVideo() || it.isDisk() }.toSorted{ it.length() }.reverse().findResult{ it }
 					if (movieFile) {
 						def movieInfo = movieFile.metadata
 						log.fine "Fetching movie artwork for [$movieInfo] to [$dir]"
@@ -628,12 +628,12 @@ if (clean) {
 	if (['DUPLICATE', 'COPY', 'HARDLINK'].any{ it.equalsIgnoreCase(_args.action) } && temporaryFiles.size() > 0) {
 		log.fine 'Clean temporary extracted files'
 		// delete extracted files
-		temporaryFiles.findAll{ it.isFile() }.sort().each{
+		temporaryFiles.findAll{ it.isFile() }.toSorted().each{
 			log.finest "Delete $it"
 			it.delete()
 		}
 		// delete remaining empty folders
-		temporaryFiles.findAll{ it.isDirectory() }.sort().reverse().each{
+		temporaryFiles.findAll{ it.isDirectory() }.toSorted().reverse().each{
 			log.finest "Delete $it"
 			if (it.getFiles().size() == 0) {
 				it.deleteDir()
