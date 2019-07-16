@@ -250,7 +250,7 @@ def acceptFile(f) {
 
 	// ignore small video files
 	if (minFileSize > 0 && f.isVideo() && f.length() < minFileSize) {
-		log.fine "Skip small video file: $f (${org.apache.commons.io.FileUtils.byteCountToDisplaySize(f.length())})"
+		log.fine "Skip small video file: $f ($f.displaySize)"
 		return false
 	}
 
