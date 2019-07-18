@@ -6,45 +6,62 @@ execute 'mkvpropedit', '--version'
 execute 'mp4tags',     '--version'
 
 
-void tag(f, m) {
-	switch(f.extension) {
-		case ~/mkv/:
-			execute 'mkvpropedit', '--verbose', f, '--edit', 'info', '--set', "title=${m}"
-			return
-		case ~ /mp4|m4v/:
-			def options = [
-				'-song'        : '{object}',
-				'-year'        : '{y}',
-				'-show'        : '{n}',
-				'-episode'     : '{e}',
-				'-season'      : '{s}',
-				'-description' : '{t}',
-				'-hdvideo'     : '{hd =~ /HD/ ? 1 : 0}',
-				'-type'        : '{any{episode; /tvshow/}{movie; /movie/}}',
-				'-artist'      : '{any{episode.info.writer}{director}}',
-				'-albumartist' : '{director}',
-				'-genre'       : '{genre}',
-				'-grouping'    : '{collection}',
-				'-network'     : '{info.network}',
-				'-longdesc'    : '{any{episode.info.overview}{info.overview}}'
-			].collectMany{ option, format ->
-				def value = getMediaInfo(f, format)
-				return value ? [option, value] : []
-			}
-			execute('mp4tags', *options, f)
-			return
-		default:
-			log.warning "[TAGS NOT SUPPORTED] $f"
-			return
-	}
+void mkv(f, m) {
+	execute 'mkvpropedit', '--verbose', f, '--edit', 'info', '--set', "title=$m"
 }
+
+
+void mp4(f, m) {
+	def options = [
+			'-song'        : m,
+			'-hdvideo'     : f.mediaCharacteristics.height >= 1000 ? '1' : '0'
+	]
+	if (m instanceof Episode) {
+		options << [
+			'-type'        : 'tvshow',
+			'-year'        : m.airdate.year,
+			'-show'        : m.seriesName,
+			'-episode'     : m.episode,
+			'-season'      : m.season,
+			'-description' : m.title,
+			'-artist'      : m.info.director,
+			'-genre'       : m.seriesInfo.genres[0],
+			'-network'     : m.seriesInfo.network,
+			'-longdesc'    : m.info.overview
+		]
+	}
+	if (m instanceof Movie) {
+		options << [
+			'-type'        : 'movie',
+			'-year'        : m.year,
+			'-artist'      : m.info.director,
+			'-grouping'    : m.info.collection,
+			'-genre'       : m.info.genres[0],
+			'-description' : m.info.tagline,
+			'-longdesc'    : m.info.overview
+		]
+	}
+	def args = options.findAll{ k, v -> v }.collectMany{ k, v -> [k, v] }
+	execute('mp4tags', *args, f)
+}
+
 
 
 args.getFiles{ it.video }.each{ f ->
 	def m = f.metadata
 	if (m) {
 		log.config "[TAG] Write [$m] to [$f]"
-		tag(f, m)
+		switch(f.extension) {
+			case ~/mkv/:
+				mkv(f, m)
+				break
+			case ~/mp4|m4v/:
+				mp4(f, m)
+				break
+			default:
+				log.warning "[TAGS NOT SUPPORTED] $f"
+				break
+		}
 	} else {
 		log.finest "[XATTR NOT FOUND] $f"
 	}
