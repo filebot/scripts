@@ -41,6 +41,7 @@ void mp4(f, m) {
 			'-longdesc'    : m.info.overview
 		]
 	}
+
 	def args = options.findAll{ k, v -> v }.collectMany{ k, v -> [k, v] }
 	execute('mp4tags', *args, f)
 }
@@ -50,7 +51,7 @@ void mp4(f, m) {
 args.getFiles{ it.video }.each{ f ->
 	def m = f.metadata
 	if (m) {
-		log.config "[TAG] Write [$m] to [$f]"
+		log.info "[TAG] Write [$m] to [$f]"
 		switch(f.extension) {
 			case ~/mkv/:
 				mkv(f, m)
