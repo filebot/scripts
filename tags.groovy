@@ -9,10 +9,29 @@ execute 'mp4tags',     '--version'
 void tag(f, m) {
 	switch(f.extension) {
 		case ~/mkv/:
-			execute 'mkvpropedit', '--verbose', f, '--edit', 'info', '--set', "title=$m"
-			return 
+			execute 'mkvpropedit', '--verbose', f, '--edit', 'info', '--set', "title=${m}"
+			return
 		case ~ /mp4|m4v/:
-			execute 'mp4tags', '-song', m, f
+			def options = [
+				'-song'        : '{object}',
+				'-year'        : '{y}',
+				'-show'        : '{n}',
+				'-episode'     : '{e}',
+				'-season'      : '{s}',
+				'-description' : '{t}',
+				'-hdvideo'     : '{hd =~ /HD/ ? 1 : 0}',
+				'-type'        : '{any{episode; /tvshow/}{movie; /movie/}}',
+				'-artist'      : '{any{episode.info.writer}{director}}',
+				'-albumartist' : '{director}',
+				'-genre'       : '{genre}',
+				'-grouping'    : '{collection}',
+				'-network'     : '{info.network}',
+				'-longdesc'    : '{any{episode.info.overview}{info.overview}}'
+			].collectMany{ option, format ->
+				def value = getMediaInfo(f, format)
+				return value ? [option, value] : []
+			}
+			execute('mp4tags', *options, f)
 			return
 		default:
 			log.warning "[TAGS NOT SUPPORTED] $f"
