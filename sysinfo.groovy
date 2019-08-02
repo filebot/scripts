@@ -72,7 +72,7 @@ try {
 	print 'Extended Attributes: '
 	if (Settings.useExtendedFileAttributes()) {
 		// create new temp file
-		def f = ApplicationFolder.AppData.resolve('.xattr')
+		def f = ApplicationFolder.AppData.resolve('xattr.txt')
 		f.createNewFile() && f.deleteOnExit()
 
 		// xattr write, read and verify
