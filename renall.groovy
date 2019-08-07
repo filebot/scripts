@@ -1,6 +1,9 @@
 #!/usr/bin/env filebot -script
 
 
+log.warning '''@Deprecated Please use -rename -r (for simple tasks) or the amc script (for complex tasks) instead of the renall script. The renall script primarily serves as minimal example for script developers.'''
+
+
 /*
  * Rename all tv shows, anime or movies folder by folder using given or default options.
  */
