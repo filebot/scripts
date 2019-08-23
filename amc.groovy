@@ -315,15 +315,15 @@ if (input.size() == 0) {
 def forceGroup() {
 	switch(label) {
 		case ~/.*(?i:Movie|Film|Concert|UFC).*/:
-			return new AutoDetection.Group().setMovie()
+			return AutoDetection.Group.Movie
 		case ~ /.*(?i:TV|Show|Series|Documentary).*/:
-			return new AutoDetection.Group().setSeries()
+			return AutoDetection.Group.Series
 		case ~ /.*(?i:Anime).*/:
-			return new AutoDetection.Group().setAnime()
+			return AutoDetection.Group.Anime
 		case ~/.*(?i:Audio|Music|Music.Video).*/:
-			return new AutoDetection.Group().setMusic()
+			return AutoDetection.Group.Music
 		case ~/.*(?i:games|book|other|ignore).*/:
-			return new AutoDetection.Group()
+			return AutoDetection.Group.None
 		default:
 			return null
 	}
