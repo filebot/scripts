@@ -144,7 +144,7 @@ try {
 }
 
 // CPU/MEM: 4 Core / 1 GB Max Memory / 15 MB Used Memory
-println String.format('CPU/MEM: %s Core / %s Max Memory / %s Used Memory', Runtime.runtime.availableProcessors(), org.apache.commons.io.FileUtils.byteCountToDisplaySize(Runtime.runtime.maxMemory()), org.apache.commons.io.FileUtils.byteCountToDisplaySize(Runtime.runtime.totalMemory() - Runtime.runtime.freeMemory()))
+println String.format('CPU/MEM: %s Core / %s Max Memory / %s Used Memory', Runtime.runtime.availableProcessors(), Runtime.runtime.maxMemory().getDisplaySize(), (Runtime.runtime.totalMemory() - Runtime.runtime.freeMemory()).getDisplaySize())
 
 // Windows 7 (x86)
 println String.format('OS: %s (%s)', System.getProperty('os.name'), System.getProperty('os.arch'))
@@ -158,8 +158,21 @@ try {
 	// silently fail on non-Unix platforms
 }
 
+
+// apfs [/] @ 30 GB | smbfs [/Volumes/Media] @ 1.4 TB
+try {
+	print 'STORAGE: '
+	println FileSystems.getDefault().getFileStores().collect{ fs ->
+		"${fs.type()} [${fs.toString().replaceTrailingBrackets()}] @ ${fs.getUsableSpace().getDisplaySize()}"
+	}.findAll{ !(it =~ /devfs|autofs|private/) }.join(' | ')
+} catch(Throwable error) {
+	println error
+}
+
+
 // SPK
 println 'Package: ' + Settings.getApplicationDeployment().toUpperCase()
+
 
 // FileBot License T1000 (Valid-Until: 2019-06-20)
 try {
