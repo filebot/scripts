@@ -163,7 +163,7 @@ try {
 	print 'STORAGE: '
 	println FileSystems.getDefault().getFileStores().collect{ fs ->
 		"${fs.type()} [${fs.toString().replaceTrailingBrackets()}] @ ${fs.getUsableSpace().getDisplaySize()}"
-	}.findAll{ !(it =~ /devfs|autofs|private/) }.join(' | ')
+	}.findAll{ !(it =~ /devfs|autofs|private/) }.join(' | ') ?: 'NONE'
 } catch(Throwable error) {
 	println error
 }
