@@ -153,7 +153,6 @@ println String.format('OS: %s (%s)', System.getProperty('os.name'), System.getPr
 // Linux diskstation 3.2.40 #23739 Fri Jun 8 12:48:05 CST 2018 armv7l GNU/Linux synology_armada370_213j
 try {
 	println 'HW: ' + ['uname', '-a'].execute().text.trim()
-	println 'DATA: ' + ApplicationFolder.AppData.get()
 } catch(Throwable error) {
 	// silently fail on non-Unix platforms
 }
@@ -168,6 +167,10 @@ try {
 } catch(Throwable error) {
 	println error
 }
+
+
+// C:\Users\FileBot\AppData\Roaming\FileBot
+println 'DATA: ' + ApplicationFolder.AppData.get()
 
 
 // SPK
