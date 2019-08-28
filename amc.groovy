@@ -237,6 +237,12 @@ def acceptFile(f) {
 		return true
 	}
 
+	// check if file exists
+	if (!f.isFile()) {
+		log.finest "Invalid file path: $f"
+		return false
+	}
+
 	// accept archives if the extract feature is enabled
 	if (f.isArchive() || f.hasExtension('001')) {
 		return !skipExtract
