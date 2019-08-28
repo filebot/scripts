@@ -161,9 +161,9 @@ try {
 // apfs [/] @ 30 GB | smbfs [/Volumes/Media] @ 1.4 TB
 try {
 	print 'STORAGE: '
-	println FileSystems.getDefault().getFileStores().collect{ fs ->
-		"${fs.type()} [${fs.toString().replaceTrailingBrackets()}] @ ${fs.getUsableSpace().getDisplaySize()}"
-	}.findAll{ !(it =~ /devfs|autofs|private|proc|sysfs|tmpfs|fusectl|debugfs|securityfs|devtmpfs|devpts|pstore|boot|cgroup/) }.join(' | ') ?: 'NONE'
+	println FileSystems.getDefault().getFileStores().findResults{ fs ->
+		fs =~ /tmpfs|private/ || fs.getUsableSpace() < 200e6 ? null : "${fs.type()} [${fs.toString().replaceTrailingBrackets()}] @ ${fs.getUsableSpace().getDisplaySize()}"
+	}.join(' | ') ?: 'NONE'
 } catch(Throwable error) {
 	println error
 }
