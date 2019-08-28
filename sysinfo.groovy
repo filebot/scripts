@@ -162,7 +162,7 @@ try {
 try {
 	print 'STORAGE: '
 	println FileSystems.getDefault().getFileStores().findResults{ fs ->
-		fs =~ /tmpfs|private/ || fs.getUsableSpace() < 200e6 ? null : "${fs.type()} [${fs.toString().replaceTrailingBrackets()}] @ ${fs.getUsableSpace().getDisplaySize()}"
+		fs =~ /tmpfs|private/ || fs.getTotalSpace() < 200e6 ? null : "${fs.type()} [${fs.toString().replaceTrailingBrackets()}] @ ${fs.getUsableSpace().getDisplaySize()}"
 	}.join(' | ') ?: 'NONE'
 } catch(Throwable error) {
 	println error
