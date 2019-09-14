@@ -376,7 +376,7 @@ groups.each{ group, files ->
 		// choose series / anime
 		def dest = group.isSeries() ? rename(file: files, format: seriesFormat, db: seriesDB) : rename(file: files, format: animeFormat, order: 'Absolute', db: animeDB)
 
-		if (dest != null) {
+		if (dest) {
 			destinationFiles += dest
 
 			if (artwork) {
@@ -389,7 +389,7 @@ groups.each{ group, files ->
 					}
 				}
 			}
-		} else if (failOnError) {
+		} else if (failOnError && dest == null) {
 			fail "Failed to process group: $group"
 		} else {
 			unsortedFiles += files
@@ -400,7 +400,7 @@ groups.each{ group, files ->
 	else if (group.isMovie() && !group.isSeries() && !group.isAnime()) {
 		def dest = rename(file: files, format: movieFormat, db: movieDB)
 
-		if (dest != null) {
+		if (dest) {
 			destinationFiles += dest
 
 			if (artwork) {
@@ -413,7 +413,7 @@ groups.each{ group, files ->
 					}
 				}
 			}
-		} else if (failOnError) {
+		} else if (failOnError && dest == null) {
 			fail "Failed to process group: $group"
 		} else {
 			unsortedFiles += files
@@ -424,9 +424,9 @@ groups.each{ group, files ->
 	else if (group.isMusic()) {
 		def dest = rename(file: files, format: musicFormat, db: musicDB)
 
-		if (dest != null) {
+		if (dest) {
 			destinationFiles += dest
-		} else if (failOnError) {
+		} else if (failOnError && dest == null) {
 			fail "Failed to process group: $group"
 		} else {
 			unsortedFiles += files
