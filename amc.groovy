@@ -384,9 +384,11 @@ groups.each{ group, files ->
 				dest.mapByFolder().each{ dir, fs ->
 					def hasSeasonFolder = any{ dir =~ /Specials|Season.\d+/ || dir.parentFile.structurePathTail.listPath().size() > 0 }{ false }	// MAY NOT WORK FOR CERTAIN FORMATS
 
-					fs.findResults{ it.metadata }.findAll{ it.seriesInfo.database == 'TheTVDB' }.collect{ [name: it.seriesName, season: it.special ? 0 : it.season, id: it.seriesInfo.id] }.unique().each{
-						log.fine "Fetching series artwork for [$it.name / Season $it.season] to [$dir]"
-						fetchSeriesArtworkAndNfo(hasSeasonFolder ? dir.parentFile : dir, dir, it.id, it.season, false, _args.language.locale)
+					fs.findResults{ it.metadata }.findAll{ it.seriesInfo.database == 'TheTVDB' }.collect{ [name: it.seriesName, season: it.special ? 0 : it.season, id: it.seriesInfo.id] }.unique().each{ s ->
+						tryLogCatch {
+							log.fine "Fetching series artwork for [$s.name / Season $s.season] to [$dir]"
+							fetchSeriesArtworkAndNfo(hasSeasonFolder ? dir.parentFile : dir, dir, s.id, s.season, false, _args.language.locale)
+						}
 					}
 				}
 			}
@@ -408,9 +410,11 @@ groups.each{ group, files ->
 				dest.mapByFolder().each{ dir, fs ->
 					def movieFile = fs.findAll{ it.isVideo() || it.isDisk() }.toSorted{ it.length() }.reverse().findResult{ it }
 					if (movieFile) {
-						def movieInfo = movieFile.metadata
-						log.fine "Fetching movie artwork for [$movieInfo] to [$dir]"
-						fetchMovieArtworkAndNfo(dir, movieInfo, movieFile, extras, false, _args.language.locale)
+						tryLogCatch {
+							def movieInfo = movieFile.metadata
+							log.fine "Fetching movie artwork for [$movieInfo] to [$dir]"
+							fetchMovieArtworkAndNfo(dir, movieInfo, movieFile, extras, false, _args.language.locale)
+						}
 					}
 				}
 			}
