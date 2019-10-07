@@ -267,6 +267,12 @@ def acceptFile(f) {
 		return false
 	}
 
+	// ignore subtitle files without matching video file in the same or parent folder (in strict mode only)
+	if (_args.strict && f.isSubtitle() && ![f, f.dir].findResults{ it.dir }.any{ it.listFiles{ it.isVideo() && f.isDerived(it) }}) {
+		log.fine "Ignore orphaned subtitles: $f"
+		return false
+	}
+
 	// process only media files (accept audio files only if music mode is enabled)
 	return f.isVideo() || f.isSubtitle() || (music && f.isAudio())
 }
