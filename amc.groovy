@@ -638,9 +638,6 @@ if (getRenameLog().size() > 0) {
 }
 
 
-// ---------- CLEAN UP ---------- //
-
-
 // clean up temporary files that may be left behind after extraction
 if (deleteAfterExtract) {
 	extractedArchives.each{ a ->
@@ -653,9 +650,16 @@ if (deleteAfterExtract) {
 	}
 }
 
+
+// abort and skip clean-up logic if we didn't process any files
+if (destinationFiles.size() == 0) {
+	fail "Finished without processing any files"
+}
+
+
 // clean empty folders, clutter files, etc after move
 if (clean) {
-	if (['DUPLICATE', 'COPY', 'HARDLINK'].any{ it.equalsIgnoreCase(_args.action) } && temporaryFiles.size() > 0) {
+	if (_args.action ==~ /(?i:COPY|HARDLINK|DUPLICATE)/ && temporaryFiles.size() > 0) {
 		log.fine 'Clean temporary extracted files'
 		// delete extracted files
 		temporaryFiles.findAll{ it.isFile() }.toSorted().each{
@@ -672,7 +676,7 @@ if (clean) {
 	}
 
 	// deleting remaining files only makes sense after moving files
-	if ('MOVE'.equalsIgnoreCase(_args.action)) {
+	if (_args.action ==~ /(?i:MOVE)/) {
 		def cleanerInput = args.size() > 0 ? args : ut.kind == 'multi' && ut.dir ? [ut.dir as File] : []
 		cleanerInput = cleanerInput.findAll{ f -> f.exists() }
 		if (cleanerInput.size() > 0) {
@@ -680,10 +684,4 @@ if (clean) {
 			executeScript('cleaner', args.size() == 0 ? [root:true, ignore: ignore] : [root:false, ignore: ignore], cleanerInput)
 		}
 	}
-}
-
-
-
-if (destinationFiles.size() == 0) {
-	fail "Finished without processing any files"
 }
