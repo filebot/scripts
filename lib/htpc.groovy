@@ -271,6 +271,9 @@ def fetchMovieNfo(outputFile, i, movieFile) {
 			i.genres.each{
 				genre(it)
 			}
+			i.keywords.each{
+				tag(it)
+			}
 			i.productionCountries.each{
 				country(it)
 			}
