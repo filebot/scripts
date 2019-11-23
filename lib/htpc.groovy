@@ -147,7 +147,7 @@ def fetchSeriesNfo(outputFile, i, locale) {
 			premiered(i.startDate)
 			status(i.status)
 			studio(i.network)
-			tvdb(id:i.id, 'http://www.thetvdb.com/?tab=series&id=' + i.id)
+			tvdb(id:i.id, 'https://www.thetvdb.com/?tab=series&id=' + i.id)
 			episodeguide {
 				url(post:'yes', cache:'auth.json', 'https://api.thetvdb.com/login?{"apikey":"439DFEBA9D3059C6","id":' + i.id + '}|Content-Type=application/json')
 			}
