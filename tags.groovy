@@ -19,7 +19,7 @@ void mp4(f, m) {
 	if (m instanceof Episode) {
 		options << [
 			'-type'        : 'tvshow',
-			'-year'        : m.airdate?.year,
+			'-year'        : m.airdate,
 			'-show'        : m.seriesName,
 			'-episode'     : m.episode,
 			'-season'      : m.season,
@@ -33,7 +33,7 @@ void mp4(f, m) {
 	if (m instanceof Movie) {
 		options << [
 			'-type'        : 'movie',
-			'-year'        : m.year,
+			'-year'        : m.info?.released ?: m.year,
 			'-artist'      : m.info?.director,
 			'-grouping'    : m.info?.collection,
 			'-genre'       : m.info?.genres[0],
