@@ -27,7 +27,7 @@ args.getFiles().each{ f ->
 
 
 def queries = shows.collect{
-	[id: it.id, database: it.database, order: it.order as SortOrder, language: it.language.toLocale()]
+	[id: it.id, database: it.database, order: it.order as SortOrder, language: it.language as Locale]
 } as LinkedHashSet
 
 def episodeList = queries.collectMany{
