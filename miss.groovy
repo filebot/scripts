@@ -17,7 +17,7 @@ args.getFiles().each{ f ->
 			shows += seriesInfo
 
 			if (episode instanceof MultiEpisode) {
-				episodes += episode.episodes
+				episodes += episode.episodes as List
 			} else {
 				episodes += episode
 			}
