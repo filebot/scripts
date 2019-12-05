@@ -240,7 +240,7 @@ def acceptFile(f) {
 
 	// check if file exists
 	if (!f.isFile()) {
-		log.finest "Invalid file path: $f"
+		log.warning "File does not exist: $f"
 		return false
 	}
 
