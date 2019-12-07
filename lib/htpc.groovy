@@ -143,7 +143,6 @@ def fetchSeriesNfo(outputFile, i, locale) {
 			i.genres.each{
 				genre(it)
 			}
-			thumb(i.bannerUrl)
 			premiered(i.startDate)
 			status(i.status)
 			studio(i.network)
