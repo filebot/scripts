@@ -413,7 +413,9 @@ groups.each{ group, files ->
 						tryLogCatch {
 							def movieInfo = movieFile.metadata
 							log.fine "Fetching movie artwork for [$movieInfo] to [$dir]"
-							fetchMovieArtworkAndNfo(dir, movieInfo, movieFile, extras, false, _args.language.locale)
+							if (movieInfo) {
+								fetchMovieArtworkAndNfo(dir, movieInfo, movieFile, extras, false, _args.language.locale)
+							}
 						}
 					}
 				}
