@@ -3,15 +3,34 @@
 
 args.getFiles{ f -> f.xattr.size() > 0 }.each{ f ->
 	log.finest "$f"
-
-	f.xattr.each{ k, v ->
-		log.info "\t$k: $v"
-	}
+	f.xattr.each{ k, v -> log.fine "\t$k: $v" }
 
 	// clear xattr mode
 	if (_args.action == 'clear') {
+		log.info "[CLEAR] $f.metadata [$f]"
 		f.xattr.clear()
-		log.finest '*** CLEARED ***'
+		return
+	}
+
+	if (_args.action == 'update') {
+		def e = f.metadata
+		if (e instanceof Episode) {
+			def i = e.seriesInfo
+			log.finest "[UPDATE] $i | $e [$f]"
+			if (i instanceof SeriesInfo) {
+				def episodeList = WebServices.getEpisodeListProvider(i.database).getEpisodeList(i.id, i.order as SortOrder, i.language as Locale)
+				if (e instanceof MultiEpisode) {
+					e = e.episodes.collect{ p -> episodeList.find{ it.id == p.id } } as MultiEpisode
+				} else {
+					e = episodeList.find{ it.id == e.id } as Episode
+				}
+				// update xattr metadata
+				if (e) {
+					f.metadata = e
+				}
+			}
+		}
+		return
 	}
 
 	// import xattr metadata into Mac OS X Finder tags (UAYOR)
@@ -30,7 +49,8 @@ args.getFiles{ f -> f.xattr.size() > 0 }.each{ f ->
 			}
 		}
 
-		log.info "*** Write tag plist to xattr [$xkey]: $tags ***"
+		log.info "[IMPORT] Write tag plist to xattr [$xkey]: $tags"
 		f.xattr[xkey] = plist
+		return
 	}
 }
