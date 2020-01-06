@@ -11,7 +11,7 @@ def accept(from, to) {
 }
 
 
-getRenameLog(true).each { from, to ->
+getPersistentRenameLog().each { from, to ->
 	if (accept(from, to))
 		println template.make(from:from, to:to)
 }
