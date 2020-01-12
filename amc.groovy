@@ -51,10 +51,10 @@ minFileSize = any{ minFileSize.toLong() }{ 50 * 1000L * 1000L }
 minLengthMS = any{ minLengthMS.toLong() }{ 10 * 60 * 1000L }
 
 // database preferences
-seriesDB = any{ seriesDB }{ 'TheTVDB' }
-animeDB = any{ animeDB }{ 'AniDB' }
-movieDB = any{ movieDB }{ 'TheMovieDB' }
-musicDB = any{ musicDB }{ 'ID3' }
+seriesDB = tryQuietly{ seriesDB } ?: 'TheTVDB'
+animeDB  = tryQuietly{ animeDB } ?: 'AniDB'
+movieDB  = tryQuietly{ movieDB } ?: 'TheMovieDB'
+musicDB  = tryQuietly{ musicDB } ?: 'ID3'
 
 // series / anime / movie format expressions
 seriesFormat   = any{ seriesFormat   }{ _args.format }{ '{plex}' }
@@ -495,7 +495,7 @@ if (getRenameLog().size() > 0) {
 		return "FileBot finished processing $count files"
 	}.memoize()
 
-	def getNotificationMessage = { prefix = '• ', postfix = '\n' -> 
+	def getNotificationMessage = { prefix = '• ', postfix = '\n' ->
 		return ut.title ?: (input.findAll{ !it.isSubtitle() } ?: input).collect{ relativeInputPath(it) as File }.root.nameWithoutExtension.unique().collect{ prefix + it }.join(postfix).trim()
 	}.memoize()
 
@@ -549,7 +549,7 @@ if (getRenameLog().size() > 0) {
 	// messages used for email / pushbullet reports
 	def getReportSubject = { getNotificationMessage('', '; ') }
 	def getReportTitle = { '[FileBot] ' + getReportSubject() }
-	def getReportMessage = { 
+	def getReportMessage = {
 		def renameLog = getRenameLog()
 		'''<!DOCTYPE html>\n''' + XML {
 			html {
