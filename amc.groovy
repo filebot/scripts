@@ -51,10 +51,10 @@ minFileSize = any{ minFileSize.toLong() }{ 50 * 1000L * 1000L }
 minLengthMS = any{ minLengthMS.toLong() }{ 10 * 60 * 1000L }
 
 // database preferences
-seriesDB = any{ seriesDB }{ 'TheTVDB' }
-animeDB = any{ animeDB }{ 'AniDB' }
-movieDB = any{ movieDB }{ 'TheMovieDB' }
-musicDB = any{ musicDB }{ 'ID3' }
+seriesDB = any{ seriesDB }{ _args.datasource.identifier }{ 'TheTVDB' }
+animeDB = any{ animeDB }{ _args.datasource.identifier }{ 'AniDB' }
+movieDB = any{ movieDB }{ _args.datasource.identifier }{ 'TheMovieDB' }
+musicDB = any{ musicDB }{ _args.datasource.identifier }{ 'ID3' }
 
 // series / anime / movie format expressions
 seriesFormat   = any{ seriesFormat   }{ _args.format }{ '{plex}' }
