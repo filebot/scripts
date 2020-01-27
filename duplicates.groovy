@@ -6,7 +6,7 @@ binary = 'BINARY'.equalsIgnoreCase _args.mode
 
 
 def group(files) {
-	// binary duplicates: Group by File Size, then Fast MovieHash, then CRC32 via Xattr
+	// Binary Duplicates: Group by File Size, then Fast MovieHash, then CRC32 via Xattr
 	if (binary) {
 		def groups = [:]
 		// 1. Group by File Size
@@ -30,18 +30,18 @@ def group(files) {
 		return groups
 	}
 
-	// logical duplicates: Group by Xattr Metadata Object
+	// Logical Duplicates: Group by Xattr Metadata Object
 	return files.groupBy{ it.metadata }
 }
 
 
 def order(files) {
-	// binary duplicates: Keep Input Argument Order
+	// Binary Duplicates: Keep Input Argument Order
 	if (binary) {
 		return files
 	}
 
-	// logical duplicates: Order by Video Quality
+	// Logical Duplicates: Order by Video Quality
 	return files.toSorted(VideoQuality.DESCENDING_ORDER)
 }
 
