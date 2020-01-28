@@ -12,13 +12,11 @@ def group(files) {
 		// 1. Group by File Size
 		files.groupBy{ it.length() }.each{ size, size_fs ->
 			if (size_fs.size() == 1) {
-				groups += [[size] : size_fs]
 				return
 			}
 			// 2. Group by MovieHash
 			size_fs.groupBy{ it.hash 'moviehash' }.each{ hash, hash_fs ->
 				if (hash_fs.size() == 1) {
-					groups += [[size, hash] : hash_fs]
 					return
 				}
 				// 3. Group by CRC32 via Xattr
@@ -31,7 +29,7 @@ def group(files) {
 	}
 
 	// Logical Duplicates: Group by Xattr Metadata Object
-	return files.groupBy{ it.metadata }
+	return files.groupBy{ it.metadata }.findAll{ m, fs -> m && fs.size() > 1 }
 }
 
 
@@ -51,18 +49,16 @@ def files = args.collectMany{ it.getFiles{ it.isVideo() } }
 
 
 group(files).each{ m, fs ->
-	if (m && fs.size() > 1) {
-		log.info "[*] $m"
+	log.info "[*] $m"
 
-		order(fs).eachWithIndex{ f, i ->
-			if (i == 0) {
-				log.finest "[+] 1. $f"
-			} else if (delete) {
-				log.warning "[DELETE] ${i+1}. $f"
-				f.trash()
-			} else {
-				log.fine "[-] ${i+1}. $f"
-			}
+	order(fs).eachWithIndex{ f, i ->
+		if (i == 0) {
+			log.finest "[+] 1. $f"
+		} else if (delete) {
+			log.warning "[DELETE] ${i+1}. $f"
+			f.trash()
+		} else {
+			log.fine "[-] ${i+1}. $f"
 		}
 	}
 }
