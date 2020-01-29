@@ -65,41 +65,9 @@ unsortedFormat = any{ unsortedFormat }{ 'Unsorted/{file.structurePathTail}' }
 
 
 
-
-
-
-
 // include artwork/nfo, pushover/pushbullet and ant utilities as required
 if (artwork || kodi || plex || emby) { include('lib/htpc') }
-if (pushover || pushbullet ) { include('lib/web') }
-if (gmail || mail) { include('lib/ant') }
-
-
-
-// error reporting functions
-def sendEmailReport(title, message, messagetype) {
-	if (gmail) {
-		sendGmail(
-			subject: title, message: message, messagemimetype: messagetype,
-			to: any{ mailto } { gmail[0].contains('@') ? gmail[0] : gmail[0] + '@gmail.com' },		// mail to self by default
-			user: gmail[0].contains('@') ? gmail[0] : gmail[0] + '@gmail.com', password: gmail[1]
-		)
-	}
-	if (mail) {
-		sendmail(
-			subject: title, message: message, messagemimetype: messagetype,
-			mailhost: mail[0], mailport: mail[1], from: mail[2], to: mailto,
-			user: mail[3], password: mail[4]
-		)
-	}
-}
-
-def fail(message) {
-	if (reportError) {
-		sendEmailReport("[FileBot] $message", "Execute:\n$_args\n\nError:\n$message", 'text/plain')
-	}
-	die(message)
-}
+if (pushover || pushbullet || gmail || mail) { include('lib/web') }
 
 
 
@@ -116,7 +84,7 @@ def ut = _def.findAll{ k, v -> k.startsWith('ut_') }.collectEntries{ k, v ->
 
 // sanity checks
 if (outputFolder == null || !outputFolder.isDirectory()) {
-	fail "Illegal usage: output folder must exist and must be a directory: $outputFolder"
+	die "Illegal usage: output folder must exist and must be a directory: $outputFolder"
 }
 
 if (ut.dir) {
@@ -124,20 +92,20 @@ if (ut.dir) {
 		die "Illegal state: $ut.state != $ut.state_allow", ExitCode.NOOP
 	}
 	if (args.size() > 0) {
-		fail "Illegal usage: use either script parameters $ut or file arguments $args but not both"
+		die "Illegal usage: use either script parameters $ut or file arguments $args but not both"
 	}
 	if (ut.dir == '/') {
-		fail "Illegal usage: No! Are you insane? You can't just pass in the entire filesystem. Think long and hard about what you just tried to do."
+		die "Illegal usage: No! Are you insane? You can't just pass in the entire filesystem. Think long and hard about what you just tried to do."
 	}
 	if (ut.dir.toFile() in outputFolder.listPath()) {
-		fail "Illegal usage: output folder [$outputFolder] must be separate from input folder $ut"
+		die "Illegal usage: output folder [$outputFolder] must be separate from input folder $ut"
 	}
 } else if (args.size() == 0) {
-	fail "Illegal usage: no input"
+	die "Illegal usage: no input"
 } else if (args.any{ f -> f in outputFolder.listPath() }) {
-	fail "Illegal usage: output folder [$outputFolder] must be separate from input arguments $args"
+	die "Illegal usage: output folder [$outputFolder] must be separate from input arguments $args"
 } else if (args.any{ f -> f in File.listRoots() }) {
-	fail "Illegal usage: input $args must not include a filesystem root"
+	die "Illegal usage: input $args must not include a filesystem root"
 }
 
 
@@ -173,13 +141,13 @@ if (excludeList) {
 		try {
 			excludePathSet.load(excludeList)
 		} catch(Exception e) {
-			fail "Failed to load excludeList: $e"
+			die "Failed to load excludeList: $e"
 		}
 		log.fine "Use excludes: $excludeList (${excludePathSet.size()})"
 	} else {
 		log.fine "Use excludes: $excludeList"
 		if ((!excludeList.parentFile.isDirectory() && !excludeList.parentFile.mkdirs()) || (!excludeList.isFile() && !excludeList.createNewFile())) {
-			fail "Failed to create excludeList: $excludeList"
+			die "Failed to create excludeList: $excludeList"
 		}
 	}
 }
@@ -393,7 +361,7 @@ groups.each{ group, files ->
 				}
 			}
 		} else if (failOnError && dest == null) {
-			fail "Failed to process group: $group"
+			die "Failed to process group: $group"
 		} else {
 			unsortedFiles += files
 		}
@@ -409,19 +377,17 @@ groups.each{ group, files ->
 			if (artwork) {
 				dest.mapByFolder().each{ dir, fs ->
 					def movieFile = fs.findAll{ it.isVideo() || it.isDisk() }.toSorted{ it.length() }.reverse().findResult{ it }
-					if (movieFile) {
-						tryLogCatch {
-							def movieInfo = movieFile.metadata
-							log.fine "Fetching movie artwork for [$movieInfo] to [$dir]"
-							if (movieInfo) {
-								fetchMovieArtworkAndNfo(dir, movieInfo, movieFile, extras, false, _args.language.locale)
-							}
+					if (movieFile) tryLogCatch {
+						def movieInfo = movieFile.metadata
+						log.fine "Fetching movie artwork for [$movieInfo] to [$dir]"
+						if (movieInfo) {
+							fetchMovieArtworkAndNfo(dir, movieInfo, movieFile, extras, false, _args.language.locale)
 						}
 					}
 				}
 			}
 		} else if (failOnError && dest == null) {
-			fail "Failed to process group: $group"
+			die "Failed to process group: $group"
 		} else {
 			unsortedFiles += files
 		}
@@ -434,7 +400,7 @@ groups.each{ group, files ->
 		if (dest) {
 			destinationFiles += dest
 		} else if (failOnError && dest == null) {
-			fail "Failed to process group: $group"
+			die "Failed to process group: $group"
 		} else {
 			unsortedFiles += files
 		}
@@ -459,7 +425,7 @@ if (unsorted) {
 
 			// sanity check user-defined unsorted format
 			if (destination == null) {
-				fail "Illegal usage: unsorted format must yield valid file path"
+				die "Illegal usage: unsorted format must yield valid file path"
 			}
 
 			// resolve relative paths
@@ -500,50 +466,40 @@ if (getRenameLog().size() > 0) {
 	}.memoize()
 
 	// make Kodi scan for new content and display notification message
-	if (kodi) {
+	if (kodi) tryLogCatch {
 		kodi.each{ instance ->
 			log.fine "Notify Kodi: $instance"
-			tryLogCatch {
-				showNotification(instance.host, instance.port, getNotificationTitle(), getNotificationMessage(), 'https://app.filebot.net/icon.png')
-				scanVideoLibrary(instance.host, instance.port)
-			}
+			showNotification(instance.host, instance.port, getNotificationTitle(), getNotificationMessage(), 'https://app.filebot.net/icon.png')
+			scanVideoLibrary(instance.host, instance.port)
 		}
 	}
 
 	// make Plex scan for new content
-	if (plex) {
+	if (plex) tryLogCatch {
 		plex.each{ instance ->
 			log.fine "Notify Plex: $instance"
-			tryLogCatch {
-				refreshPlexLibrary(instance.host, null, instance.token)
-			}
+			refreshPlexLibrary(instance.host, null, instance.token)
 		}
 	}
 
 	// make Emby scan for new content
-	if (emby) {
+	if (emby) tryLogCatch {
 		emby.each{ instance ->
 			log.fine "Notify Emby: $instance"
-			tryLogCatch {
-				refreshEmbyLibrary(instance.host, null, instance.token)
-			}
+			refreshEmbyLibrary(instance.host, null, instance.token)
 		}
 	}
 
 	// mark episodes as 'acquired'
-	if (myepisodes) {
+	if (myepisodes) tryLogCatch {
 		log.fine 'Update MyEpisodes'
-		tryLogCatch {
-			executeScript('update-mes', [login:myepisodes.join(':'), addshows:true], getRenameLog().values())
-		}
+		executeScript('update-mes', [login:myepisodes.join(':'), addshows:true], getRenameLog().values())
 	}
 
 	// pushover only supports plain text messages
-	if (pushover) {
+	if (pushover) tryLogCatch {
 		log.fine 'Sending Pushover notification'
-		tryLogCatch {
-			Pushover(pushover[0], pushover[1] ?: 'wcckDz3oygHSU2SdIptvnHxJ92SQKK').send(getNotificationTitle(), getNotificationMessage())
-		}
+		Pushover(pushover[0], pushover[1] ?: 'wcckDz3oygHSU2SdIptvnHxJ92SQKK').send(getNotificationTitle(), getNotificationMessage())
 	}
 
 	// messages used for email / pushbullet reports
@@ -606,36 +562,39 @@ if (getRenameLog().size() > 0) {
 	}
 
 	// send pushbullet report
-	if (pushbullet) {
+	if (pushbullet) tryLogCatch {
 		log.fine 'Sending PushBullet report'
-		tryLogCatch {
-			PushBullet(pushbullet).sendFile(getNotificationTitle() + '.html', getReportMessage(), 'text/html', getNotificationMessage(), any{ mailto }{ null })
-		}
+		PushBullet(pushbullet).sendFile(getNotificationTitle() + '.html', getReportMessage(), 'text/html', getNotificationMessage(), any{ mailto }{ null })
+	}
+
+	// send gmail report
+	if (gmail) tryLogCatch {
+		log.fine 'Sending Gmail report'
+		def account = gmail[0] =~ /@/ ? gmail[0] : gmail[0] + '@gmail.com'
+		Gmail(account, gmail[1]).sendHtml(account, any{ mailto }{ account }, getReportTitle(), getReportMessage())
 	}
 
 	// send email report
-	if (gmail || mail) {
-		tryLogCatch {
-			sendEmailReport(getReportTitle(), getReportMessage(), 'text/html')
-		}
+	if (mail) tryLogCatch {
+		log.fine 'Sending Email report'
+		def account = mail[2]
+		Email(mail[0], mail[1], mail[3], mail[4]).sendHtml(account, any{ mailto }{ account }, getReportTitle(), getReportMessage())
 	}
 
 	// use custom discord embeds since attachments do not play well with smart phones (i.e. Content-Disposition: attachment)
-	if (discord) {
+	if (discord) tryLogCatch {
 		log.fine 'Calling Discord webhook'
-		tryLogCatch {
-			def json = [
-				content: "FileBot finished processing **${getReportSubject()}** (${renameLog.size()} files).",
-				embeds: renameLog.collect{ from, to -> [to.parentFile, from.name, to.name] }.groupBy{ it[0] }.collect{ group, names ->
-					[
-						"title": group.getStructurePathTail() as String,
-						"fields": names.collect{ parent, from, to -> ["name": from, "value": to, inline: true] },
-						"color": new Random().nextInt(0xFFFFFF)
-					]
-				} + ["footer": [text: "Generated by ${Settings.applicationIdentifier} on ${InetAddress.localHost.hostName} at ${now}", icon_url: 'https://app.filebot.net/avatar.png']]
-			]
-			new URL(discord).post(JsonOutput.toJson(json).getBytes('UTF-8'), 'application/json', ['Content-Encoding':'gzip'])
-		}
+		def json = [
+			content: "FileBot finished processing **${getReportSubject()}** (${renameLog.size()} files).",
+			embeds: renameLog.collect{ from, to -> [to.parentFile, from.name, to.name] }.groupBy{ it[0] }.collect{ group, names ->
+				[
+					"title": group.getStructurePathTail() as String,
+					"fields": names.collect{ parent, from, to -> ["name": from, "value": to, inline: true] },
+					"color": new Random().nextInt(0xFFFFFF)
+				]
+			} + ["footer": [text: "Generated by ${Settings.applicationIdentifier} on ${InetAddress.localHost.hostName} at ${now}", icon_url: 'https://app.filebot.net/avatar.png']]
+		]
+		new URL(discord).post(JsonOutput.toJson(json).getBytes('UTF-8'), 'application/json', ['Content-Encoding':'gzip'])
 	}
 }
 
@@ -655,7 +614,7 @@ if (deleteAfterExtract) {
 
 // abort and skip clean-up logic if we didn't process any files
 if (destinationFiles.size() == 0) {
-	fail "Finished without processing any files"
+	die "Finished without processing any files"
 }
 
 

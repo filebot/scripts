@@ -1,4 +1,54 @@
 /****************************************************************************
+ * E-Mail via SMTP
+ * 				https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol
+ ****************************************************************************/
+def Gmail(username, password) {
+	new EmailClient(host: 'smtp.gmail.com', port: 587, username: username, password: password)
+}
+
+def Email(host, port, username, password) {
+	new EmailClient(host: host, port: port as int, username: username, password: password)
+}
+
+class EmailClient {
+	def username
+	def password
+	def host
+	def port
+
+	def sendHtml = { from, to, subject, message ->
+		// create email message
+		def email = new org.apache.commons.mail.HtmlEmail()
+		email.setFrom(from)
+		email.addTo(to)
+
+		// set html message body
+		email.setSubject(subject)
+		email.setHtmlMsg(message)
+
+		// configure SMTP properties
+		email.setHostName(host)
+		email.setSmtpPort(port)
+
+		if (username && password) {
+			email.setAuthentication(username, password)
+			email.setStartTLSEnabled(true)
+		}
+
+		// send email
+		try {
+			email.send()
+		} catch(org.apache.commons.mail.EmailException e) {
+			// use root cause as error message
+			throw e.cause ?: e
+		}
+	}
+}
+
+
+
+
+/****************************************************************************
  * Pushover
  * 				https://pushover.net
  ****************************************************************************/
@@ -49,6 +99,7 @@ class PushoverClient {
 		endpoint.post(parameters, [:])
 	}
 }
+
 
 
 
