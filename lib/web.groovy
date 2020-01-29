@@ -19,7 +19,7 @@ class EmailClient {
 	def sendHtml = { from, to, subject, message ->
 		// create email message
 		def email = new org.apache.commons.mail.HtmlEmail()
-		email.setFrom(from)
+		email.setFrom(from, 'FileBot')
 		email.addTo(to)
 
 		// set html message body
