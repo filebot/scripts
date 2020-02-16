@@ -5,7 +5,7 @@ def map = [:]
 def history = getPersistentRenameLog()
 
 
-getPersistentRenameLog().each { from, to ->
+history.each { from, to ->
 	// ignore history entires that were renamed in place
 	if (from.dir == to.dir) {
 		return
