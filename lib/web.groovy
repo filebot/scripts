@@ -119,11 +119,11 @@ class PushBulletClient {
 
 	def sendFile = { file_name, file_content, file_type, body = null, email = null ->
 		def requestProperties = [Authorization: 'Basic '+apikey.getBytes().encodeBase64()]
-		
+
 		// prepare upload
 		def uploadRequestData = [file_name: file_name, file_type: file_type]
 		def response = new JsonSlurper().parseText(endpoint_upload.post(uploadRequestData, requestProperties).text)
-		
+
 		// build multipart/form-data -- the most horrible data format that we will never get rid off :(
 		def MBD = '--'		// random -- before the boundry, or after, or not at all (there goes 4 hours of my life)
 		def EOL = '\r\n'	// CR+NL required per spec?! I shit you not!
