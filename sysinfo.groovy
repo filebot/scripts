@@ -184,7 +184,7 @@ try {
 	print 'License: '
 	println Settings.LICENSE.check()
 } catch(Throwable error) {
-	println error.getMessage()
+	println error.message
 }
 
 
@@ -199,6 +199,6 @@ if (!Settings.isAutoUpdateEnabled()) {
 			println '\n' + " UPDATE AVAILABLE: $app (r$rev) ".center(80, '-') + '\n'
 		}
 	} catch(Throwable error) {
-		printException(error)
+		println error
 	}
 }
