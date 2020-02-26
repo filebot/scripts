@@ -41,7 +41,7 @@ mail               = tryQuietly{ mail.split(':', 5) as List }
 pushover           = tryQuietly{ pushover.split(':', 2) as List }
 pushbullet         = tryQuietly{ pushbullet.toString() }
 discord            = tryQuietly{ discord.toString() }
-storeReport        = tryQuietly{ storeReport.toBoolean() }
+storeReport        = tryQuietly{ def f = storeReport as File; f.isAbsolute() ? f : outputFolder.resolve(f.path) }
 reportError        = tryQuietly{ reportError.toBoolean() }
 
 // user-defined filters
@@ -555,10 +555,10 @@ if (getRenameLog().size() > 0) {
 
 	// store processing report
 	if (storeReport) {
-		def reportFolder = ApplicationFolder.AppData.resolve('reports')
 		def reportName = [now.format(/[yyyy-MM-dd HH mm]/), getReportSubject().take(50)].join(' ').validateFileName().space('_')
-		def reportFile = getReportMessage().saveAs(reportFolder.resolve(reportName + '.html'))
-		log.finest "Saving report as ${reportFile}"
+		def reportFile = storeReport.resolve(reportName + '.html')
+		log.fine "Saving HTML report to [$reportFile]"
+		getReportMessage().saveAs(reportFile)
 	}
 
 	// send pushbullet report
