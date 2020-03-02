@@ -61,7 +61,7 @@ try {
 // Chromaprint: fpcalc version 1.4.2
 try {
 	print 'Chromaprint: '
-	println AcoustID.version().removeAll(/[^\d_.]/)
+	println AcoustID.version().match(/[.\d]+/)
 } catch(Throwable error) {
 	println error
 }
