@@ -13,9 +13,15 @@ def maxsize = any{ maxsize.toLong() }{ 100 * 1024 * 1024 }
 def testRun = _args.action.equalsIgnoreCase('test')
 
 
-/*
- * Delete orphaned "clutter" files like nfo, jpg, etc and sample files
- */
+// sanity checks
+if (args.size() == 0) {
+	die "Illegal usage: no input"
+} else if (args.any{ it in File.listRoots() }) {
+	die "Illegal usage: input $args must not include a filesystem root"
+}
+
+
+// delete orphaned "clutter" files like nfo, jpg, etc and sample files
 def isClutter = { f ->
 	// whitelist
 	if (f.path.findMatch(ignore))
