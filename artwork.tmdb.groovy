@@ -4,6 +4,12 @@
 def extras = any{ extras.toBoolean() }{ false }
 
 
+// sanity checks
+if (args.size() == 0) {
+	die "Illegal usage: no input"
+}
+
+
 include('lib/htpc')
 
 

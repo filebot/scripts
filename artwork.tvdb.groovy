@@ -1,6 +1,12 @@
 #!/usr/bin/env filebot -script
 
 
+// sanity checks
+if (args.size() == 0) {
+	die "Illegal usage: no input"
+}
+
+
 include('lib/htpc')
 
 
