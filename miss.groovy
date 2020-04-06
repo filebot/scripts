@@ -1,6 +1,12 @@
 #!/usr/bin/env filebot -script
 
 
+// sanity checks
+if (args.size() == 0) {
+	die "Illegal usage: no input"
+}
+
+
 def specials = any{ specials.toBoolean() }{ false }
 
 def episodes = [] as LinkedHashSet
@@ -26,9 +32,8 @@ args.getFiles().each{ f ->
 }
 
 
-// sanity checks
-if (!episodes) {
-	die "Illegal usage: input folder does not contain xattr tagged files"
+if (episodes.size() == 0) {
+	die "No xattr tagged files"
 }
 
 
@@ -52,4 +57,8 @@ def missingEpisodes = episodeList - episodes
 
 missingEpisodes.each{
 	println it
+}
+
+if (missingEpisodes.size() == 0) {
+	log.finest "No missing episodes"
 }
