@@ -3,8 +3,8 @@
 
 def specials = any{ specials.toBoolean() }{ false }
 
-def episodes = []
-def shows = []
+def episodes = [] as LinkedHashSet
+def shows = [] as LinkedHashSet
 
 args.getFiles().each{ f ->
 	if (f.isVideo()) {
@@ -23,6 +23,12 @@ args.getFiles().each{ f ->
 			}
 		}
 	}
+}
+
+
+// sanity checks
+if (!episodes) {
+	die "Illegal usage: input folder does not contain xattr tagged files"
 }
 
 
