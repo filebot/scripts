@@ -7,9 +7,7 @@ if (args.size() == 0) {
 }
 
 
-def specials = any{ specials.toBoolean() }{ false }
-
-def episodes = [] as LinkedHashSet
+def episodes = []
 def shows = [] as LinkedHashSet
 
 args.getFiles().each{ f ->
@@ -37,28 +35,22 @@ if (episodes.size() == 0) {
 }
 
 
-def queries = shows.collect{
-	[id: it.id, database: it.database, order: it.order as SortOrder, language: it.language as Locale]
+def episodeList = shows.collectMany{
+	def db = getService(it.database)
+	def el = db.getEpisodeList(it.id, it.order as SortOrder, it.language as Locale)
+	return el.findAll{ it.regular }
 } as LinkedHashSet
-
-def episodeList = queries.collectMany{
-	WebServices.getEpisodeListProvider(it.database).getEpisodeList(it.id, it.order, it.language)
-} as LinkedHashSet
-
-
-// ignore specials
-if (!specials) {
-	episodeList = episodeList.findAll{ it.special == null }
-}
 
 
 // print missing episodes
 def missingEpisodes = episodeList - episodes
 
-missingEpisodes.each{
-	println it
-}
 
 if (missingEpisodes.size() == 0) {
 	log.finest "No missing episodes"
+}
+
+
+missingEpisodes.each{
+	println it
 }
