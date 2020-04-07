@@ -38,6 +38,7 @@ if (episodes.size() == 0) {
 def episodeList = shows.collectMany{
 	def db = getService(it.database)
 	def el = db.getEpisodeList(it.id, it.order as SortOrder, it.language as Locale)
+	// ignore special episodes
 	return el.findAll{ it.regular }
 } as LinkedHashSet
 
