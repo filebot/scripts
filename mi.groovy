@@ -11,12 +11,13 @@ def model = [
 	'Video Codec': 'vc',
 	'Video Format': 'vf',
 	'Audio Codec': 'ac',
+	'Audio Profile': 'aco',
 	'Audio Channels': 'channels',
 	'Audio Languages': 'audioLanguages',
 	'Subtitle Languages': 'textLanguages',
 	'Duration': 'hours',
 	'File Size': 'megabytes',
-	'Path': 'f.canonicalPath',
+	'Path': 'f',
 	'Original Name': 'original',
 	'Extended Attributes': 'json'
 ]
