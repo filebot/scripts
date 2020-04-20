@@ -58,7 +58,7 @@ group(files).each{ m, fs ->
 			log.warning "[DELETE] ${i+1}. $f"
 			f.trash()
 		} else {
-			log.fine "[-] ${i+1}. $f"
+			log.warning "[-] ${i+1}. $f"
 		}
 	}
 }
