@@ -5,6 +5,12 @@ delete = 'DELETE'.equalsIgnoreCase _args.action
 binary = 'BINARY'.equalsIgnoreCase _args.mode
 
 
+// sanity checks
+if (args.size() == 0) {
+	die "Illegal usage: no input"
+}
+
+
 def group(files) {
 	// Binary Duplicates: Group by File Size, then Fast MovieHash, then CRC32 via Xattr
 	if (binary) {
@@ -46,6 +52,7 @@ def order(files) {
 
 // select video files (and preserve input argument order)
 def files = args.collectMany{ it.getFiles{ it.isVideo() } }
+def duplicates = []
 
 
 group(files).each{ m, fs ->
@@ -54,11 +61,40 @@ group(files).each{ m, fs ->
 	order(fs).eachWithIndex{ f, i ->
 		if (i == 0) {
 			log.finest "[+] 1. $f"
-		} else if (delete) {
-			log.warning "[DELETE] ${i+1}. $f"
-			f.trash()
 		} else {
 			log.warning "[-] ${i+1}. $f"
+			duplicates += f
 		}
+	}
+}
+
+
+// no duplicates; return with NOOP
+if (duplicates.size() == 0) {
+	die "0 duplicates", ExitCode.NOOP
+}
+
+
+// continue with post-processing
+log.fine "${duplicates.size()} duplicates"
+
+
+// -mediainfo post-processing
+if (_args.mediaInfo) {
+	getMediaInfo(file: duplicates)
+}
+
+
+// -rename post-processing
+if (_args.rename) {
+	rename(file: duplicates, db: binary ? 'file' : 'xattr')
+}
+
+
+// delete duplicate files
+if (delete) {
+	duplicates.each{ f ->
+		log.info "[DELETE] $f"
+		f.trash()
 	}
 }
