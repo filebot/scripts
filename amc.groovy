@@ -310,7 +310,6 @@ def group(files) {
 	if (singleGroupKey) {
 		return [(singleGroupKey): files]
 	}
-
 	return new AutoDetection(files, false, _args.language.locale).group()
 }
 
