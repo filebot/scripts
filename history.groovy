@@ -22,6 +22,6 @@ if (history.empty) {
 
 history.each{ from, to ->
 	if (accept(from, to)) {
-		println template.make(from:from, to:to)
+		println template.make(from: from, to: to)
 	}
 }
