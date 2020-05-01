@@ -51,10 +51,10 @@ minFileSize = any{ minFileSize.toLong() }{ 50 * 1000L * 1000L }
 minLengthMS = any{ minLengthMS.toLong() }{ 10 * 60 * 1000L }
 
 // database preferences
-seriesDB = any{ seriesDB }{ _args.datasource.identifier }{ 'TheTVDB' }
-animeDB = any{ animeDB }{ _args.datasource.identifier }{ 'AniDB' }
-movieDB = any{ movieDB }{ _args.datasource.identifier }{ 'TheMovieDB' }
-musicDB = any{ musicDB }{ _args.datasource.identifier }{ 'ID3' }
+seriesDB = any{ seriesDB }{ 'TheTVDB' }
+animeDB = any{ animeDB }{ 'AniDB' }
+movieDB = any{ movieDB }{ 'TheMovieDB' }
+musicDB = any{ musicDB }{ 'ID3' }
 
 // series / anime / movie format expressions
 seriesFormat   = any{ seriesFormat   }{ _args.format }{ '{plex}' }
@@ -73,39 +73,41 @@ if (pushover || pushbullet || gmail || mail) { include('lib/web') }
 
 // check input parameters
 def ut = _def.findAll{ k, v -> k.startsWith('ut_') }.collectEntries{ k, v ->
-	if (v ==~ /[%$]\p{Alnum}|\p{Punct}+/) {
+	if (v ==~ /[%$][\p{Alnum}\p{Punct}]+/) {
 		log.warning "Bad $k value: $v"
 		v = null
 	}
 	return [k.substring(3), v ? v : null]
 }
 
-
+if (_args.db) {
+	log.warning "Invalid usage: The --db option has no effect"
+}
 
 // sanity checks
 if (outputFolder == null || !outputFolder.isDirectory()) {
-	die "Illegal usage: output folder must exist and must be a directory: $outputFolder"
+	die "Invalid usage: output folder must exist and must be a directory: $outputFolder"
 }
 
 if (ut.dir) {
 	if (ut.state_allow && !(ut.state ==~ ut.state_allow)) {
-		die "Illegal state: $ut.state != $ut.state_allow", ExitCode.NOOP
+		die "Invalid state: $ut.state != $ut.state_allow", ExitCode.NOOP
 	}
 	if (args.size() > 0) {
-		die "Illegal usage: use either script parameters $ut or file arguments $args but not both"
+		die "Invalid usage: use either script parameters $ut or file arguments $args but not both"
 	}
 	if (ut.dir == '/') {
-		die "Illegal usage: No! Are you insane? You can't just pass in the entire filesystem. Think long and hard about what you just tried to do."
+		die "Invalid usage: No! Are you insane? You can't just pass in the entire filesystem. Think long and hard about what you just tried to do."
 	}
 	if (ut.dir.toFile() in outputFolder.listPath()) {
-		die "Illegal usage: output folder [$outputFolder] must be separate from input folder $ut"
+		die "Invalid usage: output folder [$outputFolder] must be separate from input folder $ut"
 	}
 } else if (args.size() == 0) {
-	die "Illegal usage: no input"
+	die "Invalid usage: no input"
 } else if (args.any{ f -> f in outputFolder.listPath() }) {
-	die "Illegal usage: output folder [$outputFolder] must be separate from input arguments $args"
+	die "Invalid usage: output folder [$outputFolder] must be separate from input arguments $args"
 } else if (args.any{ f -> f in File.listRoots() }) {
-	die "Illegal usage: input $args must not include a filesystem root"
+	die "Invalid usage: input $args must not include a filesystem root"
 }
 
 
@@ -342,14 +344,14 @@ groups.each{ group, files ->
 	// EPISODE MODE
 	if ((group.isSeries() || group.isAnime()) && !group.isMovie()) {
 		// choose series / anime
-		def dest = group.isSeries() ? rename(file: files, format: seriesFormat, db: seriesDB) : rename(file: files, format: animeFormat, order: 'Absolute', db: animeDB)
+		def rfs = group.isSeries() ? rename(file: files, format: seriesFormat, db: seriesDB) : rename(file: files, format: animeFormat, order: 'Absolute', db: animeDB)
 
-		if (dest) {
-			destinationFiles += dest
+		if (rfs) {
+			destinationFiles += rfs
 
 			if (artwork) {
-				dest.mapByFolder().each{ dir, fs ->
-					def hasSeasonFolder = any{ dir =~ /Specials|Season.\d+/ || dir.parentFile.structurePathTail.listPath().size() > 0 }{ false }	// MAY NOT WORK FOR CERTAIN FORMATS
+				rfs.mapByFolder().each{ dir, fs ->
+					def hasSeasonFolder = any{ dir =~ /Specials|Season.\d+/ || dir.parentFile.structurePathTail.listPath().size() > 0 }{ false }	// MAY NOT WORK WELL FOR CERTAIN FORMATS
 
 					fs.findResults{ it.metadata }.findAll{ it.seriesInfo.database == 'TheTVDB' }.collect{ [name: it.seriesName, season: it.special ? 0 : it.season, id: it.seriesInfo.id] }.unique().each{ s ->
 						tryLogCatch {
@@ -359,7 +361,7 @@ groups.each{ group, files ->
 					}
 				}
 			}
-		} else if (failOnError && dest == null) {
+		} else if (failOnError && rfs == null) {
 			die "Failed to process group: $group"
 		} else {
 			unsortedFiles += files
@@ -368,13 +370,13 @@ groups.each{ group, files ->
 
 	// MOVIE MODE
 	else if (group.isMovie() && !group.isSeries() && !group.isAnime()) {
-		def dest = rename(file: files, format: movieFormat, db: movieDB)
+		def rfs = rename(file: files, format: movieFormat, db: movieDB)
 
-		if (dest) {
-			destinationFiles += dest
+		if (rfs) {
+			destinationFiles += rfs
 
 			if (artwork) {
-				dest.mapByFolder().each{ dir, fs ->
+				rfs.mapByFolder().each{ dir, fs ->
 					def movieFile = fs.findAll{ it.isVideo() || it.isDisk() }.toSorted{ it.length() }.reverse().findResult{ it }
 					if (movieFile) tryLogCatch {
 						def movieInfo = movieFile.metadata
@@ -385,7 +387,7 @@ groups.each{ group, files ->
 					}
 				}
 			}
-		} else if (failOnError && dest == null) {
+		} else if (failOnError && rfs == null) {
 			die "Failed to process group: $group"
 		} else {
 			unsortedFiles += files
@@ -394,11 +396,11 @@ groups.each{ group, files ->
 
 	// MUSIC MODE
 	else if (group.isMusic()) {
-		def dest = rename(file: files, format: musicFormat, db: musicDB)
+		def rfs = rename(file: files, format: musicFormat, db: musicDB)
 
-		if (dest) {
-			destinationFiles += dest
-		} else if (failOnError && dest == null) {
+		if (rfs) {
+			destinationFiles += rfs
+		} else if (failOnError && rfs == null) {
 			die "Failed to process group: $group"
 		} else {
 			unsortedFiles += files
@@ -424,7 +426,7 @@ if (unsorted) {
 
 			// sanity check user-defined unsorted format
 			if (destination == null) {
-				die "Illegal usage: unsorted format must yield valid file path"
+				die "Invalid usage: unsorted format must yield valid a file path"
 			}
 
 			// resolve relative paths
