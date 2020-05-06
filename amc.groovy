@@ -143,13 +143,13 @@ if (excludeList) {
 		try {
 			excludePathSet.load(excludeList)
 		} catch(Exception e) {
-			die "Failed to load excludeList: $e"
+			die "Failed to read excludes: $excludeList: $e"
 		}
 		log.fine "Use excludes: $excludeList (${excludePathSet.size()})"
 	} else {
 		log.fine "Use excludes: $excludeList"
 		if ((!excludeList.parentFile.isDirectory() && !excludeList.parentFile.mkdirs()) || (!excludeList.isFile() && !excludeList.createNewFile())) {
-			die "Failed to create excludeList: $excludeList"
+			die "Failed to create excludes: $excludeList"
 		}
 	}
 }
@@ -272,7 +272,11 @@ def input = roots.findAll{ acceptFile(it) }.flatten{ resolveInput(it) }.toSorted
 
 // update exclude list with all input that will be processed during this run
 if (excludeList && !testRun) {
-	excludePathSet.append(excludeList, extractedArchives, input)
+	try {
+		excludePathSet.append(excludeList, extractedArchives, input)
+	} catch(Exception e) {
+		die "Failed to write excludes: $excludeList: $e"
+	}
 }
 
 // print exclude and input sets for logging
