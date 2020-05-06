@@ -420,12 +420,16 @@ groups.each{ group, files ->
 
 // ---------- POST PROCESSING ---------- //
 
-// deal with remaining files that cannot be sorted automatically
+
+// process the remaining files that cannot be sorted automatically
 if (unsorted) {
+	// skip file paths that are no longer valid (e.g. due to a partially processed but ultimately failed group)
+	unsortedFiles.removeAll{ f -> !f.exists() }
+
 	if (unsortedFiles.size() > 0) {
 		log.fine "Processing ${unsortedFiles.size()} unsorted files"
 
-		def dest = rename(map: unsortedFiles.collectEntries{ original ->
+		def rfs = rename(map: unsortedFiles.collectEntries{ original ->
 			def destination = getMediaInfo(original, unsortedFormat) as File
 
 			// sanity check user-defined unsorted format
@@ -441,8 +445,8 @@ if (unsorted) {
 			return [original, destination]
 		})
 
-		if (dest != null) {
-			destinationFiles += dest
+		if (rfs != null) {
+			destinationFiles += rfs
 		}
 	}
 }
