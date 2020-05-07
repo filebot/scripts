@@ -142,7 +142,7 @@ if (excludeList) {
 	if (excludeList.exists()) {
 		try {
 			excludePathSet.load(excludeList)
-		} catch(Exception e) {
+		} catch(e) {
 			die "Failed to read excludes: $excludeList: $e"
 		}
 		log.fine "Use excludes: $excludeList (${excludePathSet.size()})"
@@ -274,7 +274,7 @@ def input = roots.findAll{ acceptFile(it) }.flatten{ resolveInput(it) }.toSorted
 if (excludeList && !testRun) {
 	try {
 		excludePathSet.append(excludeList, extractedArchives, input)
-	} catch(Exception e) {
+	} catch(e) {
 		die "Failed to write excludes: $excludeList: $e"
 	}
 }
