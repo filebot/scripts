@@ -297,9 +297,9 @@ def forceGroup() {
 	switch(label) {
 		case ~/.*(?i:Movie|Film|Concert|UFC).*/:
 			return AutoDetection.Group.Movie
-		case ~ /.*(?i:TV|Show|Series|Documentary).*/:
+		case ~/.*(?i:TV|Show|Series|Documentary).*/:
 			return AutoDetection.Group.Series
-		case ~ /.*(?i:Anime).*/:
+		case ~/.*(?i:Anime).*/:
 			return AutoDetection.Group.Anime
 		case ~/.*(?i:Audio|Music|Music.Video).*/:
 			return AutoDetection.Group.Music
@@ -332,6 +332,9 @@ def destinationFiles = []
 
 // keep track of unsorted files or files that could not be processed for some reason
 def unsortedFiles = []
+
+
+System.exit(0)
 
 // process each batch
 groups.each{ group, files ->
