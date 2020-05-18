@@ -333,9 +333,6 @@ def destinationFiles = []
 // keep track of unsorted files or files that could not be processed for some reason
 def unsortedFiles = []
 
-
-System.exit(0)
-
 // process each batch
 groups.each{ group, files ->
 	// fetch subtitles (but not for anime)
