@@ -41,7 +41,7 @@ args.eachMediaFolder{ dir ->
 
 	// maybe require user input
 	if (options.size() > 1 && _args.strict) {
-		series = showInputDialog(options, query, 'Select TV Show:')
+		series = showInputDialog(options, query, 'Select TV Series')
 	}
 
 	if (series == null) {

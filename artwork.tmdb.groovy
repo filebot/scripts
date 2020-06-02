@@ -43,7 +43,7 @@ args.eachMediaFolder{ dir ->
 
 	// maybe require user input
 	if (options.size() > 1 && _args.strict) {
-		movie = showInputDialog(options, dir.name, 'Select Movie:')
+		movie = showInputDialog(options, dir.name, 'Select Movie')
 	}
 
 	if (movie == null) {
