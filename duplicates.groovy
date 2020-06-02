@@ -7,7 +7,7 @@ binary = 'BINARY'.equalsIgnoreCase _args.mode
 
 // sanity checks
 if (args.size() == 0) {
-	die "Illegal usage: no input"
+	die "Invalid usage: no input"
 }
 
 
