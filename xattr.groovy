@@ -1,7 +1,17 @@
 #!/usr/bin/env filebot -script
 
 
-args.getFiles{ f -> f.xattr.size() > 0 }.each{ f ->
+// select xattr tagged files
+def files = args.getFiles{ f -> f.xattr.size() > 0 }
+
+
+// sanity checks
+if (files.size() == 0) {
+	die "No xattr tagged files"
+}
+
+
+files.each{ f ->
 	log.finest "$f"
 	f.xattr.each{ k, v -> log.fine "\t$k: $v" }
 
