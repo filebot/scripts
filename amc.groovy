@@ -61,7 +61,7 @@ seriesFormat   = any{ seriesFormat   }{ _args.format }{ '{plex}' }
 animeFormat    = any{ animeFormat    }{ _args.format }{ '{plex}' }
 movieFormat    = any{ movieFormat    }{ _args.format }{ '{plex}' }
 musicFormat    = any{ musicFormat    }{ _args.format }{ '{plex}' }
-unsortedFormat = any{ unsortedFormat }{ 'Unsorted/{file.structurePathTail}' }
+unsortedFormat = any{ unsortedFormat }{ 'Unsorted/{f.structurePathTail}' }
 
 
 
