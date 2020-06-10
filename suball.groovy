@@ -19,7 +19,7 @@ def maxAgeTimeStamp = now.time - (maxAgeDays.toDouble() * 24 * 60 * 60 * 1000L) 
 
 // sanity check
 if (maxAgeDaysLimit && (maxAgeDays == null || maxAgeDays.toDouble() > 30)) {
-	die "maxAgeDays must be between 0 and 30. $maxAgeDays not reasonable."
+	die "maxAgeDays must be between 0 and 30"
 }
 
 
@@ -44,21 +44,21 @@ def accept = { f ->
 		return false
 	}
 
-	// ignore files that are too small	
+	// ignore files that are too small
 	if (minFileSize > 0 && f.length() < minFileSize) {
-		log.fine "Ignore small: $f"
+		log.fine "Ignore small: $f [$f.displaySize]"
 		return false
 	}
 
 	// ignore files that are too short
 	if (minLengthMS > 0 && any{ f.mediaCharacteristics.duration.toMillis() < minLengthMS }{ false }) {
-		log.fine "Ignore short: $f"
+		log.fine "Ignore short: $f [$f.mediaCharacteristics.duration]"
 		return false
 	}
 
 	// ignore files that already have subtitles
 	if (ignoreTextLanguage != null && any{ f.mediaCharacteristics.subtitleLanguage.findMatch(ignoreTextLanguage) }{ false }) {
-		log.fine "Ignore text language: $f"
+		log.fine "Ignore text language: $f [$f.mediaCharacteristics.subtitleLanguage]"
 		return false
 	}
 
