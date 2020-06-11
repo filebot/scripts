@@ -227,13 +227,13 @@ def acceptFile(f) {
 
 	// ignore small video files
 	if (minFileSize > 0 && f.isVideo() && f.length() < minFileSize) {
-		log.fine "Skip small video file: $f ($f.displaySize)"
+		log.fine "Skip small video file: $f [$f.displaySize]"
 		return false
 	}
 
 	// ignore short videos
 	if (minLengthMS > 0 && f.isVideo() && any{ f.mediaCharacteristics.duration.toMillis() < minLengthMS }{ false }) {
-		log.fine "Skip short video: $f"
+		log.fine "Skip short video: $f [$f.mediaCharacteristics.duration]"
 		return false
 	}
 
@@ -296,14 +296,19 @@ if (input.size() == 0) {
 def forceGroup() {
 	switch(label) {
 		case ~/.*(?i:Movie|Film|Concert|UFC).*/:
+			log.fine "Process as Movie [$label]"
 			return AutoDetection.Group.Movie
 		case ~/.*(?i:TV|Show|Series|Documentary).*/:
+			log.fine "Process as TV Series [$label]"
 			return AutoDetection.Group.Series
 		case ~/.*(?i:Anime).*/:
+			log.fine "Process as Anime [$label]"
 			return AutoDetection.Group.Anime
 		case ~/.*(?i:Audio|Music|Music.Video).*/:
+			log.fine "Process as Music [$label]"
 			return AutoDetection.Group.Music
 		case ~/.*(?i:games|book|other|ignore).*/:
+			log.fine "Process as Unsorted [$label]"
 			return AutoDetection.Group.None
 		default:
 			return null
