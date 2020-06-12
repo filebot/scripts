@@ -15,19 +15,25 @@ def group(files) {
 	// Binary Duplicates: Group by File Size, then Fast MovieHash, then CRC32 via Xattr
 	if (binary) {
 		def groups = [:]
-		// 1. Group by File Size
-		files.groupBy{ it.length() }.each{ size, size_fs ->
+
+		// 0. Group by File Key
+		def links = files.groupBy{ f -> any{ f.key }{ f.canonicalFile } }.entrySet()
+
+		// 1. Group by File Size 
+		links.groupBy{ it.value[0].length() }.each{ size, size_fs ->
 			if (size_fs.size() == 1) {
+				groups += [ (size_fs[0].key) : size_fs[0].value ]
 				return
 			}
 			// 2. Group by MovieHash
-			size_fs.groupBy{ it.hash 'moviehash' }.each{ hash, hash_fs ->
+			size_fs.groupBy{ it.value[0].hash('moviehash') }.each{ hash, hash_fs ->
 				if (hash_fs.size() == 1) {
+					groups += [ (hash_fs[0].key) : hash_fs[0].value ]
 					return
 				}
 				// 3. Group by CRC32 via Xattr
-				hash_fs.groupBy{ it.CRC32 }.each{ crc, crc_fs ->
-					groups += [[size, hash, crc] : crc_fs]
+				hash_fs.groupBy{ it.value[0].CRC32 }.each{ crc, crc_fs ->
+					groups += [ ([size, hash, crc]) : crc_fs.collectMany{ it.value } ]
 				}
 			}
 		}
@@ -35,7 +41,7 @@ def group(files) {
 	}
 
 	// Logical Duplicates: Group by Xattr Metadata Object
-	return files.groupBy{ it.metadata }.findAll{ m, fs -> m && fs.size() > 1 }
+	return files.groupBy{ it.metadata }
 }
 
 
@@ -56,14 +62,15 @@ def duplicates = []
 
 
 group(files).each{ m, fs ->
-	log.info "[*] $m"
-
-	order(fs).eachWithIndex{ f, i ->
-		if (i == 0) {
-			log.finest "[+] 1. $f"
-		} else {
-			log.warning "[-] ${i+1}. $f"
-			duplicates += f
+	if (m && fs.size() > 1) {
+		log.info "[*] $m"
+		order(fs).eachWithIndex{ f, i ->
+			if (i == 0) {
+				log.finest "[+] 1. $f"
+			} else {
+				log.warning "[-] ${i+1}. $f"
+				duplicates += f
+			}
 		}
 	}
 }
