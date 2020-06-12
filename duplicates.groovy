@@ -17,7 +17,7 @@ def group(files) {
 		def groups = [:]
 
 		// 0. Group by File Key
-		def links = files.groupBy{ f -> any{ f.key }{ f.canonicalFile } }.entrySet()
+		def links = files.groupBy{ f -> any{ f.key }{ f.canonicalFile }{ f } }.entrySet()
 
 		// 1. Group by File Size 
 		links.groupBy{ it.value[0].length() }.each{ size, size_fs ->
