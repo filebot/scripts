@@ -16,7 +16,7 @@ def group(files) {
 	if (binary) {
 		def groups = [:]
 
-		// 0. Group by File Key
+		// 0. Group by File Key (i.e. physical link duplicates are always binary duplicates)
 		def links = files.groupBy{ f -> any{ f.key }{ f.canonicalFile }{ f } }.entrySet()
 
 		// 1. Group by File Size 
