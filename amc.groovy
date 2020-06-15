@@ -253,6 +253,7 @@ def resolveInput(f) {
 	// resolve folder recursively, except disk folders
 	if (f.isDirectory()) {
 		if (f.isDisk()) {
+			log.finest "Disk Folder: $f"
 			return f
 		}
 		return f.listFiles{ acceptFile(it) }.collect{ resolveInput(it) }
