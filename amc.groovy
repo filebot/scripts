@@ -52,7 +52,7 @@ minLengthMS = any{ minLengthMS.toLong() }{ 10 * 60 * 1000L }
 
 // database preferences
 seriesDB = any{ seriesDB }{ 'TheTVDB' }
-animeDB = any{ animeDB }{ 'AniDB' }
+animeDB = any{ animeDB }{ 'TheTVDB' }
 movieDB = any{ movieDB }{ 'TheMovieDB' }
 musicDB = any{ musicDB }{ 'ID3' }
 
