@@ -2,20 +2,17 @@
 
 
 def folder = ApplicationFolder.AppData.get()
-def logFiles = folder.getFiles{ it.extension == 'log' }
+def logFiles = folder.getFiles{ it.extension == 'log' }.toSorted{ it.lastModified() }
 
 
 if (logFiles.size() == 0) {
-	log.finest "# $folder"
-	log.warning "0 log files"
+	println "# $folder"
+	println "0 log files"
 }
 
 
-logFiles.each{ f ->
-	println ""
-	log.finest "# $f [Last-Modified: ${new Date(f.lastModified())}]"
-	f.eachLine('UTF-8') { s ->
-		println s
-	}
+logFiles.each{
+	println "# $it"
+	it.eachLine('UTF-8') { println it }
 	println ""
 }
