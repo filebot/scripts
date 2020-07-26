@@ -107,13 +107,13 @@ try {
 
 
 // GIO and GVFS
-try {
-	if (Settings.useGVFS() && !java.awt.GraphicsEnvironment.isHeadless()) {
+if (Settings.useGVFS() && !java.awt.GraphicsEnvironment.isHeadless()) {
+	try {
 		print 'GVFS: '
 		println net.filebot.platform.gnome.GVFS.getDefaultVFS()
+	} catch(Throwable error) {
+		println error
 	}
-} catch(Throwable error) {
-	println error
 }
 
 
