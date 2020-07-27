@@ -135,6 +135,12 @@ println 'Groovy: ' + groovy.lang.GroovySystem.getVersion()
 // Java(TM) SE Runtime Environment 1.6.0_30 (headless)
 println 'JRE: ' + Settings.getJavaRuntimeIdentifier()
 
+// OpenJFX 14.0.2.1+1
+def jfx = System.getProperty('javafx.runtime.version')
+if (jfx) {
+	println "JFX: OpenJFX $jfx"
+}
+
 // 32-bit Java HotSpot(TM) Client VM
 try {
 	print 'JVM: '
