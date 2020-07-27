@@ -136,9 +136,11 @@ println 'Groovy: ' + groovy.lang.GroovySystem.getVersion()
 println 'JRE: ' + Settings.getJavaRuntimeIdentifier()
 
 // OpenJFX 14.0.2.1+1
-def jfx = System.getProperty('javafx.runtime.version')
-if (jfx) {
-	println "JFX: OpenJFX $jfx"
+def jfx = [version: System.getProperty('javafx.runtime.version'), error: System.getProperty('javafx.runtime.error')]
+if (jfx.version) {
+	println "JFX: OpenJFX $jfx.version"
+} else if (jfx.error) {
+	println "JFX: $jfx.error"
 }
 
 // 32-bit Java HotSpot(TM) Client VM
