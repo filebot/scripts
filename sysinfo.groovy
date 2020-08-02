@@ -180,7 +180,9 @@ try {
 
 
 // C:\Users\FileBot\AppData\Roaming\FileBot
-println 'DATA: ' + ApplicationFolder.AppData.get()
+if (!Settings.isUWP()) {
+	println 'DATA: ' + ApplicationFolder.AppData.get()
+}
 
 
 // SPK
