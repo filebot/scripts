@@ -72,7 +72,7 @@ try {
 	print 'Extended Attributes: '
 	if (Settings.useExtendedFileAttributes()) {
 		// create new temp file
-		def f = ApplicationFolder.AppData.resolve('xattr.txt')
+		def f = ApplicationFolder.TemporaryFiles.resolve('xattr.txt')
 		f.createNewFile() && f.deleteOnExit()
 
 		// xattr write, read and verify
@@ -95,7 +95,7 @@ try {
 	print 'Unicode Filesystem: '
 
 	// create new temp file
-	def f = ApplicationFolder.AppData.resolve('龍飛鳳舞').toPath()
+	def f = ApplicationFolder.TemporaryFiles.resolve('龍飛鳳舞.txt').toPath()
 	Files.createFile(f)
 	Files.delete(f)
 
