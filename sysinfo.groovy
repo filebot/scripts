@@ -189,6 +189,16 @@ if (!Settings.isUWP()) {
 println 'Package: ' + Settings.getApplicationDeployment().toUpperCase()
 
 
+// Confinement: Devmode
+if (System.getenv('SNAP')) {
+	if (FileSystems.getDefault().getFileStores()) {
+		println 'Confinement: Devmode'
+	} else {
+		println 'Confinement: Strict # Restricted File System Access'
+	}
+}
+
+
 // FileBot License T1000 (Valid-Until: 2019-06-20)
 try {
 	print 'License: '
