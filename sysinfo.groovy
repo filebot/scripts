@@ -191,7 +191,7 @@ println 'Package: ' + Settings.getApplicationDeployment().toUpperCase()
 
 // Confinement: Devmode
 if (System.getenv('SNAP')) {
-	if (FileSystems.getDefault().getFileStores()) {
+	if (FileSystems.getDefault().getFileStores().iterator().hasNext()) {
 		println 'Confinement: Devmode'
 	} else {
 		println 'Confinement: Strict # Restricted File System Access'
