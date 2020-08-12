@@ -35,6 +35,7 @@ extractFolder      = tryQuietly{ extractFolder as File }
 skipExtract        = tryQuietly{ skipExtract.toBoolean() }
 deleteAfterExtract = tryQuietly{ deleteAfterExtract.toBoolean() }
 excludeList        = tryQuietly{ def f = excludeList as File; f.isAbsolute() ? f : outputFolder.resolve(f.path) }
+excludeLink        = tryQuietly{ excludeLink.toBoolean() }
 myepisodes         = tryQuietly{ myepisodes.split(':', 2) as List }
 gmail              = tryQuietly{ gmail.split(':', 2) as List }
 mail               = tryQuietly{ mail.split(':', 5) as List }
@@ -211,6 +212,12 @@ def acceptFile(f) {
 	// check if file exists
 	if (!f.isFile()) {
 		log.warning "File does not exist: $f"
+		return false
+	}
+
+	// ignore previously linked files
+	if (excludeLink && (f.symlink || f.linkCount != 1)) {
+		log.finest "Exclude superfluous link: $f [$f.linkCount] $f.key"
 		return false
 	}
 
