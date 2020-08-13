@@ -1,8 +1,15 @@
 #!/usr/bin/env filebot -script
 
 
-delete = 'DELETE'.equalsIgnoreCase _args.action
-binary = 'BINARY'.equalsIgnoreCase _args.mode
+delete = 'DELETE'.equalsIgnoreCase(_args.action)
+binary = 'BINARY'.equalsIgnoreCase(_args.mode)
+
+// Binary Duplicates: Keep Input Argument Order
+// Logical Duplicates: Order by Video Quality
+order  = 'INPUT'  .equalsIgnoreCase(_args.order) ? 'INPUT'
+       : 'QUALITY'.equalsIgnoreCase(_args.order) ? 'QUALITY'
+       : 'TIME'   .equalsIgnoreCase(_args.order) ? 'TIME'
+       : binary ? 'INPUT' : 'QUALITY'
 
 
 // sanity checks
@@ -46,13 +53,14 @@ def group(files) {
 
 
 def order(files) {
-	// Binary Duplicates: Keep Input Argument Order
-	if (binary) {
-		return files
+	switch(order) {
+		case 'INPUT':
+			return files
+		case 'QUALITY':
+			return files.toSorted(VideoQuality.DESCENDING_ORDER)
+		case 'TIME':
+			return files.toSorted{ -it.lastModified() }
 	}
-
-	// Logical Duplicates: Order by Video Quality
-	return files.toSorted(VideoQuality.DESCENDING_ORDER)
 }
 
 
