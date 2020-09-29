@@ -8,6 +8,7 @@ binary = 'BINARY'.equalsIgnoreCase(_args.mode)
 // Logical Duplicates: Order by Video Quality
 order  = 'INPUT'  .equalsIgnoreCase(_args.order) ? 'INPUT'
        : 'QUALITY'.equalsIgnoreCase(_args.order) ? 'QUALITY'
+       : 'SIZE'   .equalsIgnoreCase(_args.order) ? 'SIZE'
        : 'DATE'   .equalsIgnoreCase(_args.order) ? 'DATE'
        : 'TIME'   .equalsIgnoreCase(_args.order) ? 'TIME'
        : binary ? 'INPUT' : 'QUALITY'
@@ -59,6 +60,8 @@ def order(files) {
 			return files
 		case 'QUALITY':
 			return files.toSorted(VideoQuality.DESCENDING_ORDER)
+		case 'SIZE':
+			return files.toSorted{ -(it.length()) }
 		case 'DATE':
 			return files.toSorted{ -(it.mediaCharacteristics?.creationTime?.toEpochMilli() ?: it.creationDate) }
 		case 'TIME':
