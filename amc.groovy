@@ -81,6 +81,12 @@ def ut = _def.findAll{ k, v -> k.startsWith('ut_') }.collectEntries{ k, v ->
 	return [k.substring(3), v ? v : null]
 }
 
+_def.each{ k, v ->
+	if (v =~ /^[@'"]|[@'"]$/) {
+		log.warning "Bad $k value: $v"
+	}
+}
+
 if (_args.db) {
 	log.warning "Invalid usage: The --db option has no effect"
 }
