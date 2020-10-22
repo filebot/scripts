@@ -10,7 +10,7 @@ execute mkvpropedit, '--version'
 execute mp4tags,     '--version'
 
 
-void mkv(f, m) {
+def mkv(f, m) {
 	def xml = null
 
 	if (m instanceof Episode) {
@@ -97,7 +97,7 @@ void mkv(f, m) {
 }
 
 
-void mp4(f, m) {
+def mp4(f, m) {
 	def options = [
 			'-song'        : m,
 			'-hdvideo'     : f.mediaCharacteristics?.height >= 1000 ? '1' : '0'
@@ -111,10 +111,11 @@ void mp4(f, m) {
 			'-episode'     : m.episode,
 			'-season'      : m.season,
 			'-description' : m.title,
+			'-genre'       : m.seriesInfo.genres[0],
+			'-network'     : m.seriesInfo.network,
 			'-artist'      : m.info?.director,
-			'-genre'       : m.seriesInfo?.genres[0],
-			'-network'     : m.seriesInfo?.network,
-			'-longdesc'    : m.info?.overview
+			'-longdesc'    : m.info?.overview,
+			'-picture'     : poster(m.seriesInfo)
 		]
 	}
 
@@ -126,12 +127,33 @@ void mp4(f, m) {
 			'-grouping'    : m.info?.collection,
 			'-genre'       : m.info?.genres[0],
 			'-description' : m.info?.tagline,
-			'-longdesc'    : m.info?.overview
+			'-longdesc'    : m.info?.overview,
+			'-picture'     : poster(m)
 		]
 	}
 
 	def args = options.findAll{ k, v -> v }.collectMany{ k, v -> [k, v] }
 	execute(mp4tags, *args, f)
+}
+
+
+def poster(m) {
+	try {
+		def url = m.artwork.url[0]
+		if (url) {
+			def bytes = url.cache().get()
+			def image = javax.imageio.ImageIO.read(new ByteArrayInputStream(bytes))
+
+			def file = File.createTempFile('poster', '.png')
+			file.deleteOnExit()
+
+			javax.imageio.ImageIO.write(image, 'png', file)
+			return file
+		}
+	} catch(e) {
+		log.finest(e.message)
+	}
+	return null
 }
 
 
