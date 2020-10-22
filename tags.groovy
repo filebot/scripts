@@ -50,7 +50,7 @@ void mkv(f, m) {
 						Name('XATTR')
 						String(m.toJsonString())
 					}
-				}				
+				}
 			}
 		}
 	}
