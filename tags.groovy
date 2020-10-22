@@ -7,7 +7,85 @@ execute 'mp4tags',     '--version'
 
 
 void mkv(f, m) {
-	execute 'mkvpropedit', '--verbose', f, '--edit', 'info', '--set', "title=$m"
+	def xml = null
+
+	if (m instanceof Episode) {
+		xml = XML {
+			Tags {
+				Tag {
+					Targets {
+						TargetTypeValue('70')
+					}
+					if (m.seriesInfo.database =~ /TheTVDBs/) {
+						Simple {
+							Name('TVDB')
+							String(m.seriesInfo.id.pad(5))
+						}
+					}
+					if (m.seriesInfo.database =~ /TheMovieDB/) {
+						Simple {
+							Name('TMDB')
+							String('tv/' + m.seriesInfo.id)
+						}
+					}
+				}
+				Tag {
+					Targets {
+						TargetTypeValue('60')
+					}
+					Simple {
+						Name('PART_NUMBER')
+						String(m.season ?: 0)
+					}
+				}
+				Tag {
+					Targets {
+						TargetTypeValue('50')
+					}
+					Simple {
+						Name('PART_NUMBER')
+						String(m.episode ?: 0)
+					}
+					Simple {
+						Name('XATTR')
+						String(m.toJsonString())
+					}
+				}				
+			}
+		}
+	}
+
+	if (m instanceof Movie) {
+		xml = XML {
+			Tags {
+				Tag {
+					Targets {
+						TargetTypeValue('70')
+					}
+					if (m.imdbId > 0) {
+						Simple {
+							Name('IMDB')
+							String('tt' + m.imdbId.pad(7))
+						}
+					}
+					if (m.tmdbId > 0) {
+						Simple {
+							Name('TMDB')
+							String('movie/' + m.tmdbId)
+						}
+					}
+				}
+			}
+		}
+	}
+
+	def tags = File.createTempFile('tags', '.xml')
+	tags.deleteOnExit()
+
+	log.finest(xml)
+	xml.saveAs(tags)	
+
+	execute 'mkvpropedit', '--verbose', f, '--edit', 'info', '--set', "title=$m", '--tags', "global:$tags"
 }
 
 
@@ -16,6 +94,7 @@ void mp4(f, m) {
 			'-song'        : m,
 			'-hdvideo'     : f.mediaCharacteristics?.height >= 1000 ? '1' : '0'
 	]
+
 	if (m instanceof Episode) {
 		options << [
 			'-type'        : 'tvshow',
@@ -30,6 +109,7 @@ void mp4(f, m) {
 			'-longdesc'    : m.info?.overview
 		]
 	}
+
 	if (m instanceof Movie) {
 		options << [
 			'-type'        : 'movie',
