@@ -1,9 +1,13 @@
 #!/usr/bin/env filebot -script
 
 
+def mkvpropedit = any{ mkvpropedit }{ 'mkvpropedit' }
+def mp4tags     = any{ mp4tags     }{ 'mp4tags'     }
+
+
 // require mkvtoolnix and mp4v2 tools
-execute 'mkvpropedit', '--version'
-execute 'mp4tags',     '--version'
+execute mkvpropedit, '--version'
+execute mp4tags,     '--version'
 
 
 void mkv(f, m) {
@@ -89,7 +93,7 @@ void mkv(f, m) {
 	log.finest(xml)
 	xml.saveAs(tags)	
 
-	execute 'mkvpropedit', '--verbose', f, '--edit', 'info', '--set', "title=$m", '--tags', "global:$tags"
+	execute mkvpropedit, '--verbose', f, '--edit', 'info', '--set', "title=$m", '--tags', "global:$tags"
 }
 
 
@@ -127,7 +131,7 @@ void mp4(f, m) {
 	}
 
 	def args = options.findAll{ k, v -> v }.collectMany{ k, v -> [k, v] }
-	execute('mp4tags', *args, f)
+	execute(mp4tags, *args, f)
 }
 
 
