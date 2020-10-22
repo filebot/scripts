@@ -74,6 +74,10 @@ void mkv(f, m) {
 							String('movie/' + m.tmdbId)
 						}
 					}
+					Simple {
+						Name('XATTR')
+						String(m.toJsonString())
+					}
 				}
 			}
 		}
