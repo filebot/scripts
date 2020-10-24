@@ -20,7 +20,7 @@ def mkv(f, m) {
 					Targets {
 						TargetTypeValue('70')
 					}
-					if (m.seriesInfo.database =~ /TheTVDBs/) {
+					if (m.seriesInfo.database =~ /TheTVDB/) {
 						Simple {
 							Name('TVDB')
 							String(m.seriesInfo.id.pad(5))
