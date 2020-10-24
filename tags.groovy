@@ -11,7 +11,10 @@ execute mp4tags,     '--version'
 
 
 def mkv(f, m) {
+	def args = ['--verbose', f, '--edit', 'info', '--set', "title=$m"]
+
 	def xml = null
+	def cover = null
 
 	if (m instanceof Episode) {
 		xml = XML {
@@ -57,6 +60,7 @@ def mkv(f, m) {
 				}
 			}
 		}
+		cover = poster(m.seriesInfo)
 	}
 
 	if (m instanceof Movie) {
@@ -85,15 +89,24 @@ def mkv(f, m) {
 				}
 			}
 		}
+		cover = poster(m)
 	}
 
-	def tags = File.createTempFile('tags', '.xml')
-	tags.deleteOnExit()
+	if (xml) {
+		def tags = File.createTempFile('tags', '.xml')
+		tags.deleteOnExit()
 
-	log.finest(xml)
-	xml.saveAs(tags)	
+		log.finest(xml)
+		xml.saveAs(tags)
 
-	execute mkvpropedit, '--verbose', f, '--edit', 'info', '--set', "title=$m", '--tags', "global:$tags"
+		args += ['--tags', "global:$tags"]
+	}
+	
+	if (cover) {
+		args += ['--attachment-name', 'cover.png', '--attachment-mime-type', 'image/png', '--add-attachment', cover]
+	}
+
+	execute(mkvpropedit, *args)
 }
 
 
