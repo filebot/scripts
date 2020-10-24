@@ -1,13 +1,9 @@
 #!/usr/bin/env filebot -script
 
 
+// require mkvtoolnix and mp4v2 tools
 def mkvpropedit = any{ mkvpropedit }{ 'mkvpropedit' }
 def mp4tags     = any{ mp4tags     }{ 'mp4tags'     }
-
-
-// require mkvtoolnix and mp4v2 tools
-execute mkvpropedit, '--version'
-execute mp4tags,     '--version'
 
 
 def mkv(f, m) {
