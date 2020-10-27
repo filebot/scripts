@@ -147,9 +147,9 @@ def mp4(f, m) {
 
 
 def poster(m) {
-	try {
-		def url = m.artwork.url[0]
-		if (url) {
+	def url = m.artwork.url[0]
+	if (url) {
+		try {
 			def bytes = url.cache().get()
 			def image = javax.imageio.ImageIO.read(new ByteArrayInputStream(bytes))
 
@@ -158,9 +158,9 @@ def poster(m) {
 
 			javax.imageio.ImageIO.write(image, 'png', file)
 			return file
+		} catch(e) {
+			log.finest "$e.message [$url]"
 		}
-	} catch(e) {
-		log.finest(e.message)
 	}
 	return null
 }
