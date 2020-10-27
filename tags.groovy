@@ -99,7 +99,11 @@ def mkv(f, m) {
 	}
 	
 	if (cover) {
-		args += ['--attachment-name', 'cover.png', '--attachment-mime-type', 'image/png', '--add-attachment', cover]
+		if (f.mediaInfo.General.Attachments =~ /cover.png/) {
+			args += ['--attachment-name', 'cover.png', '--attachment-mime-type', 'image/png', '--replace-attachment', "name:cover.png:$cover"]
+		} else {
+			args += ['--attachment-name', 'cover.png', '--attachment-mime-type', 'image/png', '--add-attachment', cover]
+		}
 	}
 
 	execute(mkvpropedit, *args)
