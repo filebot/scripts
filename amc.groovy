@@ -14,7 +14,7 @@ failOnError = _args.conflict.equalsIgnoreCase('fail')
 testRun = license == null || _args.action.equalsIgnoreCase('test')
 
 // --output folder must be a valid folder
-outputFolder = tryLogCatch{ any{ _args.output }{ '.' }.toFile().getCanonicalFile() }
+outputFolder = _args.absoluteOutputFolder ?: ('.' as File).getCanonicalFile()
 
 // enable/disable features as specified via --def parameters
 unsorted  = tryQuietly{ unsorted.toBoolean() }
