@@ -11,7 +11,7 @@ args.withIndex().each{ f, i -> if (f.exists()) { log.finest "Argument[$i]: $f" }
 
 // initialize variables
 failOnError = _args.conflict.equalsIgnoreCase('fail')
-testRun = license == null || _args.action.equalsIgnoreCase('test')
+testRun = _args.action.equalsIgnoreCase('test')
 
 // --output folder must be a valid folder
 outputFolder = _args.absoluteOutputFolder ?: ('.' as File).getCanonicalFile()
