@@ -2,12 +2,12 @@
 
 
 log.fine '\n# Environment Variables #'
-_environment.entrySet().toSorted{ it.key }.each{ k, v ->
+_environment.toSorted{ it.key }.each{ k, v ->
 	log.info "$k: $v"
 }
 
 log.fine '\n# Java System Properties #'
-_system.entrySet().toSorted{ it.key }.each{ k, v ->
+_system.toSorted{ it.key }.each{ k, v ->
 	log.info "$k: $v"
 }
 
