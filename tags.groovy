@@ -56,7 +56,7 @@ def mkv(f, m) {
 				}
 			}
 		}
-		cover = poster(m.seriesInfo)
+		cover = poster(m.series?.poster)
 	}
 
 	if (m instanceof Movie) {
@@ -85,7 +85,7 @@ def mkv(f, m) {
 				}
 			}
 		}
-		cover = poster(m)
+		cover = poster(m.info?.poster)
 	}
 
 	if (xml) {
@@ -128,7 +128,7 @@ def mp4(f, m) {
 			'-network'     : m.seriesInfo.network,
 			'-artist'      : m.info?.director,
 			'-longdesc'    : m.info?.overview,
-			'-picture'     : poster(m.seriesInfo)
+			'-picture'     : poster(m.series?.poster)
 		]
 	}
 
@@ -141,7 +141,7 @@ def mp4(f, m) {
 			'-genre'       : m.info?.genres[0],
 			'-description' : m.info?.tagline,
 			'-longdesc'    : m.info?.overview,
-			'-picture'     : poster(m)
+			'-picture'     : poster(m.info?.poster)
 		]
 	}
 
@@ -150,8 +150,7 @@ def mp4(f, m) {
 }
 
 
-def poster(m) {
-	def url = m.artwork.url[0]
+def poster(url) {
 	if (url) {
 		try {
 			def bytes = url.cache().get()
