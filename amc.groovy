@@ -21,7 +21,6 @@ unsorted  = tryQuietly{ unsorted.toBoolean() }
 music     = tryQuietly{ music.toBoolean() }
 subtitles = tryQuietly{ subtitles.split(/\W+/) as List }
 artwork   = tryQuietly{ artwork.toBoolean() && !testRun }
-extras    = tryQuietly{ extras.toBoolean() }
 clean     = tryQuietly{ clean.toBoolean() }
 exec      = tryQuietly{ exec.toString() }
 
@@ -405,7 +404,7 @@ groups.each{ group, files ->
 						def movieInfo = movieFile.metadata
 						log.fine "Fetching movie artwork for [$movieInfo] to [$dir]"
 						if (movieInfo) {
-							fetchMovieArtworkAndNfo(dir, movieInfo, movieFile, extras, false, _args.language.locale)
+							fetchMovieArtworkAndNfo(dir, movieInfo, movieFile, false, _args.language.locale)
 						}
 					}
 				}

@@ -1,9 +1,6 @@
 #!/usr/bin/env filebot -script
 
 
-def extras = any{ extras.toBoolean() }{ false }
-
-
 // sanity checks
 if (args.size() == 0) {
 	die "Illegal usage: no input"
@@ -52,6 +49,6 @@ args.eachMediaFolder{ dir ->
 
 	log.fine "$dir => $movie"
 	tryLogCatch {
-		fetchMovieArtworkAndNfo(dir, movie, dir.getFiles{ it.isVideo() }.sort{ it.length() }.reverse().findResult{ it }, extras, false, locale)
+		fetchMovieArtworkAndNfo(dir, movie, dir.getFiles{ it.isVideo() }.sort{ it.length() }.reverse().findResult{ it }, false, locale)
 	}
 }
