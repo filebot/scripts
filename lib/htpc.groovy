@@ -102,7 +102,7 @@ def fetchSeriesBanner(outputFile, seriesId, bannerType, bannerType2, season, ove
 
 	// select and fetch banner
 	def artwork = TheTVDB.getArtwork(seriesId, bannerType, locale)
-	def banner = [locale.language, null].findResult { lang -> artwork.find{ it.matches(bannerType2, season, lang) } }
+	def banner = artwork.find{ it.matches(bannerType2, season) }
 	if (banner == null) {
 		log.finest "Banner not found: $outputFile / $bannerType:$bannerType2"
 		return null
@@ -118,7 +118,7 @@ def fetchSeriesFanart(outputFile, seriesId, type, season, override, locale) {
 	}
 
 	def artwork = FanartTV.getArtwork(seriesId, "tv", locale)
-	def fanart = [locale.language, null].findResult{ lang -> artwork.find{ it.matches(type, season, lang) } }
+	def fanart = artwork.find{ it.matches(type, season) }
 	if (fanart == null) {
 		log.finest "Fanart not found: $outputFile / $type"
 		return null
@@ -206,32 +206,13 @@ def fetchMovieArtwork(outputFile, movieInfo, category, override, locale) {
 
 	// select and fetch artwork
 	def artwork = TheMovieDB.getArtwork(movieInfo.id, category, locale)
-	def selection = [locale.language, 'en', null].findResult{ lang -> artwork.find{ it.matches(lang) } }
+	def selection = artwork[0]
 	if (selection == null) {
 		log.finest "Artwork not found: $outputFile"
 		return null
 	}
 	log.finest "Fetching $outputFile => $selection"
 	return selection.url.saveAs(outputFile)
-}
-
-def fetchAllMovieArtwork(outputFolder, prefix, movieInfo, category, override, locale) {
-	// select and fetch artwork
-	def artwork = TheMovieDB.getArtwork(movieInfo.id, category, locale)
-	def selection = [locale.language, 'en', null].findResults{ lang -> artwork.findAll{ it.matches(lang) } }.flatten().unique()
-	if (selection == null) {
-		log.finest "Artwork not found: $outputFolder"
-		return null
-	}
-	selection.eachWithIndex{ s, i ->
-		def outputFile = new File(outputFolder, "${prefix}${i+1}.jpg")
-		if (outputFile.exists() && !override) {
-			log.finest "Artwork already exists: $outputFile"
-		} else {
-			log.finest "Fetching $outputFile => $s"
-			s.url.saveAs(outputFile)
-		}
-	}
 }
 
 def fetchMovieFanart(outputFile, movieInfo, type, diskType, override, locale) {
@@ -241,7 +222,7 @@ def fetchMovieFanart(outputFile, movieInfo, type, diskType, override, locale) {
 	}
 
 	def artwork = FanartTV.getArtwork(movieInfo.id, "movies", locale)
-	def fanart = [locale, null].findResult{ lang -> artwork.find{ it.matches(type, diskType, lang) } }
+	def fanart = artwork.find{ it.matches(type, diskType) }
 	if (fanart == null) {
 		log.finest "Fanart not found: $outputFile / $type"
 		return null
@@ -329,34 +310,20 @@ def fetchMovieNfo(outputFile, i, movieFile) {
 	xml.saveAs(outputFile)
 }
 
-def fetchMovieArtworkAndNfo(movieDir, movie, movieFile = null, extras = false, override = false, locale = Locale.ENGLISH) {
+def fetchMovieArtworkAndNfo(movieDir, movie, movieFile = null, override = false, locale = Locale.ENGLISH) {
 	tryLogCatch {
 		def movieInfo = TheMovieDB.getMovieInfo(movie, locale, true)
 
 		// fetch nfo
 		fetchMovieNfo(movieDir.resolve('movie.nfo'), movieInfo, movieFile)
 
-		// generate url files
-		if (extras) {
-			[[db:'imdb', id:movieInfo.imdbId, url:'http://www.imdb.com/title/tt' + (movieInfo.imdbId ?: 0).pad(7)], [db:'tmdb', id:movieInfo.id, url:"http://www.themoviedb.org/movie/${movieInfo.id}"]].each{
-				if (it.id > 0) {
-					def content = "[InternetShortcut]\nURL=${it.url}\n"
-					content.saveAs(movieDir.resolve("${it.db}.url"))
-				}
-			}
-		}
-
 		// fetch series banner, fanart, posters, etc
 		fetchMovieArtwork(movieDir.resolve('poster.jpg'), movieInfo, 'posters', override, locale)
-		fetchMovieArtwork(movieDir.resolve('fanart.jpg'), movieInfo, 'backdrops', override, locale)
+		fetchMovieArtwork(movieDir.resolve('fanart.jpg'), movieInfo, 'backdrops', override, Locale.ROOT) // prefer no language backdrops
 
 		['hdmovieclearart', 'movieart'].findResult { type -> fetchMovieFanart(movieDir.resolve('clearart.png'), movieInfo, type, null, override, locale) }
 		['hdmovielogo', 'movielogo'].findResult { type -> fetchMovieFanart(movieDir.resolve('logo.png'), movieInfo, type, null, override, locale) }
 		['bluray', 'dvd', null].findResult { diskType -> fetchMovieFanart(movieDir.resolve('disc.png'), movieInfo, 'moviedisc', diskType, override, locale) }
-
-		if (extras) {
-			fetchAllMovieArtwork(movieDir.resolve('extrafanart'), 'fanart', movieInfo, 'backdrops', override, locale)
-		}
 
 		// folder image (reuse movie poster if possible)
 		copyIfPossible(movieDir.resolve('poster.jpg'), movieDir.resolve('folder.jpg'))
