@@ -105,7 +105,7 @@ if (ut.dir) {
 	if (ut.dir == '/') {
 		die "Invalid usage: No! Are you insane? You can't just pass in the entire filesystem. Think long and hard about what you just tried to do."
 	}
-	if (ut.dir.toFile() in outputFolder.listPath()) {
+	if (ut.dir.toFile() in outputFolder.listPath() || outputFolder in ut.dir.toFile().listPath()) {
 		die "Invalid usage: output folder [$outputFolder] must be separate from input folder $ut"
 	}
 } else if (args.size() == 0) {
