@@ -25,22 +25,16 @@ try {
 
 // 7-Zip-JBinding: OK
 try {
-	switch (System.getProperty('net.filebot.archive.extractor')) {
-		case 'ApacheVFS':
-			print 'Apache Commons VFS: '
-			println org.apache.commons.vfs2.VFS.manager.schemes.findAll{ !(it =~ /file|gz|bz2|par|res|sar|war|tmp|ear|ejb3|jar|ram|ftp/) }
-			break
-		case 'ShellExecutables':
-			net.filebot.archive.ShellExecutables.Command.values().each{
-				print "$it: "
-				println it.version().match(/.[0-9]+/)
-			}
-			break
-		default:
-			print '7-Zip-JBinding: '
-			net.filebot.archive.SevenZipLoader.requireNativeLibraries() // try to load 7-Zip-JBinding native libs (default)
-			println net.filebot.archive.SevenZipLoader.getNativeVersion()
-			break
+	if (net.filebot.archive.Archive.extractor =~ /SevenZipNativeBindings/) {
+		print '7-Zip-JBinding: '
+		net.filebot.archive.SevenZipLoader.requireNativeLibraries()
+		println net.filebot.archive.SevenZipLoader.getNativeVersion()
+	}
+	if (net.filebot.archive.Archive.extractor =~ /ShellExecutables/) {
+		net.filebot.archive.ShellExecutables.Command.each{
+			print "$it: "
+			println it.version().match(/.[0-9]+/)
+		}
 	}
 } catch(Throwable error) {
 	println error
