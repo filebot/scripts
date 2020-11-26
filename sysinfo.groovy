@@ -33,7 +33,7 @@ try {
 	if (net.filebot.archive.Archive.extractor =~ /ShellExecutables/) {
 		net.filebot.archive.ShellExecutables.Command.each{
 			print "$it: "
-			println it.version().match(/\b[.0-9]+\b/)
+			println it.version().match(/\b[.\d]+\b/)
 		}
 	}
 } catch(Throwable error) {
@@ -55,7 +55,7 @@ try {
 // Chromaprint: fpcalc version 1.4.2
 try {
 	print 'Chromaprint: '
-	println AcoustID.version().match(/[.\d]+/)
+	println AcoustID.version().match(/\b[.\d]+\b/)
 } catch(Throwable error) {
 	println error
 }
