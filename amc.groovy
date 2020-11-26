@@ -105,8 +105,11 @@ if (ut.dir) {
 	if (ut.dir == '/') {
 		die "Invalid usage: No! Are you insane? You can't just pass in the entire filesystem. Think long and hard about what you just tried to do."
 	}
-	if (ut.dir.toFile() in outputFolder.listPath() || outputFolder in ut.dir.toFile().listPath()) {
+	if (ut.dir.toFile() in outputFolder.listPath()) {
 		die "Invalid usage: output folder [$outputFolder] must not be inside input folder [$ut.dir] and vice versa"
+	}
+	if (outputFolder in ut.dir.toFile().listPath()) {
+		log.warning "Invalid usage: output folder [$outputFolder] must not be inside input folder [$ut.dir] and vice versa"
 	}
 } else if (args.size() == 0) {
 	die "Invalid usage: no input"
