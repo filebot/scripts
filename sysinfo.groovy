@@ -33,7 +33,7 @@ try {
 		case 'ShellExecutables':
 			net.filebot.archive.ShellExecutables.Command.values().each{
 				print "$it: "
-				println it.version()
+				println it.version().match(/.[0-9]+/)
 			}
 			break
 		default:
