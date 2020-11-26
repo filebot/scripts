@@ -33,7 +33,7 @@ try {
 	if (net.filebot.archive.Archive.extractor =~ /ShellExecutables/) {
 		net.filebot.archive.ShellExecutables.Command.each{
 			print "$it: "
-			println it.version().match(/.[0-9]+/)
+			println it.version().match(/[.0-9]+/)
 		}
 	}
 } catch(Throwable error) {
