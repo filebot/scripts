@@ -23,6 +23,9 @@ try {
 }
 
 
+// Tools: fpcalc/1.5.0
+def tools = [:]
+
 // 7-Zip-JBinding: OK
 try {
 	if (net.filebot.archive.Archive.extractor =~ /SevenZipNativeBindings/) {
@@ -31,34 +34,29 @@ try {
 		println net.filebot.archive.SevenZipLoader.getNativeVersion()
 	}
 	if (net.filebot.archive.Archive.extractor =~ /ShellExecutables/) {
-		net.filebot.archive.ShellExecutables.Command.each{
-			print "$it: "
-			println it.version().match(/\b[.\d]+\b/)
+		net.filebot.archive.ShellExecutables.Command.each{ c ->
+			tools[c] = any{ c.version().match(/[.\d]{3,}/) }{ null }
 		}
 	}
 } catch(Throwable error) {
 	println error
 }
 
-
-// FFprobe: 3.2.4
-try {
-	if (MediaCharacteristicsParser.getDefault() =~ /ffprobe/) {
-		print 'FFprobe: '
-		println new net.filebot.media.FFProbe().version().match(/version=(\S+)/)
-	}
-} catch(Throwable error) {
-	println error
+// ffprobe version 3.3.7
+if (MediaCharacteristicsParser.getDefault() =~ /ffprobe/) {
+	tools['ffprobe'] = any{ new net.filebot.media.FFProbe().version().match(/version=(\S+)/) }{ null }
 }
 
+// fpcalc version 1.5.0
+tools['fpcalc'] = any{ AcoustID.version().match(/[.\d]{3,}/) }{ null }
 
-// Chromaprint: fpcalc version 1.4.2
-try {
-	print 'Chromaprint: '
-	println AcoustID.version().match(/\b[.\d]+\b/)
-} catch(Throwable error) {
-	println error
+// mkvpropedit v50.0.0
+net.filebot.postprocess.Tag.Command.each{ c -> 
+	tools[c] = any{ c.version().match(/[.\d]{3,}/) }{ null }
 }
+
+print 'Tools: '
+println tools.findAll{ c, v -> v }.collect{ c, v -> "$c/$v" }.join(' ') ?: 'NONE'
 
 
 // Extended File Attributes
