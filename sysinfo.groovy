@@ -26,6 +26,9 @@ try {
 // Tools: fpcalc/1.5.0
 def tools = [:]
 
+// fpcalc version 1.5.0
+tools['fpcalc'] = { AcoustID.version().match(/[.\d]{3,}/) }
+
 // 7-Zip-JBinding: OK
 try {
 	if (net.filebot.archive.Archive.extractor =~ /SevenZipNativeBindings/) {
@@ -43,16 +46,21 @@ try {
 }
 
 // ffprobe version 3.3.7
-if (MediaCharacteristicsParser.getDefault() =~ /ffprobe/) {
-	tools['ffprobe'] = { new net.filebot.media.FFProbe().version().match(/version=(\S+)/) }
+try {
+	if (MediaCharacteristicsParser.getDefault() =~ /ffprobe/) {
+		tools['ffprobe'] = { new net.filebot.media.FFProbe().version().match(/version=(\S+)/) }
+	}
+} catch(Throwable error) {
+	// ignore
 }
 
-// fpcalc version 1.5.0
-tools['fpcalc'] = { AcoustID.version().match(/[.\d]{3,}/) }
-
 // mkvpropedit v50.0.0
-net.filebot.postprocess.Tag.Command.each{ c -> 
-	tools[c] = { c.version().match(/[.\d]{3,}/) }
+try {
+	net.filebot.postprocess.Tag.Command.each{ c -> 
+		tools[c] = { c.version().match(/[.\d]{3,}/) }
+	}
+} catch(Throwable error) {
+	// ignore
 }
 
 print 'Tools: '
