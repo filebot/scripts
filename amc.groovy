@@ -109,7 +109,7 @@ if (ut.dir) {
 		die "Invalid usage: output folder [$outputFolder] must not be inside input folder [$ut.dir] and vice versa"
 	}
 	if (outputFolder in ut.dir.toFile().listPath()) {
-		log.warning "Invalid usage: output folder [$outputFolder] must not be inside input folder [$ut.dir] and vice versa"
+		log.warning "Invalid usage: input folder [$ut.dir] must not be inside output folder [$outputFolder] and vice versa"
 	}
 } else if (args.size() == 0) {
 	die "Invalid usage: no input"
