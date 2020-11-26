@@ -35,7 +35,7 @@ try {
 	}
 	if (net.filebot.archive.Archive.extractor =~ /ShellExecutables/) {
 		net.filebot.archive.ShellExecutables.Command.each{ c ->
-			tools[c] = any{ c.version().match(/[.\d]{3,}/) }{ null }
+			tools[c] = { c.version().match(/[.\d]{3,}/) }
 		}
 	}
 } catch(Throwable error) {
@@ -44,19 +44,19 @@ try {
 
 // ffprobe version 3.3.7
 if (MediaCharacteristicsParser.getDefault() =~ /ffprobe/) {
-	tools['ffprobe'] = any{ new net.filebot.media.FFProbe().version().match(/version=(\S+)/) }{ null }
+	tools['ffprobe'] = { new net.filebot.media.FFProbe().version().match(/version=(\S+)/) }
 }
 
 // fpcalc version 1.5.0
-tools['fpcalc'] = any{ AcoustID.version().match(/[.\d]{3,}/) }{ null }
+tools['fpcalc'] = { AcoustID.version().match(/[.\d]{3,}/) }
 
 // mkvpropedit v50.0.0
 net.filebot.postprocess.Tag.Command.each{ c -> 
-	tools[c] = any{ c.version().match(/[.\d]{3,}/) }{ null }
+	tools[c] = { c.version().match(/[.\d]{3,}/) }
 }
 
 print 'Tools: '
-println tools.findAll{ c, v -> v }.collect{ c, v -> "$c/$v" }.join(' ') ?: 'NONE'
+println tools.findResults{ c, v -> any{ "${c}/${v()}" }{ null } }.join(' ') ?: 'NONE'
 
 
 // Extended File Attributes
