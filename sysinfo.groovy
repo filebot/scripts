@@ -176,9 +176,8 @@ try {
 		}
 	}
 
-	println "CPU/MEM: ${cpuinfo.join(' / ')} (${meminfo.join(' / ')})"
+	println String.format('CPU/MEM: %s [%s]', cpuinfo.join(' / '), meminfo.join(' / '))
 } catch(Throwable error) {
-	println error
 	// silently fail on non-Unix platforms
 }
 
