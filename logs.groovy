@@ -11,8 +11,15 @@ if (logFiles.size() == 0) {
 }
 
 
-logFiles.each{
-	println "# $it"
-	it.eachLine('UTF-8') { println it }
+def grep = any{ ~_args.query }{ null }
+
+
+logFiles.each{ f ->
+	println "# $f"
+	f.eachLine('UTF-8') { line ->
+		if (grep == null || line =~ grep) {
+			println line
+		}		
+	}
 	println ""
 }
