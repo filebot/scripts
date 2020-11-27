@@ -161,6 +161,22 @@ println String.format('OS: %s (%s)', System.getProperty('os.name'), System.getPr
 // Linux diskstation 3.2.40 #23739 Fri Jun 8 12:48:05 CST 2018 armv7l GNU/Linux synology_armada370_213j
 try {
 	println 'HW: ' + ['uname', '-a'].execute().text.trim()
+
+	def cpuinfo = [:]
+	'/proc/cpuinfo'.toFile().splitEachLine(/\s*[:]\s*/){ row ->
+		if (row[0] =~ /(?i:Processor)/) {
+			cpuinfo[row[0]] = row[1]
+		}
+	}
+
+	def meminfo = [:]
+	'/proc/meminfo'.toFile().splitEachLine(/\s*[:]\s*/){ row ->
+		if (row[0] =~ /(?i:Mem|Swap)/) {
+			meminfo[row[0]] = row[1]
+		}
+	}
+
+	println "CPU/MEM: " + cpuinfo.join(' / ') + meminfo.collect{ m, s -> "$m $s"}.joining(' / ', '(', ')')
 } catch(Throwable error) {
 	// silently fail on non-Unix platforms
 }
