@@ -162,21 +162,21 @@ println String.format('OS: %s (%s)', System.getProperty('os.name'), System.getPr
 try {
 	println 'HW: ' + ['uname', '-a'].execute().text.trim()
 
-	def cpuinfo = [:]
-	'/proc/cpuinfo'.toFile().splitEachLine(/\s*[:]\s*/){ row ->
+	def cpuinfo = []
+	'/proc/cpuinfo'.toFile().splitEachLine(/[:]/){ row ->
 		if (row[0] =~ /(?i:Processor)/) {
-			cpuinfo[row[0]] = row[1]
+			cpuinfo << row[1]
 		}
 	}
 
-	def meminfo = [:]
+	def meminfo = []
 	'/proc/meminfo'.toFile().splitEachLine(/\s*[:]\s*/){ row ->
 		if (row[0] =~ /(?i:Mem|Swap)/) {
-			meminfo[row[0]] = row[1]
+			meminfo << row[0] + " " + row[1]
 		}
 	}
 
-	println "CPU/MEM: " + cpuinfo.join(' / ') + meminfo.collect{ m, s -> "$m $s"}.joining(' / ', '(', ')')
+	println "CPU/MEM: ${cpuinfo.join(' / ')} (${meminfo.join(' / ')})"
 } catch(Throwable error) {
 	println error
 	// silently fail on non-Unix platforms
