@@ -163,16 +163,16 @@ try {
 	println 'HW: ' + ['uname', '-a'].execute().text.trim()
 
 	def cpuinfo = [] as Set
-	'/proc/cpuinfo'.toFile().splitEachLine(/[:]/){ row ->
-		if (row[0] =~ /(?i:Processor)/) {
+	'/proc/cpuinfo'.toFile().splitEachLine(/\:\s+/){ row ->
+		if (row[0] =~ /^Processor|^model.name/) {
 			cpuinfo << row[1]
 		}
 	}
 
 	def meminfo = [] as Set
-	'/proc/meminfo'.toFile().splitEachLine(/\s*[:]\s*/){ row ->
-		if (row[0] =~ /(?i:Mem|Swap)/) {
-			meminfo << row[0] + " " + row[1]
+	'/proc/meminfo'.toFile().splitEachLine(/\:\s+/){ row ->
+		if (row[0] =~ /^Mem|^Swap/) {
+			meminfo << row[1].match(/\d+/).toLong().multiply(1024).getDisplaySize()
 		}
 	}
 
