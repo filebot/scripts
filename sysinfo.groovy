@@ -178,6 +178,7 @@ try {
 
 	println "CPU/MEM: " + cpuinfo.join(' / ') + meminfo.collect{ m, s -> "$m $s"}.joining(' / ', '(', ')')
 } catch(Throwable error) {
+	println error
 	// silently fail on non-Unix platforms
 }
 
