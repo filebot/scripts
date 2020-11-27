@@ -164,7 +164,7 @@ try {
 
 	def cpuinfo = [] as Set
 	'/proc/cpuinfo'.toFile().splitEachLine(/\:\s+/){ row ->
-		if (row[0] =~ /^Processor|^model.name/) {
+		if (row[0] =~ /^Hardware|^model.name/) {
 			cpuinfo << row[1].trim()
 		}
 	}
@@ -172,11 +172,10 @@ try {
 	def meminfo = [] as Set
 	'/proc/meminfo'.toFile().splitEachLine(/\:\s+/){ row ->
 		if (row[0] =~ /^Mem|^Swap/) {
-			meminfo << row[0].trim() + " " + row[1].match(/\d+/).toLong().multiply(1024).getDisplaySize()
+			meminfo << row[0].trim() + ": " + row[1].match(/\d+/).toLong().multiply(1024).getDisplaySize()
 		}
 	}
-
-	println String.format('CPU/MEM: %s [%s]', cpuinfo.join(' / '), meminfo.join(' / '))
+	println String.format('CPU/MEM: %s [%s]', cpuinfo.join(' | '), meminfo.join(' | '))
 } catch(Throwable error) {
 	// silently fail on non-Unix platforms
 }
