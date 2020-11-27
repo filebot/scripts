@@ -162,14 +162,14 @@ println String.format('OS: %s (%s)', System.getProperty('os.name'), System.getPr
 try {
 	println 'HW: ' + ['uname', '-a'].execute().text.trim()
 
-	def cpuinfo = []
+	def cpuinfo = [] as Set
 	'/proc/cpuinfo'.toFile().splitEachLine(/[:]/){ row ->
 		if (row[0] =~ /(?i:Processor)/) {
 			cpuinfo << row[1]
 		}
 	}
 
-	def meminfo = []
+	def meminfo = [] as Set
 	'/proc/meminfo'.toFile().splitEachLine(/\s*[:]\s*/){ row ->
 		if (row[0] =~ /(?i:Mem|Swap)/) {
 			meminfo << row[0] + " " + row[1]
