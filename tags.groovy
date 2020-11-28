@@ -1,9 +1,9 @@
 #!/usr/bin/env filebot -script
 
 
-// require mkvtoolnix and mp4v2 tools
-def mkvpropedit = any{ mkvpropedit }{ 'mkvpropedit' }
-def mp4tags     = any{ mp4tags     }{ 'mp4tags'     }
+// require mkvtoolnix and atomicparsley
+mkvpropedit   = any{ mkvpropedit   }{ 'mkvpropedit'   }
+atomicparsley = any{ atomicparsley }{ 'AtomicParsley' }
 
 
 def mkv(f, m) {
@@ -112,41 +112,53 @@ def mkv(f, m) {
 
 def mp4(f, m) {
 	def options = [
-			'-song'        : m,
-			'-hdvideo'     : f.mediaCharacteristics?.height >= 1000 ? '1' : '0'
+			'--title'        : m,
+			'--hdvideo'      : f.mediaCharacteristics?.height >= 1000 ? '2' : f.mediaCharacteristics?.height >= 700 ? '1' : '0'
 	]
 
 	if (m instanceof Episode) {
 		options << [
-			'-type'        : 'tvshow',
-			'-year'        : m.airdate,
-			'-show'        : m.seriesName,
-			'-episode'     : m.episode,
-			'-season'      : m.season,
-			'-description' : m.title,
-			'-genre'       : m.seriesInfo.genres[0],
-			'-network'     : m.seriesInfo.network,
-			'-artist'      : m.info?.director,
-			'-longdesc'    : m.info?.overview,
-			'-picture'     : poster(m.series?.poster)
+			'--stik'         : 'TV Show',
+			'--year'         : m.airdate?.toInstant(),
+			'--TVShowName'   : m.seriesName,
+			'--TVEpisodeNum' : m.episode,
+			'--TVSeasonNum'  : m.season,
+			'--description'  : m.title,
+			'--genre'        : m.info?.genres[0],
+			'--TVNetwork'    : m.info?.network,
+			'--artist'       : m.info?.director,
+			'--longdesc'     : m.info?.overview,
+			'--artwork'      : poster(m.series?.poster)
 		]
 	}
 
 	if (m instanceof Movie) {
 		options << [
-			'-type'        : 'movie',
-			'-year'        : m.info?.released ?: m.year,
-			'-artist'      : m.info?.director,
-			'-grouping'    : m.info?.collection,
-			'-genre'       : m.info?.genres[0],
-			'-description' : m.info?.tagline,
-			'-longdesc'    : m.info?.overview,
-			'-picture'     : poster(m.info?.poster)
+			'--stik'        : 'Movie',
+			'--year'        : m.info?.released?.toInstant() ?: m.year,
+			'--artist'      : m.info?.director,
+			'--grouping'    : m.info?.collection,
+			'--genre'       : m.info?.genres[0],
+			'--description' : m.info?.tagline,
+			'--longdesc'    : m.info?.overview,
+			'--artwork'     : poster(m.info?.poster)
+		]
+	}
+
+	if (m instanceof MoviePart) {
+		options << [
+			'--disk'        : m.partIndex + '/' + m.partCount
 		]
 	}
 
 	def args = options.findAll{ k, v -> v }.collectMany{ k, v -> [k, v] }
-	execute(mp4tags, *args, f)
+
+	// override existing artwork
+	if (options.'--artwork') {
+		args = ['--artwork', 'REMOVE_ALL', *args]
+	}
+
+	execute(atomicparsley, f, *args, '--overWrite')
 }
 
 
