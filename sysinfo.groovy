@@ -172,7 +172,10 @@ try {
 	def meminfo = [] as Set
 	'/proc/meminfo'.toFile().splitEachLine(/\:\s+/){ row ->
 		if (row[0] =~ /^Mem|^Swap/) {
-			meminfo << row[0].trim() + ": " + row[1].match(/\d+/).toLong().multiply(1024).getDisplaySize()
+			def space = row[1].match(/\d+/).toLong().multiply(1024)
+			if (space > 0) {
+				meminfo << row[0].trim() + ": " + space.getDisplaySize()
+			}
 		}
 	}
 	println String.format('CPU/MEM: %s [%s]', cpuinfo.join(' | '), meminfo.join(' | '))
@@ -184,16 +187,18 @@ try {
 // apfs [/] @ 30 GB | smbfs [/Volumes/Media] @ 1.4 TB
 try {
 	print 'STORAGE: '
-	println FileSystems.getDefault().getFileStores().findResults{ 
-		def fs = it.type()
-		def label = it.toString().replaceTrailingBrackets() ?: it
-		def space = it.usableSpace
-		// exclude clutter
-		if (fs =~ /rootfs|tmpfs/ || label =~ /usr|etc|tmp|var|lib|boot|snap|private|docker|System|Recovery|Backups/ || space == 0) {
-			return null
-		}
-		return "$fs [$label] @ $space.displaySize"
-	}.join(' | ') ?: 'NONE'
+	println any{
+		FileSystems.getDefault().getFileStores().findResults{
+			def fs = it.type()
+			def label = it.toString().replaceTrailingBrackets() ?: it
+			def space = it.usableSpace
+			// exclude clutter
+			if (fs =~ /rootfs|tmpfs/ || label =~ /usr|etc|tmp|var|lib|boot|snap|private|docker|System|Recovery|Backups/ || space == 0) {
+				return null
+			}
+			return "$fs [$label] @ $space.displaySize"
+		}.join(' | ')
+	}{ 'NONE' }
 } catch(Throwable error) {
 	println error
 }
