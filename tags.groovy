@@ -124,8 +124,8 @@ def mp4(f, m) {
 			'--TVEpisodeNum' : m.episode,
 			'--TVSeasonNum'  : m.season,
 			'--description'  : m.title,
-			'--genre'        : m.info?.genres[0],
-			'--TVNetwork'    : m.info?.network,
+			'--genre'        : m.seriesInfo?.genres[0],
+			'--TVNetwork'    : m.seriesInfo?.network,
 			'--artist'       : m.info?.director,
 			'--longdesc'     : m.info?.overview,
 			'--artwork'      : poster(m.series?.poster)
