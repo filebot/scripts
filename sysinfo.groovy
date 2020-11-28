@@ -57,7 +57,7 @@ try {
 // mkvpropedit v50.0.0
 try {
 	net.filebot.postprocess.Tag.Command.each{ c -> 
-		tools[c] = { c.version().match(/[.\d]{3,}/) }
+		tools[c] = { c.version().match(/[.\d]+/) }
 	}
 } catch(Throwable error) {
 	// ignore
