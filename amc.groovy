@@ -17,7 +17,7 @@ testRun = _args.action.equalsIgnoreCase('test')
 outputFolder = _args.absoluteOutputFolder ?: ('.' as File).getCanonicalFile()
 
 // enable/disable features as specified via --def parameters
-unsorted  = tryQuietly{ unsorted.toBoolean() }
+unsorted  = tryQuietly{ unsorted.toBoolean() && !testRun }
 music     = tryQuietly{ music.toBoolean() }
 subtitles = tryQuietly{ subtitles.split(/\W+/) as List }
 artwork   = tryQuietly{ artwork.toBoolean() && !testRun }
