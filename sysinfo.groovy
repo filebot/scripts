@@ -178,6 +178,7 @@ try {
 			}
 		}
 	}
+
 	println String.format('CPU/MEM: %s [%s]', cpuinfo.join(' | '), meminfo.join(' | '))
 } catch(Throwable error) {
 	// silently fail on non-Unix platforms
