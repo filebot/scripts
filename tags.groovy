@@ -113,7 +113,7 @@ def mkv(f, m) {
 def mp4(f, m) {
 	def options = [
 			'--title'        : m,
-			'--hdvideo'      : f.mediaCharacteristics?.height >= 1000 ? '2' : f.mediaCharacteristics?.height >= 700 ? '1' : '0'
+			'--hdvideo'      : f.mediaCharacteristics?.height >= 1000
 	]
 
 	if (m instanceof Episode) {
