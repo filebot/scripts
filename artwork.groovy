@@ -1,22 +1,22 @@
 #!/usr/bin/env filebot -script
 
 
-def fetchMovieArtwork(file, movie) {
-	fetch movie.getArtwork('posters', movie.language)
+def fetchMovieArtwork(file, movie, language) {
+	fetch movie.getArtwork('posters', language)
 	fetch movie.getArtwork('backdrops', null)
 }
 
 
-def fetchSeriesArtwork(file, series) {
+def fetchSeriesArtwork(file, series, language) {
 	switch(series.database) {
 		case ~/TheTVDB/:
-			fetch series.getArtwork('poster', series.language)
-			fetch series.getArtwork('series', series.language)
-			fetch series.getArtwork('season', series.language)
-			fetch series.getArtwork('seasonwide', series.language)
+			fetch series.getArtwork('poster', language)
+			fetch series.getArtwork('series', language)
+			fetch series.getArtwork('season', language)
+			fetch series.getArtwork('seasonwide', language)
 			break
 		case ~/TheMovieDB/:
-			fetch series.getArtwork('posters', movie.language)
+			fetch series.getArtwork('posters', language)
 			fetch series.getArtwork('backdrops', null)
 			break
 		default:
@@ -39,11 +39,11 @@ args.getFiles{ it.video }.each{ f ->
 	switch(m) {
 		case Movie:
 			log.finest "[MOVIE] $m [$f]"
-			fetchMovieArtwork(f, m)
+			fetchMovieArtwork(f, m, m.language)
 			break
 		case Episode:
 			log.finest "[EPISODE] $m [$f]"
-			fetchSeriesArtwork(f, m.seriesInfo)
+			fetchSeriesArtwork(f, m.seriesInfo, m.seriesInfo.language)
 			break;
 		default:
 			log.finest "[XATTR NOT FOUND] $f"
