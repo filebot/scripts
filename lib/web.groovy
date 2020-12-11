@@ -182,6 +182,6 @@ class DiscordClient {
 		]
 		def data = JsonOutput.toJson(json)
 		log.finest "POST: $webhook $data"
-		new URL(webhook).post(data.getBytes('UTF-8'), 'application/json', ['Content-Encoding':'gzip'])
+		new URL(webhook).post(data.getBytes('UTF-8'), 'application/json', [:])
 	}
 }
