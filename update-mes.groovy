@@ -48,11 +48,13 @@ class MyEpisodesScraper {
 	def username
 	def password
 
+	def host = "https://www.myepisodes.com"
+
 	def cache = Cache.getCache('myepisodes', CacheType.Monthly)
 	def session = [:]
 
 	def login() {
-		def response = Jsoup.connect('http://www.myepisodes.com/login.php').data('username', username, 'password', password, 'action', 'Login', 'u', '').method(Method.POST).execute()
+		def response = Jsoup.connect("${host}/login.php").data('username', username, 'password', password, 'action', 'Login', 'u', '').method(Method.POST).execute()
 		session << response.cookies()
 		return response.parse()
 	}
@@ -68,7 +70,7 @@ class MyEpisodesScraper {
 
 		if (html.select('#frmLogin')) {
 			session.clear()
-			throw new Exception('Login failed')
+			throw new Exception('Bad Login')
 		}
 
 		return html
@@ -78,7 +80,7 @@ class MyEpisodesScraper {
 		def shows = cache.get('MyEpisodes.Shows')
 		if (shows == null) {
 			shows = ['other', 'A'..'Z'].flatten().findResults{ section ->
-				get("http://myepisodes.com/shows.php?list=${section}").select('a').findResults{ a ->
+				get("${host}/shows.php?list=${section}").select('a').findResults{ a ->
 					try {
 						// e.g. http://www.myepisodes.com/epsbyshow/491/The%20A-Team
 						return [id:a.absUrl('href').match(/\/(\d+)\//).toInteger(), name:a.text().trim()]
@@ -93,7 +95,7 @@ class MyEpisodesScraper {
 	}
 
 	def getShowList() {
-		get("http://www.myepisodes.com/shows.php?type=manage").select('option').findResults{ option ->
+		get("${host}/shows.php?type=manage").select('option').findResults{ option ->
 			try {
 				return [id:option.attr('value').toInteger(), name:option.text().trim()]
 			} catch(e) {
@@ -103,10 +105,10 @@ class MyEpisodesScraper {
 	}
 
 	def addShow(showid) {
-		get("http://www.myepisodes.com/views.php?type=manageshow&mode=add&showid=${showid}")
+		get("${host}/views.php?type=manageshow&mode=add&showid=${showid}")
 	}
 
 	def update(showid, season, episode, tick = 'acquired', value = '1') {
-		get("http://www.myepisodes.com/myshows.php?action=Update&showid=${showid}&season=${season}&episode=${episode}&${tick}=${value}")
+		get("${host}/myshows.php?action=Update&showid=${showid}&season=${season}&episode=${episode}&${tick}=${value}")
 	}
 }
