@@ -48,17 +48,17 @@ class MyEpisodesScraper {
 	def username
 	def password
 
-	def cache = Cache.getCache('myepisodes', CacheType.Weekly)
+	def cache = Cache.getCache('myepisodes', CacheType.Monthly)
 	def session = [:]
 
-	def login = {
+	def login() {
 		def response = Jsoup.connect('http://www.myepisodes.com/login.php').data('username', username, 'password', password, 'action', 'Login', 'u', '').method(Method.POST).execute()
 		session << response.cookies()
 		return response.parse()
 	}
 
-	def get = { url ->
-		if (session.isEmpty()) {
+	def get(url) {
+		if (!session) {
 			login()
 		}
 
@@ -74,7 +74,7 @@ class MyEpisodesScraper {
 		return html
 	}
 
-	def getShows = {
+	def getShows() {
 		def shows = cache.get('MyEpisodes.Shows')
 		if (shows == null) {
 			shows = ['other', 'A'..'Z'].flatten().findResults{ section ->
@@ -92,7 +92,7 @@ class MyEpisodesScraper {
 		return shows
 	}
 
-	def getShowList = {
+	def getShowList() {
 		get("http://www.myepisodes.com/shows.php?type=manage").select('option').findResults{ option ->
 			try {
 				return [id:option.attr('value').toInteger(), name:option.text().trim()]
@@ -102,11 +102,11 @@ class MyEpisodesScraper {
 		}
 	}
 
-	def addShow = { showid ->
+	def addShow(showid) {
 		get("http://www.myepisodes.com/views.php?type=manageshow&mode=add&showid=${showid}")
 	}
 
-	def update = { showid, season, episode, tick = 'acquired', value = '1' ->
+	def update(showid, season, episode, tick = 'acquired', value = '1') {
 		get("http://www.myepisodes.com/myshows.php?action=Update&showid=${showid}&season=${season}&episode=${episode}&${tick}=${value}")
 	}
 }
