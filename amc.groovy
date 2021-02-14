@@ -152,13 +152,17 @@ if (excludeList) {
 		try {
 			excludePathSet.load(excludeList)
 		} catch(e) {
-			die "Failed to read excludes: $excludeList: $e"
+			die "Failed to read excludes: $excludeList: $e.message"
 		}
 		log.fine "Use excludes: $excludeList (${excludePathSet.size()})"
 	} else {
 		log.fine "Use excludes: $excludeList"
-		if ((!excludeList.parentFile.isDirectory() && !excludeList.parentFile.mkdirs()) || (!excludeList.isFile() && !excludeList.createNewFile())) {
-			die "Failed to create excludes: $excludeList"
+		try {
+			if ((!excludeList.parentFile.isDirectory() && !excludeList.parentFile.mkdirs()) || (!excludeList.isFile() && !excludeList.createNewFile())) {
+				die "Failed to create excludes: $excludeList"
+			}
+		} catch(e) {
+			die "Failed to create excludes: $excludeList: $e.message"
 		}
 	}
 }
