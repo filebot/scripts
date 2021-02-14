@@ -151,6 +151,14 @@ try {
 	println error
 }
 
+// JAVA_OPTS: -Xmx512m -XX:ActiveProcessorCount=1
+['JAVA_OPTS', 'FILEBOT_OPTS'].each{ name ->
+	def value = System.getenv(name)
+	if (value) {
+		println "$name: $value"
+	}
+}
+
 // CPU/MEM: 4 Core / 1 GB Max Memory / 15 MB Used Memory
 println String.format('CPU/MEM: %s Core / %s Max Memory / %s Used Memory', Runtime.runtime.availableProcessors(), Runtime.runtime.maxMemory().getDisplaySize(), (Runtime.runtime.totalMemory() - Runtime.runtime.freeMemory()).getDisplaySize())
 
