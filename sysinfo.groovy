@@ -205,6 +205,12 @@ try {
 }
 
 
+// root
+if (!Settings.isWindowsApp() && !Settings.isMacApp()) {
+	println 'USER: ' + System.getProperty('user.name')
+}
+
+
 // C:\Users\FileBot\AppData\Roaming\FileBot
 if (!Settings.isUWP()) {
 	println 'DATA: ' + ApplicationFolder.AppData.get()
