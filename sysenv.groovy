@@ -1,17 +1,17 @@
 #!/usr/bin/env filebot -script
 
 
-println '\n# Environment Variables #'
+log.fine '\n# Environment Variables #'
 _environment.toSorted{ it.key }.each{ k, v ->
-	println "$k: $v"
+	log.info "$k: $v"
 }
 
-println '\n# Java System Properties #'
+log.fine '\n# Java System Properties #'
 _system.toSorted{ it.key }.each{ k, v ->
-	println "$k: $v"
+	log.info "$k: $v"
 }
 
-println '\n# Arguments #'
+log.fine '\n# Arguments #'
 _args.argumentArray.eachWithIndex{ a, i ->
-	println "args[$i] = $a"
+	log.info "args[$i] = $a"
 }
