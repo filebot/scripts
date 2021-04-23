@@ -87,11 +87,11 @@ _def.each{ k, v ->
 }
 
 if (_args.db) {
-	log.warning "* The --db option has no effect"
+	log.warning "Invalid usage: The --db option has no effect"
 }
 
 if (_args.output == null) {
-	log.warning "* The --output option is required"
+	die "Invalid usage: The --output option is required"
 }
 
 if (outputFolder == null || !outputFolder.isDirectory()) {
