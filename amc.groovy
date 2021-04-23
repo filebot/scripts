@@ -14,7 +14,7 @@ failOnError = _args.conflict.equalsIgnoreCase('fail')
 testRun = _args.action.equalsIgnoreCase('test')
 
 // --output folder must be a valid folder
-outputFolder = _args.absoluteOutputFolder ?: ('.' as File).getCanonicalFile()
+outputFolder = _args.absoluteOutputFolder
 
 // enable/disable features as specified via --def parameters
 unsorted  = tryQuietly{ unsorted.toBoolean() && !testRun }
@@ -87,10 +87,13 @@ _def.each{ k, v ->
 }
 
 if (_args.db) {
-	log.warning "Invalid usage: The --db option has no effect"
+	log.warning "* The --db option has no effect"
 }
 
-// sanity checks
+if (_args.output == null) {
+	log.warning "* The --output option is required"
+}
+
 if (outputFolder == null || !outputFolder.isDirectory()) {
 	die "Invalid usage: output folder must exist and must be a directory: $outputFolder"
 }
