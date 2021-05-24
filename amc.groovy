@@ -91,7 +91,7 @@ if (_args.db) {
 }
 
 if (_args.output == null) {
-	die "Invalid usage: The --output option is required"
+	die "Invalid usage: The --output folder option is required"
 }
 
 if (outputFolder == null || !outputFolder.isDirectory()) {
