@@ -1,6 +1,9 @@
 #!/usr/bin/env filebot -script
 
 
+log.fine '\n# Local Time #'
+log.info "$now"
+
 log.fine '\n# Environment Variables #'
 _environment.toSorted{ it.key }.each{ k, v ->
 	log.info "$k: $v"
