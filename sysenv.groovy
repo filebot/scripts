@@ -8,10 +8,10 @@ log.fine '\n# Process Tree #'
 try {
 	def t = []
 	for (def p = ProcessHandle.current(); p != null; p = p.parent().orElse(null)) {
-		t.push(p.info())
+		t.push p.info()
 	}
 	t.findResults{ p -> p.command().orElse(null) }.eachWithIndex{ p, i ->
-		println(i == 0 ? p : '   ' * (i-1) + '└─ ' + p)
+		log.info "${i == 0 ? p : '   ' * (i-1) + '└─ ' + p}"
 	}
 } catch(Throwable e) {
 	log.warning "$e"
