@@ -98,6 +98,10 @@ if (outputFolder == null || !outputFolder.isDirectory()) {
 	die "Invalid usage: output folder must exist and must be a directory: $outputFolder"
 }
 
+if (!outputFolder.canWrite()) {
+	log.warning "Invalid usage: output folder must be writable: $outputFolder"
+}
+
 if (ut.dir) {
 	if (ut.state_allow && !(ut.state ==~ ut.state_allow)) {
 		die "Invalid state: $ut.state != $ut.state_allow", ExitCode.NOOP
