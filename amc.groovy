@@ -94,12 +94,8 @@ if (_args.output == null) {
 	log.severe "Invalid usage: The --output folder option is required"
 }
 
-if (outputFolder == null || !outputFolder.isDirectory()) {
-	log.severe "Invalid usage: output folder must exist and must be a directory: $outputFolder"
-}
-
-if (outputFolder == null || !outputFolder.canWrite()) {
-	log.severe "Invalid usage: output folder must be writable: $outputFolder"
+if (outputFolder == null || !outputFolder.isDirectory() || !outputFolder.canWrite()) {
+	log.severe "Invalid usage: output folder must exist and must be a writable directory: $outputFolder"
 }
 
 if (ut.dir) {
