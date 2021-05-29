@@ -91,15 +91,15 @@ if (_args.db) {
 }
 
 if (_args.output == null) {
-	log.warning "Invalid usage: The --output folder option is required"
+	log.severe "Invalid usage: The --output folder option is required"
 }
 
 if (outputFolder == null || !outputFolder.isDirectory()) {
-	die "Invalid usage: output folder must exist and must be a directory: $outputFolder"
+	log.severe "Invalid usage: output folder must exist and must be a directory: $outputFolder"
 }
 
 if (!outputFolder.canWrite()) {
-	log.warning "Invalid usage: output folder must be writable: $outputFolder"
+	log.severe "Invalid usage: output folder must be writable: $outputFolder"
 }
 
 if (ut.dir) {
