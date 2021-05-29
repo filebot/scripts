@@ -98,7 +98,7 @@ if (outputFolder == null || !outputFolder.isDirectory()) {
 	log.severe "Invalid usage: output folder must exist and must be a directory: $outputFolder"
 }
 
-if (!outputFolder.canWrite()) {
+if (outputFolder == null || !outputFolder.canWrite()) {
 	log.severe "Invalid usage: output folder must be writable: $outputFolder"
 }
 
