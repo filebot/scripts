@@ -1,5 +1,7 @@
 #!/usr/bin/env filebot -script
 
+log.finest "# ${MediaInfo.version()}"
+
 args.files.each{ f ->
 	log.fine "\n[$f]"
 	MediaInfo.snapshot(f).each{ kind, streams ->
