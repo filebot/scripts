@@ -50,7 +50,9 @@ def group(files) {
 	}
 
 	// Logical Duplicates: Group by Xattr Metadata Object
-	return files.groupBy{ it.metadata }
+	return files.groupBy{ f ->
+		return allOf{ f.metadata }{ getMediaInfo(f, _args.format) }
+	}
 }
 
 
@@ -75,9 +77,9 @@ def files = args.collectMany{ it.getFiles{ it.isVideo() } }
 def duplicates = []
 
 
-group(files).each{ m, fs ->
-	if (m && fs.size() > 1) {
-		log.info "[*] $m"
+group(files).each{ g, fs ->
+	if (g && fs.size() > 1) {
+		log.info "[*] ${g.join(' / ')}"
 		order(fs).eachWithIndex{ f, i ->
 			if (i == 0) {
 				log.finest "[+] 1. $f"
