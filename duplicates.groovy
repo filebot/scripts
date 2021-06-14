@@ -51,7 +51,7 @@ def group(files) {
 
 	// Logical Duplicates: Group by Xattr Metadata Object
 	return files.groupBy{ f ->
-		return allOf{ f.metadata }{ getMediaInfo(f, _args.format) }
+		return allOf{ f.metadata }{ f.metadata && _args.format ? getMediaInfo(f, _args.format) : null }
 	}
 }
 
