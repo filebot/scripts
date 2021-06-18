@@ -20,7 +20,7 @@ def watchman = args[0].watchFolder{ changes ->
 	}
 
 	// rename input files
-	if (_args.rename){
+	if (_args.rename) {
 		rename(file: changes)
 	}
 }
