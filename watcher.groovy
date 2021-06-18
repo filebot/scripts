@@ -25,8 +25,9 @@ def watchman = args[0].watchFolder{ changes ->
 	}
 }
 
-watchman.commitDelay = 5000			    // default = 5s
-watchman.commitPerFolder = true			// default = true
+// commit changes after 5s of settle down time
+watchman.commitDelay = 5000
+watchman.commitPerFolder = true
 
 println "Press ENTER to exit..."
 console.readLine()
