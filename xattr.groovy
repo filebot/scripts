@@ -5,24 +5,19 @@
 def files = args.getFiles{ f -> f.xattr.size() > 0 }
 
 
-// sanity checks
-if (files.size() == 0) {
-	die "No xattr tagged files"
-}
-
 
 files.each{ f ->
 	log.finest "$f"
 	f.xattr.each{ k, v -> log.fine "\t$k: $v" }
 
-	// clear xattr mode
-	if (_args.action == 'clear') {
+	// clear xattr metadata
+	if (_args.action =~ 'clear') {
 		log.info "[CLEAR] $f.metadata [$f]"
 		f.xattr.clear()
-		return
 	}
 
-	if (_args.action == 'update') {
+	// update xattr metadata
+	if (_args.action =~ 'update') {
 		def e = f.metadata
 		if (e instanceof Episode) {
 			def i = e.seriesInfo
@@ -40,16 +35,15 @@ files.each{ f ->
 				}
 			}
 		}
-		return
 	}
 
 	// import xattr metadata into Mac OS X Finder tags (UAYOR)
-	if (_args.action == 'import') {
+	if (_args.action =~ 'import') {
 		def xkey = 'com.apple.metadata:_kMDItemUserTags'
 		def info = getMediaInfo(f, '''{if (movie) 'Movie'};{if (episode) 'Episode'};{source};{vf};{sdhd}''')
 		def tags = info.split(';')*.trim().findAll{ it.length() > 0 }
 
-		def plist = '''<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n''' + XML{
+		def plist = XML{
 			plist(version:'1.0') {
 				array {
 					tags.each{
@@ -61,6 +55,29 @@ files.each{ f ->
 
 		log.info "[IMPORT] Write tag plist to xattr [$xkey]: $tags"
 		f.xattr[xkey] = plist
-		return
 	}
+}
+
+
+
+// delete .xattr folders
+if (_args.action =~ 'clear|prune') {
+	args.flatten{ it.directory ? it.listFiles().toList() : it }.findAll{ it.name == /net.filebot.metadata/ }.findResults{ it.dir.dir }.unique().each{
+		if (_args.action =~ 'clear') {
+			log.info "[DELETE] $it"
+			it.trash()
+		}
+		else if (_args.action =~ 'prune') {
+			it.listFiles{ !(it.name in it.dir.dir.listFiles().name) }.each{
+				log.info "[DELETE] $it"
+				it.trash()
+			}
+		}
+	}
+}
+
+
+
+if (files.empty) {
+	log.warning "No xattr tagged files"
 }
