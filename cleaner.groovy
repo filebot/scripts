@@ -59,7 +59,7 @@ def clean = { f ->
 
 // memoize media folder status for performance
 def hasMediaFiles = { dir ->
-	return dir.isDirectory() && dir.getFiles().find{ (it.isVideo() || it.isAudio()) && !isClutter(it) }
+	return dir.isDirectory() && dir.getFiles().any{ f -> (f.isVideo() || f.isAudio()) && !isClutter(f) }
 }.memoize()
 
 
@@ -82,7 +82,7 @@ args.folders.toSorted().reverse().each{ d ->
 	}
 
 	// skip non-empty folder
-	if (d.files.any{ f -> !isClutter(f) }) {
+	if (d.hasFile{ f -> f.isDirectory() || !isClutter(f) }) {
 		log.finest "Keep $d"
 		return
 	}
