@@ -65,11 +65,19 @@ def hasMediaFiles = { dir ->
 
 // delete clutter files in orphaned media folders
 args.files.each{ f ->
-	if (isClutter(f) && !hasMediaFiles(f.dir)) {
-		clean(f)
-	} else {
+	// keep non-clutter files
+	if (!isClutter(f)) {
 		log.finest "Keep $f (not clutter)"
+		return
 	}
+
+	// keep sibling files of non-clutter files
+	if (hasMediaFiles(f.dir)) {
+		log.finest "Keep $f (parent folder contains media files)"
+		return
+	}
+
+	clean(f)
 }
 
 
