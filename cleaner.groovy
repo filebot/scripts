@@ -34,7 +34,7 @@ def isClutter = { f ->
 	if (f.extension ==~ exts && fsize < maxsize)
 		return true
 
-	if (f.path.findMatch(/\b(/ + terms + /)\b/) && fsize < maxsize)
+	if (f.path.findWordMatch(terms) && fsize < maxsize)
 		return true
 
 	// NOTE: some smb filesystem implementations are buggy and known to incorrectly return filesize 0 for all files
