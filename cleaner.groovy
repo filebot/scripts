@@ -24,7 +24,7 @@ if (args.size() == 0) {
 // delete orphaned "clutter" files like nfo, jpg, etc and sample files
 def isClutter = { f ->
 	// whitelist
-	if (f.path.findMatch(ignore))
+	if (f.path.findWordMatch(ignore))
 		return false
 
 	// file is either too small to have meaning, or to large to be considered clutter
