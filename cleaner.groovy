@@ -68,7 +68,7 @@ args.files.each{ f ->
 	if (isClutter(f) && !hasMediaFiles(f.dir)) {
 		clean(f)
 	} else {
-		log.finest "Keep $f"
+		log.finest "Keep $f (not clutter)"
 	}
 }
 
@@ -77,13 +77,13 @@ args.files.each{ f ->
 args.folders.toSorted().reverse().each{ d ->
 	// skip input folder
 	if (!deleteRootFolder && args.contains(d)) {
-		log.finest "Keep $d"
+		log.finest "Keep $d (root folder)"
 		return
 	}
 
 	// skip non-empty folder
 	if (d.hasFile{ f -> f.isDirectory() || !isClutter(f) }) {
-		log.finest "Keep $d"
+		log.finest "Keep $d (not empty)"
 		return
 	}
 
