@@ -185,9 +185,9 @@ def poster(m) {
 		} catch(e) {
 			log.warning "$e.message [$url]"
 		}
-	} else {
-		log.finest "[POSTER NOT FOUND] $m"
 	}
+
+	log.finest "[POSTER NOT FOUND] $m"
 	return null
 }
 
