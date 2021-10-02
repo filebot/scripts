@@ -56,7 +56,7 @@ def mkv(f, m) {
 				}
 			}
 		}
-		cover = poster(m.series?.poster)
+		cover = poster(m)
 	}
 
 	if (m instanceof Movie) {
@@ -85,7 +85,7 @@ def mkv(f, m) {
 				}
 			}
 		}
-		cover = poster(m.info?.poster)
+		cover = poster(m)
 	}
 
 	if (xml) {
@@ -128,7 +128,7 @@ def mp4(f, m) {
 			'--TVNetwork'    : m.seriesInfo?.network,
 			'--artist'       : m.info?.director,
 			'--longdesc'     : m.info?.overview,
-			'--artwork'      : poster(m.series?.poster)
+			'--artwork'      : poster(m)
 		]
 	}
 
@@ -141,7 +141,7 @@ def mp4(f, m) {
 			'--genre'       : m.info?.genres[0],
 			'--description' : m.info?.tagline,
 			'--longdesc'    : m.info?.overview,
-			'--artwork'     : poster(m.info?.poster)
+			'--artwork'     : poster(m)
 		]
 	}
 
@@ -162,7 +162,16 @@ def mp4(f, m) {
 }
 
 
-def poster(url) {
+def poster(m) {
+	def url = null
+
+	if (m instanceof Episode) {
+		url = any{ m.series.poster }{ null }
+	}
+	if (m instanceof Movie) {
+		url = any{ m.info.poster }{ null }
+	}
+
 	if (url) {
 		try {
 			def bytes = url.cache().get()
@@ -174,8 +183,10 @@ def poster(url) {
 			javax.imageio.ImageIO.write(image, 'png', file)
 			return file
 		} catch(e) {
-			log.finest "$e.message [$url]"
+			log.warning "$e.message [$url]"
 		}
+	} else {
+		log.finest "[POSTER NOT FOUND] $m"
 	}
 	return null
 }
