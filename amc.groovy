@@ -117,9 +117,9 @@ if (ut.dir) {
 } else if (args.size() == 0) {
 	die "Invalid usage: no input"
 } else if (args.any{ f -> f in outputFolder.listPath() }) {
-	die "Invalid usage: output folder [$outputFolder] must be separate from input arguments $args"
+	die "Invalid usage: output folder [$outputFolder] must not be the same as or be inside of input folder $args"
 } else if (args.any{ f -> f in File.listRoots() }) {
-	die "Invalid usage: input $args must not include a filesystem root"
+	die "Invalid usage: input folder $args must not be a filesystem root"
 }
 
 
