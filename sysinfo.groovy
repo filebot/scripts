@@ -146,7 +146,14 @@ if (jfx.version) {
 // 32-bit Java HotSpot(TM) Client VM
 try {
 	print 'JVM: '
-	println "${com.sun.jna.Platform.is64Bit() ? 64 : 32}-bit ${System.getProperty('java.vm.name')}"
+	def bit = com.sun.jna.Platform.is64Bit() ? '64-Bit' : '32-Bit'
+	def jvm = System.getProperty('java.vm.name')
+	println(jvm =~ bit ? jvm : "$bit $jvm")
+
+	// Synology NAS ships with Zero VM (which is extremely slow and has a very low default memory limit)
+	if (jvm =~ /Zero.VM/) {
+		log.warning "WARNING: BAD JVM = Zero VM"
+	}
 } catch(Throwable error) {
 	println error
 }
