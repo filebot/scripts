@@ -12,6 +12,7 @@ def fetchSeriesArtwork(file, series, language) {
 		case ~/TheTVDB/:
 			fetch series.getArtwork('poster', language)
 			fetch series.getArtwork('series', language)
+			fetch series.getArtwork('fanart', language)
 			fetch series.getArtwork('season', language)
 			fetch series.getArtwork('seasonwide', language)
 			break
