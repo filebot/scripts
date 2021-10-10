@@ -1,7 +1,7 @@
 #!/usr/bin/env filebot -script
 
 
-// sanity checks
+// require at least 1 input folder
 if (args.size() == 0) {
 	die "Illegal usage: no input"
 }
@@ -53,7 +53,5 @@ args.eachMediaFolder{ dir ->
 	def season = sxe && sxe.season > 0 ? sxe.season : 1
 
 	log.fine "$dir => $series"
-	tryLogCatch {
-		fetchSeriesArtworkAndNfo(seriesDir, dir, series.id, season, false, locale)
-	}
+	fetchSeriesArtworkAndNfo(seriesDir, dir, TheTVDB.getSeriesInfo(series, locale), season, false, locale)
 }

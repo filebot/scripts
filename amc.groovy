@@ -385,11 +385,9 @@ groups.each{ group, files ->
 				rfs.mapByFolder().each{ dir, fs ->
 					def hasSeasonFolder = any{ dir =~ /Specials|Season.\d+/ || dir.parentFile.structurePathTail.listPath().size() > 0 }{ false }	// MAY NOT WORK WELL FOR CERTAIN FORMATS
 
-					fs.findResults{ it.metadata }.findAll{ it.seriesInfo.database == 'TheTVDB' }.collect{ [name: it.seriesName, season: it.special ? 0 : it.season, id: it.seriesInfo.id] }.unique().each{ s ->
-						tryLogCatch {
-							log.fine "Fetching series artwork for [$s.name / Season $s.season] to [$dir]"
-							fetchSeriesArtworkAndNfo(hasSeasonFolder ? dir.parentFile : dir, dir, s.id, s.season, false, _args.language.locale)
-						}
+					fs.findResults{ it.metadata }.collect{ [series: it.seriesInfo, season: it.special ? 0 : it.season] }.unique().each{ s ->
+						log.fine "Fetching series artwork for [$s.series / Season $s.season] to [$dir]"
+						fetchSeriesArtworkAndNfo(hasSeasonFolder ? dir.parentFile : dir, dir, s.series, s.season, false, _args.language.locale)
 					}
 				}
 			}
