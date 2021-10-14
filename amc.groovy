@@ -129,10 +129,14 @@ roots = args
 
 if (args.size() == 0) {
 	// assume we're called with utorrent parameters (account for older and newer versions of uTorrents)
-	if (ut.kind == 'single' || (ut.kind != 'multi' && ut.dir && ut.file)) {
-		roots = [new File(ut.dir, ut.file).getCanonicalFile()] // single-file torrent
+	def d = ut.dir as File
+	def f = ut.file as File
+	def single = ut.kind != 'multi'
+
+	if (single && d && f) {
+		roots = [(f.absolute ? f : d / f).canonicalFile] // single-file torrent
 	} else {
-		roots = [new File(ut.dir).getCanonicalFile()] // multi-file torrent
+		roots = [d.canonicalFile] // multi-file torrent
 	}
 }
 
