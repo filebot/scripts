@@ -148,6 +148,7 @@ def fetchSeriesNfo(outputFile, i, locale) {
 			premiered(i.startDate)
 			status(i.status)
 			studio(i.network)
+			episodeguide(i.id)
 			tvdb(id:i.id, 'https://thetvdb.com/series/' + i.slug)
 		}
 	}
