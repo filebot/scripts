@@ -209,7 +209,7 @@ try {
 			def label = it.toString().replaceTrailingBrackets() ?: it
 			def space = it.usableSpace
 			// exclude clutter
-			if (fs =~ /rootfs|tmpfs/ || label =~ /usr|etc|tmp|var|lib|boot|snap|private|docker|timemachine|backup|System|Recovery|Backups/ || space == 0) {
+			if (fs =~ /rootfs|tmpfs/ || label =~ /usr|etc|tmp|var|lib|boot|snap|private|docker|timemachine|backup|System|Recovery|Backups|GoogleDrive/ || space == 0) {
 				return null
 			}
 			return "$fs [$label] @ $space.displaySize"
