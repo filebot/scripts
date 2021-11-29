@@ -310,7 +310,7 @@ if (excludeList && !testRun) {
 input.each{ f -> log.fine "Input: $f" }
 
 // print xattr metadata
-input.each{ f -> if (f.metadata) log.finest "xattr: [$f.name] => [$f.metadata]" }
+input.each{ f -> if (f.metadata) log.warning "xattr: [$f.name] => [$f.metadata]" }
 
 // early abort if there is nothing to do
 if (input.size() == 0) {
