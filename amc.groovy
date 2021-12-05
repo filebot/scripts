@@ -47,7 +47,7 @@ reportError        = tryQuietly{ reportError.toBoolean() }
 // user-defined filters
 label       = any{ ut_label }{ null }
 ignore      = any{ ignore }{ null }
-minAgeDays  = any{ minAgeDays.toDouble() }{ 0d }
+minFileAge  = any{ minFileAge.toDouble() }{ 0d }
 minFileSize = any{ minFileSize.toLong() }{ 50 * 1000L * 1000L }
 minLengthMS = any{ minLengthMS.toLong() }{ 10 * 60 * 1000L }
 
@@ -242,7 +242,7 @@ def acceptFile(f) {
 	}
 
 	// ignore young files
-	if (minAgeDays > 0 && f.age < minAgeDays) {
+	if (minFileAge > 0 && f.age < minFileAge) {
 		log.finest "Skip young file: $f [Creation-Date: ${sprintf('%tc', f.creationDate)}]"
 		return false
 	}
