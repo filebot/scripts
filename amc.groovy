@@ -517,7 +517,7 @@ if (getRenameLog().size() > 0) {
 	// make Kodi scan for new content and display notification message
 	if (kodi) tryLogCatch {
 		kodi.each{ instance ->
-			log.fine "Notify Kodi: $instance"
+			log.fine "Notify Kodi [$instance.host]"
 			showNotification(instance.host, instance.port, getNotificationTitle(), getNotificationMessage(), 'https://app.filebot.net/icon.png')
 			scanVideoLibrary(instance.host, instance.port)
 		}
@@ -526,15 +526,15 @@ if (getRenameLog().size() > 0) {
 	// make Plex scan for new content
 	if (plex) tryLogCatch {
 		plex.each{ instance ->
-			log.fine "Notify Plex: $instance"
-			refreshPlexLibrary(instance.host, null, instance.token)
+			log.fine "Notify Plex [$instance.host]"
+			refreshPlexLibrary(instance.host, null, instance.token, destinationFiles)
 		}
 	}
 
 	// make Emby scan for new content
 	if (emby) tryLogCatch {
 		emby.each{ instance ->
-			log.fine "Notify Emby: $instance"
+			log.fine "Notify Emby [$instance.host]"
 			refreshEmbyLibrary(instance.host, null, instance.token)
 		}
 	}
@@ -542,7 +542,7 @@ if (getRenameLog().size() > 0) {
 	// mark episodes as 'acquired'
 	if (myepisodes) tryLogCatch {
 		log.fine 'Update MyEpisodes'
-		executeScript('update-mes', [login:myepisodes.join(':'), addshows:true], getRenameLog().values())
+		executeScript('update-mes', [login:myepisodes.join(':'), addshows:true], destinationFiles)
 	}
 
 	// pushover only supports plain text messages

@@ -31,15 +31,56 @@ def postKodiRPC(host, port, json) {
 /**
  * Plex helpers
  */
-def refreshPlexLibrary(server, port, token) {
+def encodeQueryString(parameters) {
+	def query = parameters.findAll{ k, v -> k && v }.collect{ k, v -> k + '=' + URLEncoder.encode(v, 'UTF-8') }.join('&')
+	return query ? '?' + query : ''
+}
+
+def refreshPlexLibrary(server, port, token, files) {
 	// use HTTPS if hostname is specified, use HTTP if IP is specified
 	def protocol = server ==~ /localhost|[0-9.:]+/ ? 'http' : 'https'
-	def url = "${protocol}://${server}:${port ?: htpc.plex.http}/library/sections/all/refresh"
-	if (token) {
-		url += "?X-Plex-Token=$token"
+	def endpoint = "${protocol}://${server}:${port ?: htpc.plex.http}/library/sections"
+	// pass authentication token via query parameters
+	def auth = ['X-Plex-Token': token]
+
+	// try to narrow down the rescan request to a specific library and folder path
+	def requests = [] as SortedSet
+	if (files) {
+		// request remote library information
+		def libraryRoot = [:].withDefault{ [] }
+		def xml = new XmlSlurper().parse(endpoint + encodeQueryString(auth))
+		xml.'Directory'.'Location'.collect{ location ->
+			def key = location.'..'.'@key'.text()
+			def path = location.'@path'.text()
+			def root = path.split(/[\\\/]/).last()
+			libraryRoot[root] += [key: key, path: path]
+		}
+
+		def folders = files.findResults{ f -> f.dir } as SortedSet
+		folders.collect{ f -> f.path.split(/[\\\/]/).tail() }.each{ components ->
+			components.eachWithIndex{ c, i ->
+				libraryRoot[c].each{ r ->
+					def sectionKey = r.key
+					def remotePath = r.path
+					// scan specific library path
+					if (i < components.size() - 1) {
+						remotePath += '/' + components[i+1..-1].join('/')
+					}
+					requests += endpoint + '/' + sectionKey + '/refresh' + encodeQueryString(path: remotePath, *: auth)
+				}
+			}
+		}
 	}
-	log.finest "GET: $url"
-	new URL(url).get()
+
+	// refresh all libraries as a last resort
+	if (requests.empty) {
+		requests += endpoint + '/all/refresh' + encodeQueryString(auth)
+	}
+
+	requests.each{ url ->
+		log.finest "GET: $url"
+		new URL(url).get()
+	}
 }
 
 
