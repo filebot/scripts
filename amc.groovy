@@ -85,6 +85,9 @@ _def.each{ k, v ->
 	if (v =~ /^[@'"]|[@'"]$/) {
 		log.warning "Bad $k value: $v"
 	}
+	if (k =~ /^[A-Z]/) {
+		log.warning "Invalid usage: upper-case script parameter --def $k has no effect"
+	}
 }
 
 if (_args.db) {
