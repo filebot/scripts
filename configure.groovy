@@ -13,16 +13,22 @@ if (Settings.getApplicationRevisionNumber() < 9072) {
 }
 
 
-// set login
+// set login details
 if (osdbUser && osdbPwd) {
 	console.printf('Testing OpenSubtitles login details... ')
 	WebServices.setLogin(WebServices.OpenSubtitles, osdbUser, osdbPwd)
-	console.printf('OK\n')
+	// print account information
+	def info = WebServices.OpenSubtitles.getServerInfo()
+	console.printf('OK\n\n')
+
+	info.download_limits.each{ n, v ->
+		log.config("$n: $v")
+	}
 }
 
 
-// clear login
-if (osdbUser.empty && osdbPwd.empty) {
+// clear login details
+if (!osdbUser && !osdbPwd) {
 	console.printf('Clear OpenSubtitles login details... ')
 	WebServices.setLogin(WebServices.OpenSubtitles, null, null)
 	console.printf('OK\n')
