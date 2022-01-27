@@ -318,10 +318,12 @@ if (excludeList && !testRun) {
 
 // print exclude and input sets for logging
 input.each{ f ->
-	log.fine "Input: $f"
 	// print xattr metadata
 	if (f.metadata) {
-		log.finest "└─ xattr: $f.metadata"
+		log.fine "Input: $f"
+		log.fine "       └─ Metadata: $f.metadata"
+	} else {
+		log.fine "Input: $f"
 	}
 }
 
