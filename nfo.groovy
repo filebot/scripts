@@ -80,10 +80,11 @@ def fetchEpisodeNfo(outputFile, episodeObject, episodeFile) {
 
 
 args.files.each{ f ->
-	def m = f.metadata
-	if (m instanceof Episode) {
-		def nfoFile = f.dir / f.nameWithoutExtension + '.nfo'
-		fetchEpisodeNfo(nfoFile, m, f)
+	if (f.video) {
+		def m = f.metadata
+		if (m instanceof Episode) {
+			def nfoFile = f.dir / f.nameWithoutExtension + '.nfo'
+			fetchEpisodeNfo(nfoFile, m, f)
+		}		
 	}
 }
-
