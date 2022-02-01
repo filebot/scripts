@@ -2,8 +2,6 @@
 
 
 def fetchEpisodeNfo(outputFile, episodeObject, episodeFile) {
-	log.finest "Generate Episode NFO: $episodeObject [$outputFile]"
-
 	def si = episodeObject.seriesInfo
 	def ei = episodeObject.info
 	def mi = MediaInfo.snapshot(episodeFile)
@@ -84,7 +82,12 @@ args.files.each{ f ->
 		def m = f.metadata
 		if (m instanceof Episode) {
 			def nfoFile = f.dir / f.nameWithoutExtension + '.nfo'
-			fetchEpisodeNfo(nfoFile, m, f)
+			if (nfoFile.exists()) {
+				log.finest "Skip [$f.name] because [$nfoFile.name] already exists"
+			} else {
+				log.info "Generate Episode NFO: $m [$nfoFile]"
+				fetchEpisodeNfo(nfoFile, m, f)
+			}
 		}		
 	}
 }
