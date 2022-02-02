@@ -72,8 +72,21 @@ def fetchEpisodeNfo(outputFile, episodeObject, episodeFile) {
 		}
 	}
 
+	// write episode nfo file
 	xml.saveAs(outputFile)
+
+	// write episode thumbnail to file
+	if (ei.image) {
+		def thumbnailFile = outputFile.dir / outputFile.nameWithoutExtension + '.png'
+		if (thumbnailFile.exists()) {
+			log.finest "Skip [$ei.image] because [$thumbnailFile.name] already exists"
+		} else {
+			log.fine "Fetch $thumbnailFile [$ei.image]"
+			ei.image.fetch().getImage().saveAs(thumbnailFile)
+		}
+	}
 }
+
 
 
 
