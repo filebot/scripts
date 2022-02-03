@@ -44,7 +44,7 @@ def fetchMovieNfo(m, f) {
 				studio(c)
 			}
 
-			creditsFragment(delegate, i.people)
+			creditsFragment(delegate, i.crew)
 			fileFragment(delegate, f)
 		}
 	}
@@ -128,7 +128,7 @@ def fetchEpisodeNfo(m, f) {
 				plot(e.overview)
 				thumb(aspect:'thumb', e.image)
 
-				creditsFragment(delegate, e.people)
+				creditsFragment(delegate, e.crew)
 				fileFragment(delegate, f)
 			}
 		}
