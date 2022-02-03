@@ -44,7 +44,7 @@ def fetchMovieNfo(m, f) {
 				studio(c)
 			}
 
-			creditsFragment(delegate, i.crew)
+			crewFragment(delegate, i.crew)
 			fileFragment(delegate, f)
 		}
 	}
@@ -90,7 +90,7 @@ def fetchSeriesNfo(m, f) {
 				genre(g)
 			}
 
-			creditsFragment(delegate, s.crew)
+			crewFragment(delegate, s.crew)
 		}
 	}
 
@@ -128,7 +128,7 @@ def fetchEpisodeNfo(m, f) {
 				plot(e.overview)
 				thumb(aspect:'thumb', e.image)
 
-				creditsFragment(delegate, e.crew)
+				crewFragment(delegate, e.crew)
 				fileFragment(delegate, f)
 			}
 		}
@@ -151,7 +151,7 @@ def fetchEpisodeNfo(m, f) {
 }
 
 
-def creditsFragment(element, crew) {
+def crewFragment(element, crew) {
 	crew.each{ p ->
 		if (p.director) {
 			element.director(p.name)
