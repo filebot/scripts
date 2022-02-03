@@ -56,6 +56,8 @@ def fetchArtwork(object, category, language, file) {
 }
 
 
+
+
 args.getFiles{ it.video }.each{ f ->
 	def m = f.metadata
 	switch(m) {
