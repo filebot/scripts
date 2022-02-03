@@ -172,9 +172,9 @@ def creditsFragment(element, crew) {
 def fileFragment(element, file) {
 	element.fileinfo {
 		streamdetails {
-			MediaInfo.snapshot(file).each { kind, streams ->
+			MediaInfo.snapshot(file).each{ kind, streams ->
 				def section = kind.toString().toLowerCase()
-				streams.each { s ->
+				streams.each{ s ->
 					if (section == 'video') {
 						video {
 							codec((s.'Encoded_Library/Name' ?: s.'CodecID/Hint' ?: s.'Format').replaceAll(/[ ].+/, '').trim())
