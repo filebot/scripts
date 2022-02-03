@@ -25,8 +25,9 @@ def fetchSeriesArtwork(series, language, seriesFolder, seasonFolder) {
 }
 
 
-def fetchEpisodeArtwork(episode, file) {
-	if (file.exists()) {
+def fetchEpisodeArtwork(episode, episodeFile) {
+	def thumbnailFile = episodeFile.dir / episodeFile.nameWithoutExtension + '.jpg'
+	if (thumbnailFile.exists()) {
 		return
 	}
 
@@ -35,8 +36,8 @@ def fetchEpisodeArtwork(episode, file) {
 		return
 	}
 
-	log.fine "Fetch $i.image [$file]"
-	i.image.saveAs(file)
+	log.fine "Fetch $i.image [$thumbnailFile]"
+	i.image.saveAs(thumbnailFile)
 }
 
 
@@ -68,7 +69,7 @@ args.getFiles{ it.video }.each{ f ->
 		case Episode:
 			log.finest "[EPISODE] $m [$f]"
 			fetchSeriesArtwork(m.seriesInfo, m.seriesInfo.language, f.dir.dir, f.dir)
-			fetchEpisodeArtwork(m, f.dir / f.nameWithoutExtension + '.jpg')
+			fetchEpisodeArtwork(m, f)
 			break;
 		default:
 			log.finest "[XATTR NOT FOUND] $f"
