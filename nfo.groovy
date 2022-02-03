@@ -12,13 +12,6 @@ def fetchMovieNfo(m, f) {
 
 	def xml = XML {
 		movie {
-			if (m.imdbId) {
-				imdb(id:"tt" + m.imdbId.pad(7), "http://www.imdb.com/title/tt" + m.imdbId.pad(7))
-			}
-			if (m.tmdbId) {
-				tmdb(id:m.tmdbId, "http://www.themoviedb.org/movie/" + m.tmdbId)
-			}
-
 			title(i.name)
 			originaltitle(i.originalName)
 			set(i.collection)
@@ -26,10 +19,10 @@ def fetchMovieNfo(m, f) {
 			rating(i.rating)
 			votes(i.votes)
 			mpaa(i.certification)
-			id(i.id)
 			plot(i.overview)
 			tagline(i.tagline)
 			runtime(i.runtime)
+			id(i.id)
 
 			i.genres.each{ g ->
 				genre(g)
@@ -46,6 +39,11 @@ def fetchMovieNfo(m, f) {
 
 			crewFragment(delegate, i.crew)
 			fileFragment(delegate, f)
+
+			if (i.imdbId) {
+				imdb(id:'tt' + i.imdbId.pad(7), 'https://www.imdb.com/title/tt' + i.imdbId.pad(7))
+			}
+			tmdb(id:i.id, 'https://www.themoviedb.org/movie/' + i.id)
 		}
 	}
 
@@ -66,10 +64,10 @@ def fetchSeriesNfo(m, f) {
 
 	def xml = XML {
 		tvshow {
-			if (s.database =~ 'TheTVDB') {
+			if (s.database == 'TheTVDB') {
 				uniqueid(type:'tvdb', s.id)
 			}
-			if (s.database =~ 'TheMovieDB') {
+			if (s.database == 'TheMovieDB::TV') {
 				uniqueid(type:'tmdb', s.id)
 			}
 
@@ -112,12 +110,15 @@ def fetchEpisodeNfo(m, f) {
 		m.each{ episodePart ->
 			// retrieve episode information for each episode or multi-episode component
 			def e = episodePart.info
+			if (e == null) {
+				return
+			}
 
 			episodedetails {
-				if (s.database =~ 'TheTVDB') {
+				if (s.database == 'TheTVDB') {
 					uniqueid(type:'tvdb', e.id)
 				}
-				if (s.database =~ 'TheMovieDB') {
+				if (s.database == 'TheMovieDB::TV') {
 					uniqueid(type:'tmdb', e.id)
 				}
 
@@ -134,20 +135,12 @@ def fetchEpisodeNfo(m, f) {
 		}
 	}
 
-	// write episode nfo file
-	xml.saveAs(nfoFile)
-
-	// write episode thumbnail to file
-	def thumbnailFile = nfoFile.dir / nfoFile.nameWithoutExtension + '.jpg'
-	if (thumbnailFile.exists()) {
+	if (xml.empty) {
 		return
 	}
 
-	def thumbnailUrl = m.info.image
-	if (thumbnailUrl) {
-		log.fine "Fetch $thumbnailFile [$thumbnailUrl]"
-		thumbnailUrl.saveAs(thumbnailFile)
-	}
+	// write episode nfo file
+	xml.saveAs(nfoFile)
 }
 
 
