@@ -55,7 +55,7 @@ def fetchMovieNfo(m, f) {
 
 
 def fetchSeriesNfo(m, f) {
-	def seriesFolder = f.dir.dir.dir
+	def seriesFolder = f.dir.dir
 	def nfoFile = seriesFolder / seriesFolder.name + '.nfo'
 	if (nfoFile.exists()) {
 		return
