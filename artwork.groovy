@@ -41,7 +41,7 @@ def fetchEpisodeArtwork(episode, episodeFile) {
 		return
 	}
 	if (i.image == null) {
-		log.warning "Artwork not found: $episode"
+		log.warning "Artwork not found: $episode [$thumbnailFile]"
 		return
 	}
 
@@ -58,7 +58,7 @@ def fetchArtwork(object, category, language, file) {
 
 	def artwork = object.getArtwork(category, language)
 	if (artwork == null || artwork.empty) {
-		log.warning "Artwork not found: $object"
+		log.warning "Artwork not found: $object [$file]"
 		return
 	}
 
