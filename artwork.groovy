@@ -22,17 +22,26 @@ def fetchSeriesArtwork(series, language, seriesFolder, seasonFolder) {
 		fetchArtwork(series, 'backdrops', null, seriesFolder / 'backdrop.jpg')
 		return
 	}
+
+	log.warning "Artwork not supported: $series"
+	return
 }
 
 
 def fetchEpisodeArtwork(episode, episodeFile) {
 	def thumbnailFile = episodeFile.dir / episodeFile.nameWithoutExtension + '.jpg'
 	if (thumbnailFile.exists()) {
+		log.finest "[SKIP] Artwork already exists: $thumbnailFile"
 		return
 	}
 
 	def i = episode.info
-	if (i == null || i.image == null) {
+	if (i == null) {
+		log.warning "Artwork not supported: $episode.seriesInfo"
+		return
+	}
+	if (i.image == null) {
+		log.warning "Artwork not found: $episode"
 		return
 	}
 
@@ -43,11 +52,13 @@ def fetchEpisodeArtwork(episode, episodeFile) {
 
 def fetchArtwork(object, category, language, file) {
 	if (file.exists()) {
+		log.finest "[SKIP] Artwork already exists: $file"
 		return
 	}
 
 	def artwork = object.getArtwork(category, language)
 	if (artwork == null || artwork.empty) {
+		log.warning "Artwork not found: $object"
 		return
 	}
 

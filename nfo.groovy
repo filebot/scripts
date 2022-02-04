@@ -4,6 +4,7 @@
 def fetchMovieNfo(m, f) {
 	def nfoFile = f.dir / f.nameWithoutExtension + '.nfo'
 	if (nfoFile.exists()) {
+		log.finest "[SKIP] NFO already exists: $nfoFile"
 		return
 	}
 
@@ -56,6 +57,7 @@ def fetchSeriesNfo(m, f) {
 	def seriesFolder = f.dir.dir
 	def nfoFile = seriesFolder / seriesFolder.name + '.nfo'
 	if (nfoFile.exists()) {
+		log.finest "[SKIP] NFO already exists: $nfoFile"
 		return
 	}
 
@@ -100,6 +102,7 @@ def fetchSeriesNfo(m, f) {
 def fetchEpisodeNfo(m, f) {
 	def nfoFile = f.dir / f.nameWithoutExtension + '.nfo'
 	if (nfoFile.exists()) {
+		log.finest "[SKIP] NFO already exists: $nfoFile"
 		return
 	}
 
@@ -136,6 +139,7 @@ def fetchEpisodeNfo(m, f) {
 	}
 
 	if (xml.empty) {
+		log.warning "Episode NFO not supported: $s"
 		return
 	}
 
