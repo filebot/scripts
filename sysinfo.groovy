@@ -267,7 +267,7 @@ try {
 } catch(Throwable error) {
 	println error
 
-	if (error =~ /UnknownHostException|SSLException/) {
+	if (error =~ /UnknownHost|SSL/) {
 		println "DNS Network Error: Please contact your ISP or use CloudFlare DNS 1.1.1.1 instead of the default DNS provided by your ISP."
 	}
 }
