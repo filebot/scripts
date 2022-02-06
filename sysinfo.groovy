@@ -256,16 +256,18 @@ try {
 
 
 // CHECK FOR UPDATES
-if (!Settings.isAutoUpdateEnabled()) {
-	try {
-		def update = new XmlSlurper().parse('https://app.filebot.net/update.xml')
-		def rev = update.revision.text() as int
-		def app = update.name.text()
+try {
+	def update = new XmlSlurper().parse('https://app.filebot.net/update.xml')
+	def rev = update.revision.text() as int
+	def app = update.name.text()
 
-		if (rev > Settings.getApplicationRevisionNumber()) {
-			println '\n' + " UPDATE AVAILABLE: $app (r$rev) ".center(80, '-') + '\n'
-		}
-	} catch(Throwable error) {
-		println error
+	if (rev > Settings.getApplicationRevisionNumber()) {
+		println '\n' + " UPDATE AVAILABLE: $app (r$rev) ".center(80, '-') + '\n'
+	}
+} catch(Throwable error) {
+	println error
+
+	if (error =~ /UnknownHostException|SSLException/) {
+		println "DNS Network Error: Please contact your ISP or use CloudFlare DNS 1.1.1.1 instead of the default DNS provided by your ISP."
 	}
 }
