@@ -28,8 +28,15 @@ if (Settings.getApplicationRevisionNumber() < 9072) {
 // set login details (FileBot 4.9.5 r9072 or higher)
 if (osdbUser && osdbPwd) {
 	log.config('Set OpenSubtitles login details')
-	WebServices.setLogin(WebServices.OpenSubtitles, osdbUser, osdbPwd)
-	printAccountInformation()
+	try {
+		WebServices.setLogin(WebServices.OpenSubtitles, osdbUser, osdbPwd)
+		printAccountInformation()
+	} catch(e) {
+		if (e.message == /401 Unauthorized/) {
+			log.warning 'Your login details are incorrect. Please go to www.opensubtitles.org (and not www.opensubtitles.com) to check your login details and reset your password if necessary.'
+		}
+		die e.message
+	}
 }
 
 
@@ -46,13 +53,11 @@ if (!osdbUser && !osdbPwd) {
  * Log in and retrieve account details.
  */
 void printAccountInformation() {
-	tryLogCatch{
-		console.printf('Checking... ')
-		def info = WebServices.OpenSubtitles.getServerInfo()
-		console.printf('OK\n\n')
+	console.printf('Checking... ')
+	def info = WebServices.OpenSubtitles.getServerInfo()
+	console.printf('OK\n\n')
 
-		info.download_limits.each{ n, v ->
-			log.config("$n: $v")
-		}
+	info.download_limits.each{ n, v ->
+		log.config("$n: $v")
 	}
 }
