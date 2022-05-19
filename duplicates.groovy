@@ -26,7 +26,7 @@ def group(files) {
 		def groups = [:]
 
 		// 0. Group by File Key (i.e. physical link duplicates are always binary duplicates)
-		def links = files.unique().groupBy{ f -> any{ f.key }{ f.canonicalFile }{ f } }.entrySet()
+		def links = files.groupBy{ f -> any{ f.key }{ f.canonicalFile }{ f } }.entrySet()
 
 		// 1. Group by File Size 
 		links.groupBy{ it.value[0].length() }.each{ size, size_fs ->
@@ -80,7 +80,7 @@ def duplicates = []
 group(files).each{ g, fs ->
 	if (g && fs.size() > 1) {
 		log.info "[*] $g"
-		order(fs).eachWithIndex{ f, i ->
+		order(fs).unique().eachWithIndex{ f, i ->
 			if (i == 0) {
 				log.finest "[+] 1. $f"
 			} else {
