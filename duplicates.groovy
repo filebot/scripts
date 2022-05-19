@@ -50,7 +50,7 @@ def group(files) {
 	}
 
 	// Logical Duplicates: Group by Xattr Metadata Object
-	return files.groupBy{ f ->
+	return files.findAll{ it.isVideo() }.groupBy{ f ->
 		return allOf{ f.metadata }{ f.metadata && _args.format ? getMediaInfo(f, _args.format) : null }
 	}
 }
@@ -73,7 +73,7 @@ def order(files) {
 
 
 // select video files (and preserve input argument order)
-def files = args.collectMany{ it.getFiles{ it.isVideo() } }
+def files = args.collectMany{ it.files }
 def duplicates = []
 
 
