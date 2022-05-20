@@ -31,18 +31,18 @@ def group(files) {
 		// 1. Group by File Size 
 		links.groupBy{ it.value[0].length() }.each{ size, size_fs ->
 			if (size_fs.size() == 1) {
-				groups += [ (size_fs[0].key) : size_fs[0].value ]
+				groups.put(size_fs[0].key, size_fs[0].value)
 				return
 			}
 			// 2. Group by MovieHash
 			size_fs.groupBy{ it.value[0].hash('moviehash') }.each{ hash, hash_fs ->
 				if (hash_fs.size() == 1) {
-					groups += [ (hash_fs[0].key) : hash_fs[0].value ]
+					groups.put(hash_fs[0].key, hash_fs[0].value)
 					return
 				}
 				// 3. Group by CRC32 via Xattr
 				hash_fs.groupBy{ it.value[0].CRC32 }.each{ crc, crc_fs ->
-					groups += [ ([size, hash, crc]) : crc_fs.collectMany{ it.value } ]
+					groups.put([size, hash, crc], crc_fs.collectMany{ it.value })
 				}
 			}
 		}
