@@ -21,7 +21,7 @@ unsorted  = tryQuietly{ unsorted.toBoolean() && !testRun }
 music     = tryQuietly{ music.toBoolean() }
 subtitles = tryQuietly{ subtitles.split(/\W+/) as List }
 artwork   = tryQuietly{ artwork.toBoolean() && !testRun }
-clean     = tryQuietly{ clean.toBoolean() }
+clean     = tryQuietly{ clean.toBoolean() && !testRun }
 exec      = tryQuietly{ exec.toString() }
 
 // array of kodi/plex/emby hosts
@@ -656,7 +656,7 @@ if (deleteAfterExtract) {
 
 // abort and skip clean-up logic if we didn't process any files
 if (destinationFiles.size() == 0) {
-	die "Finished without processing any files"
+	die "Finished without processing any files", !testRun ? ExitCode.FAILURE : ExitCode.NOOP
 }
 
 
