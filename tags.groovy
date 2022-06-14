@@ -68,7 +68,7 @@ def mkv(f, m) {
 					}
 					Simple {
 						Name('GENRE')
-						String(m.seriesInfo.genres[0])
+						String(m.seriesInfo.genres.join(';'))
 					}
 					Simple {
 						Name('PUBLISHER')
@@ -118,7 +118,7 @@ def mkv(f, m) {
 					}
 					Simple {
 						Name('GENRE')
-						String(m.info?.genres[0])
+						String(m.info?.genres.join(';'))
 					}
 					Simple {
 						Name('KEYWORDS')
@@ -200,7 +200,7 @@ def mp4(f, m) {
 			'--TVEpisodeNum' : m.episode,
 			'--TVSeasonNum'  : m.season,
 			'--description'  : m.title,
-			'--genre'        : m.seriesInfo.genres[0],
+			'--genre'        : m.seriesInfo.genres.join(';'),
 			'--TVNetwork'    : m.seriesInfo.network,
 			'--artist'       : m.info?.director,
 			'--longdesc'     : m.info?.overview,
@@ -214,7 +214,7 @@ def mp4(f, m) {
 			'--year'        : m.info?.released?.toInstant() ?: m.year,
 			'--artist'      : m.info?.director,
 			'--grouping'    : m.info?.collection,
-			'--genre'       : m.info?.genres[0],
+			'--genre'       : m.info?.genres.join(';'),
 			'--description' : m.info?.tagline,
 			'--longdesc'    : m.info?.overview,
 			'--artwork'     : poster(m)
