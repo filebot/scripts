@@ -253,11 +253,13 @@ def poster(m) {
 			def bytes = url.cache().get()
 			def image = javax.imageio.ImageIO.read(new ByteArrayInputStream(bytes))
 
-			def file = File.createTempFile('poster', '.png')
-			file.deleteOnExit()
+			if (image != null) {
+				def file = File.createTempFile('poster', '.png')
+				file.deleteOnExit()
 
-			javax.imageio.ImageIO.write(image, 'png', file)
-			return file
+				javax.imageio.ImageIO.write(image, 'png', file)
+				return file
+			}
 		} catch(e) {
 			log.warning "$e.message [$url]"
 		}
