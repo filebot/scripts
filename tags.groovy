@@ -13,11 +13,20 @@ def mkv(f, m) {
 	def cover = null
 
 	if (m instanceof Episode) {
+		// e.g. https://www.matroska.org/files/tags/simpsons-s01e05.xml
 		xml = XML {
 			Tags {
 				Tag {
 					Targets {
 						TargetTypeValue('70')
+					}
+					Simple {
+						Name('CONTENT_TYPE')
+						String('TV Show')
+					}
+					Simple {
+						Name('TITLE')
+						String(m.seriesName)
 					}
 					if (m.seriesInfo.database =~ /TheTVDB/) {
 						Simple {
@@ -50,6 +59,30 @@ def mkv(f, m) {
 						String(m.episode ?: 0)
 					}
 					Simple {
+						Name('TITLE')
+						String(m.title)
+					}
+					Simple {
+						Name('DATE_RELEASED')
+						String(m.airdate)
+					}
+					Simple {
+						Name('GENRE')
+						String(m.seriesInfo.genres[0])
+					}
+					Simple {
+						Name('PUBLISHER')
+						String(m.seriesInfo.network)
+					}
+					Simple {
+						Name('DIRECTOR')
+						String(m.info?.director)
+					}
+					Simple {
+						Name('SYNOPSIS')
+						String(m.info?.overview)
+					}
+					Simple {
 						Name('XATTR')
 						String(m.toJsonString())
 					}
@@ -60,11 +93,54 @@ def mkv(f, m) {
 	}
 
 	if (m instanceof Movie) {
+		// e.g. https://www.matroska.org/files/tags/dune.xml
 		xml = XML {
 			Tags {
 				Tag {
 					Targets {
-						TargetTypeValue('70')
+						TargetTypeValue('50')
+					}
+					Simple {
+						Name('CONTENT_TYPE')
+						String('Movie')
+					}
+					Simple {
+						Name('TITLE')
+						String(m.name)
+					}
+					Simple {
+						Name('DATE_RELEASED')
+						String(m.info?.released ?: m.year)
+					}
+					Simple {
+						Name('DIRECTOR')
+						String(m.info?.director)
+					}
+					Simple {
+						Name('GENRE')
+						String(m.info?.genres[0])
+					}
+					Simple {
+						Name('KEYWORDS')
+						String(m.info?.collection)
+					}
+					Simple {
+						Name('SUMMARY')
+						String(m.info?.tagline)
+					}
+					Simple {
+						Name('SYNOPSIS')
+						String(m.info?.overview)
+					}
+					if (m instanceof MoviePart) {
+						Simple {
+							Name('PART_NUMBER')
+							String(m.partIndex)
+						}
+						Simple {
+							Name('TOTAL_PARTS')
+							String(m.partCount)
+						}
 					}
 					if (m.imdbId > 0) {
 						Simple {
@@ -124,8 +200,8 @@ def mp4(f, m) {
 			'--TVEpisodeNum' : m.episode,
 			'--TVSeasonNum'  : m.season,
 			'--description'  : m.title,
-			'--genre'        : m.seriesInfo?.genres[0],
-			'--TVNetwork'    : m.seriesInfo?.network,
+			'--genre'        : m.seriesInfo.genres[0],
+			'--TVNetwork'    : m.seriesInfo.network,
 			'--artist'       : m.info?.director,
 			'--longdesc'     : m.info?.overview,
 			'--artwork'      : poster(m)
