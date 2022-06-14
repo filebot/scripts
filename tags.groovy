@@ -250,15 +250,11 @@ def poster(m) {
 
 	if (url) {
 		try {
-			def bytes = url.cache().get()
-			def image = javax.imageio.ImageIO.read(new ByteArrayInputStream(bytes))
-
-			if (image != null) {
+			def image = url.cache().getImage()
+			if (image) {
 				def file = File.createTempFile('poster', '.png')
 				file.deleteOnExit()
-
-				javax.imageio.ImageIO.write(image, 'png', file)
-				return file
+				return image.saveAs(file)
 			}
 		} catch(e) {
 			log.warning "$e.message [$url]"
