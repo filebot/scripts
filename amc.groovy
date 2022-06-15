@@ -113,10 +113,10 @@ if (ut.dir) {
 		die "Invalid usage: No! Are you insane? You can't just pass in the entire filesystem. Think long and hard about what you just tried to do."
 	}
 	if (ut.dir.toFile() in outputFolder.listPath()) {
-		die "Invalid usage: output folder [$outputFolder] must not be inside input folder [$ut.dir] and vice versa"
+		die "Invalid usage: output folder [$outputFolder] must not start with input folder [$ut.dir]"
 	}
 	if (outputFolder in ut.dir.toFile().listPath()) {
-		log.warning "Invalid usage: input folder [$ut.dir] must not be inside output folder [$outputFolder] and vice versa"
+		log.warning "Invalid usage: input folder [$ut.dir] must not start with output folder [$outputFolder]"
 	}
 } else if (args.size() == 0) {
 	die "Invalid usage: no input"
