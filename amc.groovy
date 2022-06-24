@@ -245,8 +245,8 @@ def acceptFile(f) {
 	}
 
 	// ignore young files
-	if (minFileAge > 0 && f.age < minFileAge) {
-		log.finest "Skip young file: $f [Creation-Date: ${sprintf('%tc', f.creationDate)}]"
+	if (minFileAge > 0 && f.ageLastModified < minFileAge) {
+		log.finest "Skip young file: $f [Last-Modified: $f.ageLastModified days ago"
 		return false
 	}
 
