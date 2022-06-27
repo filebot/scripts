@@ -94,11 +94,11 @@ if (_args.db) {
 	log.warning "Invalid usage: The --db option has no effect"
 }
 
-if (_args.output == null) {
-	log.severe "Invalid usage: The --output folder option is required"
+if (outputFolder == null) {
+	die "Invalid usage: The --output folder option is required"
 }
 
-if (outputFolder == null || !outputFolder.isDirectory() || !outputFolder.canWrite()) {
+if (!outputFolder.isDirectory() || !outputFolder.canWrite()) {
 	log.severe "Invalid usage: output folder must exist and must be a writable directory: $outputFolder"
 }
 
