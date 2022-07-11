@@ -17,7 +17,8 @@ args.getFiles{ it.isVideo() }.each{ f ->
 	// hash search
 	def hash = computeHash(f)
 	def size = f.length()
-	println "Hash/Tag Lookup (hash: $hash, size: $size, lang: $lang, tag: $f.nameWithoutExtension)"
+	def tag = ? f.metadata?.originalName?.nameWithoutExtension : f.nameWithoutExtension
+	println "Hash/Tag Lookup (hash: $hash, size: $size, lang: $lang, tag: $tag)"
 
 	def hashMatches = lookupSubtitlesByHash(WebServices.OpenSubtitles, [f], lang, true, strict).get(f)
 	hashMatches.eachWithIndex{ d, i ->
