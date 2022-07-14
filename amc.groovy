@@ -17,11 +17,11 @@ testRun = _args.action.equalsIgnoreCase('test')
 outputFolder = _args.absoluteOutputFolder
 
 // enable/disable features as specified via --def parameters
-unsorted  = tryQuietly{ unsorted.toBoolean() && !testRun }
+unsorted  = tryQuietly{ unsorted.toBoolean() }
 music     = tryQuietly{ music.toBoolean() }
 subtitles = tryQuietly{ subtitles.split(/\W+/) as List }
-artwork   = tryQuietly{ artwork.toBoolean() && !testRun }
-clean     = tryQuietly{ clean.toBoolean() && !testRun }
+artwork   = tryQuietly{ artwork.toBoolean() }
+clean     = tryQuietly{ clean.toBoolean() }
 exec      = tryQuietly{ exec.toString() }
 
 // array of kodi/plex/emby hosts
@@ -92,6 +92,15 @@ _def.each{ k, v ->
 
 if (_args.db) {
 	log.warning "Invalid usage: The --db option has no effect"
+}
+if (testRun && artwork) {
+	log.warning "[TEST] --def artwork is incompatible with --action TEST and has been disabled"
+}
+if (testRun && clean) {
+	log.warning "[TEST] --def clean is incompatible with --action TEST and has been disabled"
+}
+if (testRun && unsorted) {
+	log.warning "[TEST] --def unsorted is incompatible with --action TEST and has been disabled"
 }
 
 if (outputFolder == null) {
@@ -398,7 +407,7 @@ groups.each{ group, files ->
 		if (rfs) {
 			destinationFiles += rfs
 
-			if (artwork) {
+			if (artwork && !testRun) {
 				rfs.mapByFolder().each{ dir, fs ->
 					def hasSeasonFolder = any{ dir =~ /Specials|Season.\d+/ || dir.parentFile.structurePathTail.listPath().size() > 0 }{ false }	// MAY NOT WORK WELL FOR CERTAIN FORMATS
 
@@ -422,7 +431,7 @@ groups.each{ group, files ->
 		if (rfs) {
 			destinationFiles += rfs
 
-			if (artwork) {
+			if (artwork && !testRun) {
 				rfs.mapByFolder().each{ dir, fs ->
 					def movieFile = fs.findAll{ it.isVideo() || it.isDisk() }.toSorted{ it.length() }.reverse().findResult{ it }
 					if (movieFile) tryLogCatch {
@@ -465,7 +474,7 @@ groups.each{ group, files ->
 
 
 // process the remaining files that cannot be sorted automatically
-if (unsorted) {
+if (unsorted && !testRun) {
 	// skip file paths that are no longer valid (e.g. due to a partially processed but ultimately failed group)
 	unsortedFiles.removeAll{ f -> !f.exists() }
 
@@ -661,7 +670,7 @@ if (destinationFiles.size() == 0) {
 
 
 // clean empty folders, clutter files, etc after move
-if (clean) {
+if (clean && !testRun) {
 	if (_args.action ==~ /(?i:COPY|HARDLINK|DUPLICATE)/ && temporaryFiles.size() > 0) {
 		log.fine 'Clean temporary extracted files'
 		// delete extracted files
