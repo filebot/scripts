@@ -33,7 +33,7 @@ emby = tryQuietly{ emby.split(/[ ,;|]+/)*.split(/:/).collect{ it.length >= 2 ? [
 extractFolder      = tryQuietly{ extractFolder as File }
 skipExtract        = tryQuietly{ skipExtract.toBoolean() }
 deleteAfterExtract = tryQuietly{ deleteAfterExtract.toBoolean() }
-excludeList        = tryQuietly{ def f = excludeList as File; f.absolute ? f : !f.path ? null : outputFolder.resolve(f.path) }
+excludeList        = tryQuietly{ def f = excludeList as File; f.absolute ? f : outputFolder.resolve(f.path) }
 excludeLink        = tryQuietly{ excludeLink.toBoolean() }
 myepisodes         = tryQuietly{ myepisodes.split(':', 2) as List }
 gmail              = tryQuietly{ gmail.split(':', 2) as List }
@@ -41,7 +41,7 @@ mail               = tryQuietly{ mail.split(':', 5) as List }
 pushover           = tryQuietly{ pushover.split(':', 2) as List }
 pushbullet         = tryQuietly{ pushbullet.toString() }
 discord            = tryQuietly{ discord.toString() }
-storeReport        = tryQuietly{ def f = storeReport as File; f.isAbsolute() ? f : outputFolder.resolve(f.path) }
+storeReport        = tryQuietly{ def f = storeReport as File; f.absolute ? f : outputFolder.resolve(f.path) }
 reportError        = tryQuietly{ reportError.toBoolean() }
 
 // user-defined filters
