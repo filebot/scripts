@@ -33,7 +33,7 @@ emby = tryQuietly{ emby.split(/[ ,;|]+/)*.split(/:/).collect{ it.length >= 2 ? [
 extractFolder      = tryQuietly{ extractFolder as File }
 skipExtract        = tryQuietly{ skipExtract.toBoolean() }
 deleteAfterExtract = tryQuietly{ deleteAfterExtract.toBoolean() }
-excludeList        = tryQuietly{ def f = excludeList as File; f.isAbsolute() ? f : outputFolder.resolve(f.path) }
+excludeList        = tryQuietly{ def f = excludeList as File; f.absolute ? f : !f.path ? null : outputFolder.resolve(f.path) }
 excludeLink        = tryQuietly{ excludeLink.toBoolean() }
 myepisodes         = tryQuietly{ myepisodes.split(':', 2) as List }
 gmail              = tryQuietly{ gmail.split(':', 2) as List }
