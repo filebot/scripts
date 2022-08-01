@@ -135,7 +135,18 @@ if (ut.dir) {
 	die "Invalid usage: input folder $args must not be a filesystem root"
 }
 
+video_filter = null
 
+if(ut.video_filter_file) {
+	video_filter = '(?<=\\b|_)(?i:'
+	lines = new File(ut.video_filter_file).getText('UTF-8').split('\n')
+	log.finest "video_filter_file: $lines"
+	lines.eachWithIndex { a, i ->
+  		video_filter += a + "|"
+	} 
+	video_filter = video_filter.substring(0, video_filter.length() - 1);
+	video_filter += ')(?=\\b|_)'  
+}
 
 // collect input fileset as specified by the given --def parameters
 roots = args
@@ -220,9 +231,16 @@ def acceptFile(f) {
 		return false
 	}
 
-	if (f.isVideo() && f.name =~ /(?<=\b|_)(?i:Sample|Trailer(?!.park)|Extras|Featurettes|Extra.Episodes|Bonus.Features|Music.Video|Scrapbook|Behind.the.Scenes|Extended.Scenes|Deleted.Scenes|Mini.Series|s\d{2}c\d{2}|S\d+EXTRA|\d+xEXTRA|NCED|NCOP|(OP|ED)\d+|Formula.1.\d{4})(?=\b|_)/) {
-		log.finest "Ignore video extra: $f"
-		return false
+	if(video_filter == null) {
+		if (f.isVideo() && f.name =~ /(?<=\b|_)(?i:Sample|Trailer|Extras|Featurettes|Extra.Episodes|Bonus.Features|Music.Video|Scrapbook|Behind.the.Scenes|Extended.Scenes|Deleted.Scenes|Mini.Series|s\d{2}c\d{2}|S\d+EXTRA|\d+xEXTRA|NCED|NCOP|(OP|ED)\d+|Formula.1.\d{4})(?=\b|_)/) {
+			log.finest "Ignore video extra: $f"
+			return false
+		}
+	} else {
+		if (f.isVideo() && f.name =~ /${video_filter}/) {
+			log.finest "Ignore video extra file filters: $f"
+			return false
+		}
 	}
 
 	// ignore if the user-defined ignore pattern matches
