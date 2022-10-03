@@ -116,7 +116,7 @@ if (ut.dir) {
 		die "Invalid state: $ut.state != $ut.state_allow", ExitCode.NOOP
 	}
 	if (args.size() > 0) {
-		die "Invalid usage: use either script parameters $ut or file arguments $args but not both"
+		die "Invalid usage: input file path must be passed via script parameters $ut or via file arguments $args but not both"
 	}
 	if (ut.dir == '/') {
 		die "Invalid usage: No! Are you insane? You can't just pass in the entire filesystem. Think long and hard about what you just tried to do."
