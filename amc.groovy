@@ -394,8 +394,7 @@ groups.each{ group, files ->
 		subtitles.each{ languageCode ->
 			def subtitleFiles = getMissingSubtitles(file: files, lang: languageCode, strict: true, output: 'srt', encoding: 'UTF-8', format: 'MATCH_VIDEO_ADD_LANGUAGE_TAG') ?: []
 			files += subtitleFiles
-			input += subtitleFiles // make sure subtitles are added to the exclude list and other post processing operations
-			temporaryFiles += subtitleFiles // if downloaded for temporarily extraced files delete later
+			temporaryFiles += subtitleFiles
 		}
 	}
 
@@ -671,7 +670,7 @@ if (destinationFiles.size() == 0) {
 
 // clean empty folders, clutter files, etc after move
 if (clean && !testRun) {
-	if (_args.action ==~ /(?i:COPY|HARDLINK|DUPLICATE)/ && temporaryFiles.size() > 0) {
+	if (temporaryFiles && _args.action ==~ /(?i:COPY|HARDLINK|DUPLICATE)/) {
 		log.fine 'Clean temporary extracted files'
 		// delete extracted files
 		temporaryFiles.findAll{ it.isFile() }.toSorted().each{
@@ -695,5 +694,15 @@ if (clean && !testRun) {
 			log.fine 'Clean clutter files and empty folders'
 			executeScript('cleaner', args.size() == 0 ? [root:true, ignore: ignore] : [root:false, ignore: ignore], cleanerInput)
 		}
+	}
+}
+
+
+// update exclude list with files that were added during the run (e.g. subtitles)
+if (temporaryFiles && excludeList && !testRun) {
+	try {
+		excludePathSet.append(excludeList, temporaryFiles.findAll{ it.isFile() })
+	} catch(e) {
+		die "Failed to write excludes: $excludeList: $e"
 	}
 }
