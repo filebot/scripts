@@ -4,6 +4,13 @@
 // log input parameters
 log.fine("Run script [$_args.script] at [$now]")
 
+
+log.warning """
+[PSA] Important Discussion of Proposed Changes:
+https://www.filebot.net/forums/viewtopic.php?t=13406
+"""
+
+
 _def.each{ n, v -> log.finest('Parameter: ' + [n, n =~ /plex|kodi|emby|pushover|pushbullet|discord|mail|myepisodes/ ? '*****' : v].join(' = ')) }
 args.withIndex().each{ f, i -> if (f.exists()) { log.finest "Argument[$i]: $f" } else { log.warning "Argument[$i]: File does not exist: $f" } }
 
