@@ -31,7 +31,7 @@ args.getFiles().each{ f ->
 
 
 if (episodes.size() == 0) {
-	die "No xattr tagged files", ExitCode.ERROR
+	die "No xattr tagged files", ExitCode.FAILURE
 }
 
 
