@@ -31,15 +31,22 @@ args.getFiles().each{ f ->
 
 
 if (episodes.size() == 0) {
-	die "No xattr tagged files"
+	die "No xattr tagged files", ExitCode.ERROR
 }
 
 
-def episodeList = shows.collectMany{
-	def db = getService(it.database)
-	def el = db.getEpisodeList(it.id, it.order as SortOrder, it.language as Locale)
+def episodeList = shows.collectMany{ s ->
+	def episodeList = tryLogCatch{
+		return getService(s.database).getEpisodeList(s.id, s.order as SortOrder, s.language as Locale)
+	}
+
+	// abort if we cannot receive the current episode list information
+	if (!episodeList) {
+		die "Failed to fetch episode list for $s.name [$s]"
+	}
+
 	// ignore special episodes
-	return el.findAll{ it.regular }
+	return episodeList.findAll{ e -> e.regular }
 } as LinkedHashSet
 
 
@@ -47,11 +54,15 @@ def episodeList = shows.collectMany{
 def missingEpisodes = episodeList - episodes
 
 
-if (missingEpisodes.size() == 0) {
-	log.finest "No missing episodes"
+// print missing episodes directly to standard console output (and not to the --log-file)
+missingEpisodes.each{ e ->
+	println e
 }
 
 
-missingEpisodes.each{
-	println it
+// return Exit Code 0 (no missing episodes) or Exit Code 100 (some missing episodes)
+if (missingEpisodes) {
+	die "[${missingEpisodes.size()}] missing episodes", ExitCode.NOOP
+} else {
+	log.finest "No missing episodes"
 }
