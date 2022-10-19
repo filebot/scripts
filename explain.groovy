@@ -28,11 +28,12 @@ if (args) {
  * Print local index matches (if the --q option is passed along)
  */
 if (_args.query) {
+	def q = _args.query
 	// search series index
 	WebServices.episodeListProviders.each{ db ->
 		db.index.each{ s ->
 			s.effectiveNames.each{ n ->
-				if (n.findWordMatch(_args.query)) {
+				if (n.findWordMatch(q) || s.id ==~ q) {
 					println "$n [$db.identifier::$s.id]"
 				}
 			}
@@ -42,7 +43,7 @@ if (_args.query) {
 	WebServices.movieLookupServices.each{ db ->
 		db.index.each{ m ->
 			m.effectiveNames.each{ n ->
-				if (n.findWordMatch(_args.query)) {
+				if (n.findWordMatch(q) || m.id ==~ q) {
 					println "$n [$db.identifier::$m.id]"
 				}
 			}
