@@ -222,7 +222,11 @@ try {
 
 // root
 if (!Settings.isWindowsApp() && !Settings.isMacApp()) {
-	println 'USER: ' + System.getProperty('user.name')
+	try {
+		println 'UID/GID: ' + ['id'].execute().text.trim()
+	} catch(Throwable error) {
+		// cannot happen on Unix platforms
+	}
 }
 
 
