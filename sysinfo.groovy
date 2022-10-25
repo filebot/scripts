@@ -220,7 +220,7 @@ try {
 }
 
 
-// root
+// uid=1024(admin) gid=100(users) groups=100(users),101(administrators)
 if (!Settings.isWindowsApp() && !Settings.isMacApp()) {
 	try {
 		println 'UID/GID: ' + ['id'].execute().text.trim()
