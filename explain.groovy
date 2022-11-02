@@ -49,4 +49,11 @@ if (_args.query) {
 			}
 		}
 	}
+
+	// search anime mappings
+	WebServices.AnimeList.model.anime.each{ m ->
+		if (m.name.findWordMatch(q) || m.tvdbname.findWordMatch(q) || m.anidbid ==~ q || m.tvdbid ==~ q) {
+			println m
+		}
+	}
 }
