@@ -222,13 +222,13 @@ def acceptFile(f) {
 		return false
 	}
 
-	if (f.isDirectory() && f.name ==~ /[.@].+|bin|initrd|opt|sbin|var|dev|lib|proc|sys|var.defaults|etc|lost.found|root|tmp|etc.defaults|mnt|run|usr|System.Volume.Information/) {
+	if (f.name ==~ /[.@].+|bin|initrd|opt|sbin|var|dev|lib|proc|sys|var.defaults|etc|lost.found|root|tmp|etc.defaults|mnt|run|usr|System.Volume.Information/) {
 		log.finest "Ignore system path: $f"
 		return false
 	}
 
-	if (f.isVideo() && f.name =~ /(?<=\b|_)(?i:Sample|Trailer(?!.Park.Boys)|Extras|Featurettes|Extra.Episodes|Bonus.Features|Music.Video|Scrapbook|Behind.the.Scenes|Extended.Scenes|Deleted.Scenes|Mini.Series|s\d{2}c\d{2}|S\d+EXTRA|\d+xEXTRA|SP\d+|NCED|NCOP|(OP|ED)\d+|Formula.1.\d{4})(?=\b|_)/) {
-		log.finest "Ignore video extra: $f"
+	if (f.name =~ /(?<=\b|_)(?i:Sample|Trailer(?!.Park.Boys)|Extras|Featurettes|Extra.Episodes|Bonus.Features|Music.Video|Scrapbook|Behind.the.Scenes|Extended.Scenes|Deleted.Scenes|Mini.Series|s\d{2}c\d{2}|S\d+EXTRA|\d+xEXTRA|SP\d+|NCED|NCOP|(OP|ED)\d+|Formula.1.\d{4})(?=\b|_)/) {
+		log.finest "Ignore extra: $f"
 		return false
 	}
 
