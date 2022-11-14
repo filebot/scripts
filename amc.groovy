@@ -321,7 +321,7 @@ def resolveInput(f) {
 
 
 // flatten nested file structure
-def input = roots.findAll{ acceptFile(it) }.flatten{ resolveInput(it) }.toSorted()
+def input = roots.findAll{ acceptFile(it) }.flatten{ resolveInput(it) }
 
 // update exclude list with all input that will be processed during this run
 if (excludeList && !testRun) {
