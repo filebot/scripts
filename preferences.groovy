@@ -35,10 +35,10 @@ def clearPreferences = {
 
 if (args) {
 	args.each{ f -> importPreferences(f) }
-} 
+}
 
 if (_args.output) {
-	def f = new File(_args.output, System.getProperty('user.name') + '.prefs.xml').getCanonicalFile()
+	def f = new File(_args.output, 'java.prefs.xml').getCanonicalFile()
 	exportPreferences(f)
 }
 
