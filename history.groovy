@@ -17,7 +17,7 @@ if (history.empty) {
 }
 
 
-// select files from history and then pipe to -mediainfo --format or -find -exec as input
+// select files from history and then pipe them to -mediainfo --format or -find -exec as input
 if (_args.format || _args.exec || _args.apply) {
 	getMediaInfo(file: history.values())
 	return
