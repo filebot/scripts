@@ -52,8 +52,9 @@ def group(files) {
 	// Logical Duplicates: Group by Xattr Metadata Object
 	return files.findAll{ it.isVideo() }.groupBy{ f ->
 		def m = f.metadata
-		def v = m && _args.format ? getMediaInfo(f, _args.format) : null
-		return m && v ? [m, v] : m
+		// Strict Mode: group by metadata
+		// Non-Lenient Mode: group by metadata and video format
+		return !m || _args.strict ? m : [m, getMediaInfo(f, '{vf}')]
 	}
 }
 
@@ -104,15 +105,17 @@ if (duplicates.size() == 0) {
 log.fine "${duplicates.size()} duplicates"
 
 
-// -mediainfo post-processing
-if (_args.mediaInfo) {
-	getMediaInfo(file: duplicates)
+// select duplicate files and then pipe them to -rename as input
+if (_args.rename) {
+	rename(file: duplicates, db: binary ? 'file' : 'xattr')
+	return
 }
 
 
-// -rename post-processing
-if (_args.rename) {
-	rename(file: duplicates, db: binary ? 'file' : 'xattr')
+// select files from history and then pipe them to -mediainfo --format or -find -exec as input
+if (_args.format || _args.exec || _args.apply) {
+	getMediaInfo(file: duplicates)
+	return
 }
 
 
