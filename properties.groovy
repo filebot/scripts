@@ -9,7 +9,7 @@ if (_def.size() > 0) {
 	if (f.exists()) {
 		log.fine "Load user-defined System Properties"
 		f.withReader('UTF-8'){
-			log.finest "* Read $f"
+			log.fine "* Read $f"
 			p.load(it)
 		}
 	}
@@ -17,20 +17,26 @@ if (_def.size() > 0) {
 	log.fine "Update user-defined System Properties"
 	_def.each{ k, v ->
 		if (v) {
-			log.finest "* Set $k = $v"
+			log.fine "* Set $k = $v"
 			p.put(k, v)
 		} else {
-			log.finest "* Delete $k"
+			log.fine "* Delete $k"
 			p.remove(k)
 		}
 	}
 
 	log.fine "Store user-defined System Properties"
 	f.withWriter('UTF-8'){
-		log.finest "* Write $f"
+		log.fine "* Write $f"
 		p.store(it, 'FileBot System Properties')
 	}
 }
 
 
-println f.getText('UTF-8')
+if (f.exists()) {
+	// print configuration file
+	println f.getText('UTF-8')
+} else {
+	// custom configuration file does not exist yet
+	log.warning "No user-defined properties"
+}
