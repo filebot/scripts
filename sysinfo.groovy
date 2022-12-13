@@ -261,7 +261,8 @@ try {
 
 // CHECK FOR UPDATES
 try {
-	def update = new XmlSlurper().parse('https://app.filebot.net/update.xml')
+	def update = Settings.getApplicationRevisionNumber() >= 8046 ? xml('https://app.filebot.net/update.xml') : new XmlSlurper().parse('https://app.filebot.net/update.xml')
+
 	def rev = update.revision.text() as int
 	def app = update.name.text()
 
