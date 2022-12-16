@@ -59,8 +59,8 @@ minFileSize = any{ minFileSize.toLong() }{ 50 * 1000L * 1000L }
 minLengthMS = any{ minLengthMS.toLong() }{ 10 * 60 * 1000L }
 
 // database preferences
-seriesDB = any{ seriesDB }{ 'TheTVDB' }
-animeDB = any{ animeDB }{ 'AniDB' }
+seriesDB = any{ seriesDB }{ 'TheMovieDB::TV' }
+animeDB = any{ animeDB }{ 'TheMovieDB::TV' }
 movieDB = any{ movieDB }{ 'TheMovieDB' }
 musicDB = any{ musicDB }{ 'ID3' }
 
@@ -222,7 +222,7 @@ def acceptFile(f) {
 		return false
 	}
 
-	if (f.name ==~ /[.@].+|bin|initrd|opt|sbin|var|dev|lib|proc|sys|var.defaults|etc|lost.found|root|tmp|etc.defaults|mnt|run|usr|System.Volume.Information/) {
+	if (f.isSystem()) {
 		log.finest "Ignore system path: $f"
 		return false
 	}
@@ -408,7 +408,7 @@ groups.each{ group, files ->
 	// EPISODE MODE
 	if ((group.isSeries() || group.isAnime()) && !group.isMovie()) {
 		// choose series / anime
-		def rfs = group.isSeries() ? rename(file: files, format: seriesFormat, db: seriesDB) : rename(file: files, format: animeFormat, order: animeDB == 'TheMovieDB::TV' ? 'Airdate' : 'Absolute', db: animeDB)
+		def rfs = group.isSeries() ? rename(file: files, format: seriesFormat, db: seriesDB) : rename(file: files, format: animeFormat, db: animeDB)
 
 		if (rfs) {
 			destinationFiles += rfs

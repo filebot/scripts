@@ -2,8 +2,8 @@
 
 
 // require mkvtoolnix and atomicparsley
-mkvpropedit   = any{ mkvpropedit   }{ net.filebot.postprocess.WriteTags.Command.mkvpropedit.getCommand()   }{ 'mkvpropedit'   }
-atomicparsley = any{ atomicparsley }{ net.filebot.postprocess.WriteTags.Command.AtomicParsley.getCommand() }{ 'AtomicParsley' }
+mkvpropedit   = any{ mkvpropedit   }{ WriteTags.Command.mkvpropedit.getCommand()   }
+atomicparsley = any{ atomicparsley }{ WriteTags.Command.AtomicParsley.getCommand() }
 
 
 def mkv(f, m) {

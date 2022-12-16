@@ -12,22 +12,22 @@ include('lib/htpc')
 
 args.eachMediaFolder{ dir ->
 	// fetch only missing artwork by default
-	if (dir.hasFile{it.name == 'movie.nfo'} && dir.hasFile{it.name == 'poster.jpg'} && dir.hasFile{it.name == 'fanart.jpg'}) {
+	if (dir.hasFile{ it.name == 'movie.nfo' } && dir.hasFile{ it.name == 'poster.jpg' } && dir.hasFile{ it.name == 'fanart.jpg' }) {
 		log.finest "Skipping $dir"
 		return
 	}
 
 	def videos = dir.listFiles{ it.isVideo() }
 	def query = _args.query
-	def locale = any{ _args.language.locale }{ Locale.ENGLISH }
+	def locale = _args.language.locale
 	def options = []
 
 	if (query) {
 		// manual search & sort by relevance
-		options = TheMovieDB.searchMovie(query, locale).sortBySimilarity(query, { it.name })
+		options = TheMovieDB.searchMovie(query, locale).sortBySimilarity(query){ it.name }
 	} else if (videos.size() > 0) {
 		// run movie auto-detection for video files
-		options = MediaDetection.detectMovie(videos[0], TheMovieDB, locale, true)
+		options = detectMovie(videos[0], true)
 	}
 
 	if (options.isEmpty()) {

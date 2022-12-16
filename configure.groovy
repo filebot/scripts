@@ -8,24 +8,7 @@ osdbPwd = any{ osdbPwd }{ console.printf('Enter OpenSubtitles password: '); cons
 /* --------------------------------------------------------------------- */
 
 
-if (Settings.getApplicationRevisionNumber() < 9072) {
-	// set login details (FileBot 4.9.4 r9071 or lower)
-	if (osdbUser && osdbPwd) {
-		log.config('Set OpenSubtitles login details')
-		UserData.forPackage(WebServices.class).put(WebServices.LOGIN_OPENSUBTITLES, String.join(WebServices.LOGIN_SEPARATOR, osdbUser, osdbPwd))
-		WebServices.OpenSubtitles.login(osdbUser, osdbPwd)
-		printAccountInformation()
-	}
-	// clear login details (FileBot 4.9.4 r9071 or lower)
-	if (!osdbUser && !osdbPwd) {
-		log.config('Reset OpenSubtitles login details')
-		UserData.forPackage(WebServices.class).remove(WebServices.LOGIN_OPENSUBTITLES)
-	}
-	return
-}
-
-
-// set login details (FileBot 4.9.5 r9072 or higher)
+// set login details
 if (osdbUser && osdbPwd) {
 	log.config('Set OpenSubtitles login details')
 	try {
@@ -40,7 +23,7 @@ if (osdbUser && osdbPwd) {
 }
 
 
-// clear login details (FileBot 4.9.5 r9072 or higher)
+// clear login details
 if (!osdbUser && !osdbPwd) {
 	log.config('Reset OpenSubtitles login details')
 	WebServices.setLogin(WebServices.OpenSubtitles, null, null)
