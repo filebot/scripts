@@ -377,7 +377,7 @@ def group(files) {
 	if (singleGroupKey) {
 		return [(singleGroupKey): files]
 	}
-	return new AutoDetection(files, false, _args.language.locale).group()
+	return AutoDetection.group(files, _args.language.locale)
 }
 
 
