@@ -10,6 +10,10 @@ log.warning """
 https://www.filebot.net/forums/viewtopic.php?t=13406
 """
 
+if (Settings.getApplicationRevisionNumber() < 9480){
+	die """$_args.script requires FileBot r9480 or higher. You are running FileBot r${Settings.getApplicationRevisionNumber()}. Please use -script fn:amc instead."""
+}
+
 
 _def.each{ n, v -> log.finest('Parameter: ' + [n, n =~ /plex|kodi|emby|pushover|pushbullet|discord|mail|myepisodes/ ? '*****' : v].join(' = ')) }
 args.withIndex().each{ f, i -> if (f.exists()) { log.finest "Argument[$i]: $f" } else { log.warning "Argument[$i]: File does not exist: $f" } }
