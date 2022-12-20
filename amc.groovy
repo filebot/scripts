@@ -11,7 +11,7 @@ https://www.filebot.net/forums/viewtopic.php?t=13406
 """
 
 if (Settings.getApplicationRevisionNumber() < 9483){
-	die """$_args.script requires FileBot r9483 or higher. You are running FileBot r${Settings.getApplicationRevisionNumber()}. Please use -script fn:amc instead."""
+	die """$_args.script requires FileBot r9483 or higher. You are running FileBot r${Settings.getApplicationRevisionNumber()}. ** Please use -script fn:amc instead. **"""
 }
 
 
