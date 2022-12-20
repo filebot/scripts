@@ -496,7 +496,7 @@ if (unsorted && !testRun) {
 
 			// sanity check user-defined unsorted format
 			if (destination == null) {
-				die "Invalid usage: unsorted format must yield valid a file path: $original"
+				die "Invalid usage: --def unsortedFormat [$unsortedFormat] must yield a valid target file path for unsorted file [$original]"
 			}
 
 			// resolve relative paths
