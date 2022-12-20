@@ -10,8 +10,8 @@ log.warning """
 https://www.filebot.net/forums/viewtopic.php?t=13406
 """
 
-if (Settings.getApplicationRevisionNumber() < 9480){
-	die """$_args.script requires FileBot r9480 or higher. You are running FileBot r${Settings.getApplicationRevisionNumber()}. Please use -script fn:amc instead."""
+if (Settings.getApplicationRevisionNumber() < 9483){
+	die """$_args.script requires FileBot r9483 or higher. You are running FileBot r${Settings.getApplicationRevisionNumber()}. Please use -script fn:amc instead."""
 }
 
 
@@ -73,7 +73,7 @@ seriesFormat   = any{ seriesFormat   }{ _args.format }{ '{plex}' }
 animeFormat    = any{ animeFormat    }{ _args.format }{ '{plex}' }
 movieFormat    = any{ movieFormat    }{ _args.format }{ '{plex}' }
 musicFormat    = any{ musicFormat    }{ _args.format }{ '{plex}' }
-unsortedFormat = any{ unsortedFormat }{ 'Unsorted/{f.structurePathTail}' }
+unsortedFormat = any{ unsortedFormat }{ 'Unsorted/{relativeFile}' }
 
 
 
