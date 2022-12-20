@@ -10,7 +10,7 @@ log.warning """
 https://www.filebot.net/forums/viewtopic.php?t=13406
 """
 
-if (Settings.getApplicationRevisionNumber() < 99483){
+if (Settings.getApplicationRevisionNumber() < 9483){
 	die """-script $_args.script requires FileBot r9483 or higher. You are running FileBot r${Settings.getApplicationRevisionNumber()}.\nPlease use -script fn:amc and NOT -script $_args.script to ensure compatibility."""
 }
 
