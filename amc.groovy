@@ -5,14 +5,15 @@
 log.fine("Run script [$_args.script] at [$now]")
 
 
+if (Settings.getApplicationRevisionNumber() < 9483){
+	die """-script $_args.script requires FileBot r9483 or higher. You are running FileBot r${Settings.getApplicationRevisionNumber()}.\nPlease use -script fn:amc and NOT -script $_args.script to ensure compatibility."""
+}
+
+
 log.warning """
 [PSA] Important Discussion of Proposed Changes:
 https://www.filebot.net/forums/viewtopic.php?t=13406
 """
-
-if (Settings.getApplicationRevisionNumber() < 9483){
-	die """-script $_args.script requires FileBot r9483 or higher. You are running FileBot r${Settings.getApplicationRevisionNumber()}.\nPlease use -script fn:amc and NOT -script $_args.script to ensure compatibility."""
-}
 
 
 _def.each{ n, v -> log.finest('Parameter: ' + [n, n =~ /plex|kodi|emby|pushover|pushbullet|discord|mail|myepisodes/ ? '*****' : v].join(' = ')) }
