@@ -12,25 +12,27 @@ def myshows = mes.getShowList()
 // series name => series key (e.g. Doctor Who (2005) => doctorwho)
 def collationKey = { s -> s == null ? '' : s.removeAll(/^(?i)(The|A)\b/).removeAll(/\(?\d{4}\)?$/).removeAll(/\W/).lower() }
 
-args.getFiles().findAll{ it.isVideo() && parseEpisodeNumber(it) && detectSeriesName(it) }.groupBy{ detectSeriesName(it) }.each{ series, files ->
-	def show = myshows.find{ collationKey(it.name) == collationKey(series) }
-	if (show == null && mesadd) {
-		show = mes.getShows().find{ collationKey(it.name) == collationKey(series) }
-		if (show == null) {
-			println "[failure] '$series' not found"
-			return
+args.getFiles{ it.isVideo() && parseEpisodeNumber(it) }.groupBy{ detectSeries(it).name }.each{ series, files ->
+	if (series) {
+		def show = myshows.find{ collationKey(it.name) == collationKey(series) }
+		if (show == null && mesadd) {
+			show = mes.getShows().find{ collationKey(it.name) == collationKey(series) }
+			if (show == null) {
+				println "[failure] '$series' not found"
+				return
+			}
+			mes.addShow(show.id)
+			println "[added] $show.name"
 		}
-		mes.addShow(show.id)
-		println "[added] $show.name"
-	}
 
-	files.each{
-		if (show != null) {
-			def sxe = parseEpisodeNumber(it)
-			mes.update(show.id, sxe.season, sxe.episode, mesupdate, mesvalue)
-			println "[$mesupdate] $show.name $sxe [$it.name]"
-		} else {
-			println "[failure] '$series' has not been added [$it.name]"
+		files.each{
+			if (show != null) {
+				def sxe = parseEpisodeNumber(it)
+				mes.update(show.id, sxe.season, sxe.episode, mesupdate, mesvalue)
+				println "[$mesupdate] $show.name $sxe [$it.name]"
+			} else {
+				println "[failure] '$series' has not been added [$it.name]"
+			}
 		}
 	}
 }

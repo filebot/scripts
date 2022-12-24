@@ -12,17 +12,26 @@ include('lib/htpc')
 
 args.eachMediaFolder{ dir ->
 	// fetch only missing artwork by default
-	if (dir.hasFile{it.name == 'banner.jpg'}) {
+	if (dir.hasFile{ it.name == 'banner.jpg' }) {
 		log.finest "Skipping $dir"
 		return
 	}
 
 	def videos = dir.listFiles{ it.isVideo() }
-	def query = _args.query ?: detectSeriesName(videos)
 	def sxe = videos.findResult{ parseEpisodeNumber(it) }
 	def locale = _args.language.locale
 
-	if (query == null) {
+	// use --q option value
+	def query = _args.query
+	// use series detection
+	if (!query) {
+		def s = detectSeries(videos)
+		if (s) {
+			query = (s.getExternalId('TheTVDB') as String) ?: s.name
+		}
+	}
+	// use series folder name
+	if (!query) {
 		query = dir.dir.hasFile{ it.name =~ /Season/ && it.isDirectory() } ? dir.dir.name : dir.name
 	}
 
