@@ -53,8 +53,8 @@ def group(files) {
 	return files.findAll{ it.isVideo() }.groupBy{ f ->
 		def m = f.metadata
 		// Strict Mode: group by metadata
-		// Non-Lenient Mode: group by metadata and video format
-		return !m || _args.strict ? m : [m, getMediaInfo(f, '{vf}')]
+		// Non-Lenient Mode: group by metadata and video format and HDR type
+		return !m || _args.strict ? m : [m, getMediaInfo(f, '{vf} {hdr}')]
 	}
 }
 
