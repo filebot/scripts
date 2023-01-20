@@ -5,8 +5,8 @@
 log.fine("Run script [$_args.script] at [$now]")
 
 
-if (Settings.getApplicationRevisionNumber() < 9483){
-	die """-script $_args.script requires FileBot r9483 or higher. You are running FileBot r${Settings.getApplicationRevisionNumber()}.\nPlease use -script fn:amc and NOT -script $_args.script to ensure compatibility."""
+if (Settings.getApplicationRevisionNumber() < 9500){
+	die """-script $_args.script requires FileBot r9500 or higher. You are running FileBot r${Settings.getApplicationRevisionNumber()}.\nPlease use -script fn:amc and NOT -script $_args.script to ensure compatibility."""
 }
 
 
@@ -38,8 +38,8 @@ exec      = tryQuietly{ exec.toString() }
 
 // array of kodi/plex/emby hosts
 kodi = tryQuietly{ any{kodi}{xbmc}.split(/[ ,;|]+/)*.split(/:(?=\d+$)/).collect{ it.length >= 2 ? [host: it[0], port: it[1] as int] : [host: it[0]] } }
-plex = tryQuietly{ plex.split(/[ ,;|]+/)*.split(/:/).collect{ it.length >= 2 ? [host: it[0], token: it[1]] : [host: it[0]] } }
-emby = tryQuietly{ emby.split(/[ ,;|]+/)*.split(/:/).collect{ it.length >= 2 ? [host: it[0], token: it[1]] : [host: it[0]] } }
+plex = tryQuietly{ plex.split(/[ ,;|]+/)*.split(/:/).collect{ it.length >= 3 ? [host: it[0], port: it[1] as int, token: it[2]] : it.length >= 2 ? [host: it[0], token: it[1]] : [host: it[0]] } }
+emby = tryQuietly{ emby.split(/[ ,;|]+/)*.split(/:/).collect{ it.length >= 3 ? [host: it[0], port: it[1] as int, token: it[2]] : it.length >= 2 ? [host: it[0], token: it[1]] : [host: it[0]] } }
 
 // extra options, myepisodes updates and email notifications
 extractFolder      = tryQuietly{ extractFolder as File }
@@ -550,7 +550,7 @@ if (getRenameLog().size() > 0) {
 	if (plex) tryLogCatch {
 		plex.each{ instance ->
 			log.fine "Notify Plex [$instance.host]"
-			refreshPlexLibrary(instance.host, null, instance.token, destinationFiles)
+			refreshPlexLibrary(instance.host, instance.port, instance.token, destinationFiles)
 		}
 	}
 
@@ -558,7 +558,7 @@ if (getRenameLog().size() > 0) {
 	if (emby) tryLogCatch {
 		emby.each{ instance ->
 			log.fine "Notify Emby [$instance.host]"
-			refreshEmbyLibrary(instance.host, null, instance.token)
+			refreshEmbyLibrary(instance.host, instance.port, instance.token)
 		}
 	}
 
