@@ -11,7 +11,7 @@ order  = 'INPUT'  .equalsIgnoreCase(_args.order) ? 'INPUT'
        : 'SIZE'   .equalsIgnoreCase(_args.order) ? 'SIZE'
        : 'DATE'   .equalsIgnoreCase(_args.order) ? 'DATE'
        : 'TIME'   .equalsIgnoreCase(_args.order) ? 'TIME'
-       : _args.order ==~ /^[{].*[}]$/ ? evaluate(_args.order) // e.g. --order '{ a, b -> 0 }'
+       : _args.order ==~ /^[{].*[}]$/ ? __shell.callable(_args.order) // e.g. --order '{ a, b -> 0 }'
        : binary ? 'INPUT' : 'QUALITY'
 
 
