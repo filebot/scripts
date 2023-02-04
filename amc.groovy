@@ -71,10 +71,13 @@ musicDB = any{ musicDB }{ 'ID3' }
 
 // series / anime / movie format expressions
 seriesFormat   = any{ seriesFormat   }{ _args.format }{ '{plex}' }
-animeFormat    = any{ animeFormat    }{ _args.format }{ '{plex}' }
+animeFormat    = any{ animeFormat    }{ seriesFormat }{ '{plex}' }
 movieFormat    = any{ movieFormat    }{ _args.format }{ '{plex}' }
 musicFormat    = any{ musicFormat    }{ _args.format }{ '{plex}' }
 unsortedFormat = any{ unsortedFormat }{ 'Unsorted/{relativeFile}' }
+
+// default anime mapper expression
+animeMapper = any{ _args.mapper }{ 'allOf{ episode }{ order.absolute.episode }{ AnimeList.AniDB }' }
 
 
 
@@ -413,7 +416,7 @@ groups.each{ group, files ->
 	// EPISODE MODE
 	if ((group.isSeries() || group.isAnime()) && !group.isMovie()) {
 		// choose series / anime
-		def rfs = group.isSeries() ? rename(file: files, format: seriesFormat, db: seriesDB) : rename(file: files, format: animeFormat, db: animeDB)
+		def rfs = group.isSeries() ? rename(file: files, format: seriesFormat, db: seriesDB) : rename(file: files, format: animeFormat, db: animeDB, mapper: animeMapper)
 
 		if (rfs) {
 			destinationFiles += rfs
