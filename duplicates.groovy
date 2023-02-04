@@ -11,6 +11,7 @@ order  = 'INPUT'  .equalsIgnoreCase(_args.order) ? 'INPUT'
        : 'SIZE'   .equalsIgnoreCase(_args.order) ? 'SIZE'
        : 'DATE'   .equalsIgnoreCase(_args.order) ? 'DATE'
        : 'TIME'   .equalsIgnoreCase(_args.order) ? 'TIME'
+       : _args.order ==~ /^[{].*[}]$/ ? evaluate(_args.order) // e.g. --order '{ a, b -> 0 }'
        : binary ? 'INPUT' : 'QUALITY'
 
 
@@ -71,6 +72,8 @@ def order(files) {
 			return files.toSorted{ -(it.mediaCharacteristics?.creationTime?.toEpochMilli() ?: it.creationDate) }
 		case 'TIME':
 			return files.toSorted{ -(it.lastModified()) }
+		default:
+			return files.toSorted(order)
 	}
 }
 
