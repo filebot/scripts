@@ -46,17 +46,27 @@ def episodeList = shows.collectMany{ s ->
 	}
 
 	// ignore special episodes
-	return episodeList.findAll{ e -> e.regular }
+	return episodeList.findAll{ e -> e.episode }
 } as LinkedHashSet
 
 
 // print missing episodes
 def missingEpisodes = episodeList - episodes
 
+// support custom output formatting
+def format = _args.expressionFormat
 
 // print missing episodes directly to standard console output (and not to the --log-file)
 missingEpisodes.each{ e ->
-	println e
+	if (format) {
+		try {
+			println format.apply(e)
+		} catch(error) {
+			log.warning "$error.message [$e]"
+		}
+	} else {
+		println e
+	}
 }
 
 
