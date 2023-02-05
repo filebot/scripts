@@ -65,7 +65,7 @@ minLengthMS = any{ minLengthMS.toLong() }{ 10 * 60 * 1000L }
 
 // database preferences
 seriesDB = any{ seriesDB }{ 'TheMovieDB::TV' }
-animeDB = any{ animeDB }{ 'TheMovieDB::TV' }
+animeDB = any{ animeDB }{ seriesDB }
 movieDB = any{ movieDB }{ 'TheMovieDB' }
 musicDB = any{ musicDB }{ 'ID3' }
 
@@ -77,7 +77,7 @@ musicFormat    = any{ musicFormat    }{ _args.format }{ '{plex}' }
 unsortedFormat = any{ unsortedFormat }{ 'Unsorted/{relativeFile}' }
 
 // default anime mapper expression
-animeMapper = any{ _args.mapper }{ 'allOf{ episode }{ order.absolute.episode }{ AnimeList.AniDB }' }
+animeMapper = any{ _args.mapper }{ animeDB ==~ /(?i:AniDB)/ ? null : 'allOf{ episode }{ order.absolute.episode }{ AnimeList.AniDB }' }
 
 
 
