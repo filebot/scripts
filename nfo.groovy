@@ -38,7 +38,8 @@ def fetchMovieNfo(m, f) {
 				studio(c)
 			}
 
-			crewFragment(delegate, i.crew)
+			certificationFragment(delegate, i)
+			crewFragment(delegate, i)
 			fileFragment(delegate, f)
 
 			if (i.imdbId) {
@@ -90,7 +91,8 @@ def fetchSeriesNfo(m, f) {
 				genre(g)
 			}
 
-			crewFragment(delegate, s.crew)
+			certificationFragment(delegate, s)
+			crewFragment(delegate, s)
 		}
 	}
 
@@ -132,7 +134,7 @@ def fetchEpisodeNfo(m, f) {
 				plot(e.overview)
 				thumb(aspect:'thumb', e.image)
 
-				crewFragment(delegate, e.crew)
+				crewFragment(delegate, e)
 				fileFragment(delegate, f)
 			}
 		}
@@ -148,8 +150,8 @@ def fetchEpisodeNfo(m, f) {
 }
 
 
-def crewFragment(element, crew) {
-	crew.each{ p ->
+def crewFragment(element, info) {
+	info.crew.each{ p ->
 		if (p.director) {
 			element.director(p.name)
 		} else if (p.writer) {
@@ -164,6 +166,17 @@ def crewFragment(element, crew) {
 		}
 	}
 }
+
+
+def certificationFragment(element, info) {
+	info.certifications.each{ k, v ->
+		element.certification {
+			country(k)
+			rating(v)
+		}
+	}
+}
+
 
 
 def fileFragment(element, file) {
