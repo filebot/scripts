@@ -1,8 +1,9 @@
 #!/usr/bin/env filebot -script
 
 
-// watch folder and execute amc script on newly added files
-args[0].watchFolder{ changes ->
+// watch given input folder
+args*.watchFolder{ changes ->
+	// call amc script on newly added files
 	executeScript('amc', changes)
 }
 
