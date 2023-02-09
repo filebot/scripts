@@ -8,5 +8,6 @@ args*.watchFolder{ changes ->
 }
 
 
+// keep running indefinitely
 println "Press ENTER to quit..."
 console.readLine()
