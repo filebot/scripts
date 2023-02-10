@@ -1,11 +1,11 @@
 #!/usr/bin/env filebot -script
 
 
-// print input watch folders
+// print input folders
 args.each{ folder -> log.fine "Watch $folder" }
 
 
-// watch given input folder
+// watch input folders
 args*.watchFolder{ changes ->
 	// call amc script on newly added files
 	executeScript('amc', changes)
