@@ -529,10 +529,12 @@ if (exec) {
 // ---------- REPORTING ---------- //
 
 
-if (getRenameLog().size() > 0) {
+def renameLog = getRenameLog()
+
+if (renameLog.size() > 0) {
 	// messages used for kodi / plex / emby pushover notifications
 	def getNotificationTitle = {
-		def count = getRenameLog().count{ k, v -> !v.isSubtitle() }
+		def count = renameLog.count{ k, v -> !v.isSubtitle() }
 		return "FileBot finished processing $count files"
 	}.memoize()
 
@@ -581,7 +583,6 @@ if (getRenameLog().size() > 0) {
 	def getReportSubject = { getNotificationMessage('', '; ') }
 	def getReportTitle = { '[FileBot] ' + getReportSubject() }
 	def getReportMessage = { 
-		def renameLog = getRenameLog()
 		'''<!DOCTYPE html>\n''' + XML {
 			html {
 				head {
