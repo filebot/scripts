@@ -9,9 +9,7 @@ osdbPwd = any{ osdbPwd }{ console.printf('Enter OpenSubtitles password: '); cons
 
 
 // user preferences are per-user and not per-device
-if (java.util.prefs.Preferences.userRoot().class =~ /FileSystemPreferences/) {
-	help "* Preferences for ${System.getProperty('user.name')} are stored at ${System.getProperty('user.home')}"
-}
+log.fine "Store user preferences to [${UserData.root()}]"
 
 
 // set login details
