@@ -9,6 +9,7 @@ args.each{ folder -> log.fine "Watch $folder" }
 args*.watchFolder{ changes ->
 	// call amc script on newly added files
 	executeScript('amc', changes)
+	commit()
 }
 
 
