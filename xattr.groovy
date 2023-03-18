@@ -12,6 +12,9 @@ args*.eachFileRecurse{ f ->
 	if (f.name == /net.filebot.metadata/) {
 		xattrFolders += f.dir.dir
 	}
+
+	// read / write custom xattr values
+	_def.each{ k, v -> setXattrKey(f, k, v) }
 }
 
 
@@ -46,6 +49,18 @@ if (!xattrFiles && !xattrFolders) {
 }
 
 
+
+
+// clear xattr metadata
+def setXattrKey(f, k, v) {
+	if (v) {
+		log.info "[SET] $f:$k = $v"
+		f.xattr[k] = v
+	} else if (f.xattr[k]) {
+		log.info "[UNSET] $f:$k"
+		f.xattr[k] = null
+	}
+}
 
 
 // clear xattr metadata
