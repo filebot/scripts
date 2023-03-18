@@ -6,7 +6,7 @@ def xattrFolders = [] as Set
 
 args*.eachFileRecurse{ f ->
 	// select files with xattr metadata
-	if (f.metadata) {
+	if (f.xattr.keySet().any{ k -> !isSystemKey(k) }) {
 		xattrFiles += f
 	}
 	if (f.name == /net.filebot.metadata/) {
@@ -49,6 +49,12 @@ if (!xattrFiles && !xattrFolders) {
 }
 
 
+
+
+// hide system xattr keys
+def isSystemKey(k) {
+	k.startsWith('com.apple.') && _args.strict
+}
 
 
 // clear xattr metadata
