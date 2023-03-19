@@ -4,17 +4,19 @@
 def xattrFiles = []
 def xattrFolders = [] as Set
 
-args*.eachFileRecurse{ f ->
+args.flatten{ f -> f.isDirectory() ? f.listFiles() as List : f }.each{ f ->
+	// read / write custom xattr values
+	_def.each{ k, v -> setXattrKey(f, k, v) }
+
 	// select files with xattr metadata
 	if (f.xattr.keySet().any{ k -> !isSystemKey(k) }) {
 		xattrFiles += f
 	}
+
+	// manage .xattr folders
 	if (f.name == /net.filebot.metadata/) {
 		xattrFolders += f.dir.dir
 	}
-
-	// read / write custom xattr values
-	_def.each{ k, v -> setXattrKey(f, k, v) }
 }
 
 
