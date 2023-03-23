@@ -27,10 +27,10 @@ args.eachMediaFolder{ dir ->
 		options = TheMovieDB.searchMovie(query, locale).sortBySimilarity(query){ it.name }
 	} else if (videos.size() > 0) {
 		// run movie auto-detection for video files
-		options = detectMovie(videos[0], true)
+		options = MediaDetection.detectMovie(videos[0], TheMovieDB, locale, true)
 	}
 
-	if (options.isEmpty()) {
+	if (!options) {
 		log.warning "$dir ${videos.name} => movie not found"
 		return
 	}
