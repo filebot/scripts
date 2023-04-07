@@ -5,15 +5,12 @@
 log.fine("Run script [$_args.script] at [$now]")
 
 
-if (Settings.getApplicationRevisionNumber() < 9500){
-	die """-script $_args.script requires FileBot r9500 or higher. You are running FileBot r${Settings.getApplicationRevisionNumber()}.\nPlease use -script fn:amc and NOT -script $_args.script to ensure compatibility."""
-}
-
 
 log.warning """
 [PSA] Important Discussion of Proposed Changes:
 https://www.filebot.net/forums/viewtopic.php?t=13406
 """
+
 
 
 _def.each{ n, v -> log.finest('Parameter: ' + [n, n =~ /plex|kodi|emby|pushover|pushbullet|discord|mail|myepisodes/ ? '*****' : v].join(' = ')) }
@@ -71,7 +68,7 @@ musicDB = any{ musicDB }{ 'ID3' }
 
 // series / anime / movie format expressions
 seriesFormat   = any{ seriesFormat   }{ _args.format }{ '{plex}' }
-animeFormat    = any{ animeFormat    }{ seriesFormat }{ '{plex}' }
+animeFormat    = any{ animeFormat    }{ seriesFormat }
 movieFormat    = any{ movieFormat    }{ _args.format }{ '{plex}' }
 musicFormat    = any{ musicFormat    }{ _args.format }{ '{plex}' }
 unsortedFormat = any{ unsortedFormat }{ 'Unsorted/{relativeFile}' }
