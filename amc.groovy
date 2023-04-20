@@ -67,11 +67,11 @@ movieDB = any{ movieDB }{ 'TheMovieDB' }
 musicDB = any{ musicDB }{ 'ID3' }
 
 // series / anime / movie format expressions
-seriesFormat   = any{ seriesFormat   }{ _args.format }{ '{plex}' }
-animeFormat    = any{ animeFormat    }{ seriesFormat }
-movieFormat    = any{ movieFormat    }{ _args.format }{ '{plex}' }
-musicFormat    = any{ musicFormat    }{ _args.format }{ '{plex}' }
-unsortedFormat = any{ unsortedFormat }{ 'Unsorted/{relativeFile}' }
+seriesFormat   = any{ seriesFormat   }{ _args.format }{ '{ plex.id }' }
+animeFormat    = any{ animeFormat    }{ _args.format }{ 'Anime/{ ~plex.id }' }
+movieFormat    = any{ movieFormat    }{ _args.format }{ '{ plex.id }' }
+musicFormat    = any{ musicFormat    }{ _args.format }{ '{ plex.id }' }
+unsortedFormat = any{ unsortedFormat }{ 'Unsorted/{ relativeFile }' }
 
 // default anime mapper expression
 animeMapper = any{ _args.mapper }{ animeDB ==~ /(?i:AniDB)/ ? null : 'allOf{ episode }{ order.absolute.episode }{ AnimeList.AniDB }' }
