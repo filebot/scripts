@@ -12,8 +12,8 @@ include('lib/htpc')
 
 args.eachMediaFolder{ dir ->
 	// fetch only missing artwork by default
-	if (dir.hasFile{ it.name == 'banner.jpg' }) {
-		log.finest "Skipping $dir"
+	if (dir.hasFile{ it.name == 'poster.jpg' }) {
+		log.finest "Skip [$dir] because [poster.jpg] exists already"
 		return
 	}
 
