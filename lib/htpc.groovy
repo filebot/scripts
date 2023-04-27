@@ -223,14 +223,14 @@ def fetchSeriesArtworkAndNfo(seriesDir, seasonDir, series, season, override = fa
 		fetchSeriesNfo(seriesDir.resolve('tvshow.nfo'), sid, locale)
 
 		// series artwork
-		['680x1000', null].findResult{ fetchSeriesBanner(seriesDir.resolve('poster.jpg'), sid, 'poster', it, null, override, locale) }
-		['graphical', null].findResult{ fetchSeriesBanner(seriesDir.resolve('banner.jpg'), sid, 'series', it, null, override, locale) }
-		['1920x1080', '1280x720', null].findResult{ fetchSeriesBanner(seriesDir.resolve('fanart.jpg'), sid, 'fanart', it, null, override, locale) }
+		fetchSeriesBanner(seriesDir.resolve('poster.jpg'), sid, 'posters', 'series', null, override, locale)
+		fetchSeriesBanner(seriesDir.resolve('banner.jpg'), sid, 'banners', 'series', null, override, locale)
+		fetchSeriesBanner(seriesDir.resolve('fanart.jpg'), sid, 'backgrounds', 'series', null, override, locale)
 
 		// season artwork
 		if (seasonDir != seriesDir) {
-			fetchSeriesBanner(seasonDir.resolve('poster.jpg'), sid, 'season', 'season', season, override, locale)
-			fetchSeriesBanner(seasonDir.resolve('banner.jpg'), sid, 'seasonwide', 'seasonwide', season, override, locale)
+			fetchSeriesBanner(seasonDir.resolve('poster.jpg'), sid, 'posters', 'season', season, override, locale)
+			fetchSeriesBanner(seasonDir.resolve('banner.jpg'), sid, 'banners', 'season', season, override, locale)
 		}
 
 		// external series artwork
