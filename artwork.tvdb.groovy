@@ -46,21 +46,23 @@ args.eachMediaFolder{ dir ->
 	options = options.sortBySimilarity(query){ it.name }
 
 	// auto-select series
-	def series = options[0]
+	def id = options.first()
 
 	// maybe require user input
 	if (options.size() > 1 && _args.strict) {
-		series = showInputDialog(options, query, 'Select TV Series')
+		id = showInputDialog(options, query, 'Select TV Series')
 	}
 
-	if (series == null) {
+	if (id == null) {
 		return null
 	}
 
 	// auto-detect structure
-	def seriesDir = [dir.dir, dir].sortBySimilarity(series.name, { it.name })[0]
+	def seriesInfo = TheTVDB.getSeriesInfo(id, locale)
+
+	def seriesDir = [dir.dir, dir].sortBySimilarity(seriesInfo.name){ it.name }.first()
 	def season = sxe && sxe.season > 0 ? sxe.season : 1
 
-	log.fine "$dir => $series"
-	fetchSeriesArtworkAndNfo(seriesDir, dir, TheTVDB.getSeriesInfo(series, locale), season, false, locale)
+	log.fine "$dir => $seriesInfo.name [$seriesInfo]"
+	fetchSeriesArtworkAndNfo(seriesDir, dir, seriesInfo, season, false, locale)
 }
