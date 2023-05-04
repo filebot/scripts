@@ -13,8 +13,30 @@ https://www.filebot.net/forums/viewtopic.php?t=13406
 
 
 
-_def.each{ n, v -> log.finest('Parameter: ' + [n, n =~ /plex|kodi|emby|pushover|pushbullet|discord|mail|myepisodes/ ? '*****' : v].join(' = ')) }
-args.withIndex().each{ f, i -> if (f.exists()) { log.finest "Argument[$i]: $f" } else { log.warning "Argument[$i]: File does not exist: $f" } }
+// sanity check script parameters
+_def.each{ n, v ->
+	// mirror script parameters and print warnings for invalid or mistyped parameters 
+	if (n ==~ /plex|kodi|emby|pushbullet|pushover|discord|gmail|mail|mailto|myepisodes/) {
+		log.finest "Parameter: $n = *****"
+	} else if (n ==~ /ut_dir|ut_file|ut_label|ut_title|ut_kind|ut_state|ut_state_allow|music|subtitles|artwork|reportError|storeReport|extractFolder|skipExtract|deleteAfterExtract|clean|exec|unsorted|ignore|minLengthMS|minFileSize|minFileAge|excludeLink|excludeList|movieFormat|seriesFormat|animeFormat|musicFormat|unsortedFormat|movieDB|seriesDB|animeDB|musicDB/) {
+		log.finest "Parameter: $n = $v"
+	} else {
+		log.warning "Invalid usage: --def $n is not used and has no effect"
+	}
+	// print warnings for badly delimited argument values
+	if (v =~ /^[@'"]|[@'"]$/) {
+		log.warning "Bad $n value: $v"
+	}
+}
+
+// sanity check input arguments
+args.withIndex().each{ f, i ->
+	if (f.exists()) {
+		log.finest "Argument[$i]: $f"
+	} else {
+		log.warning "Argument[$i]: File does not exist: $f"
+	}
+}
 
 
 
@@ -91,15 +113,6 @@ def ut = _def.findAll{ k, v -> k.startsWith('ut_') }.collectEntries{ k, v ->
 		v = null
 	}
 	return [k.substring(3), v ? v : null]
-}
-
-_def.each{ k, v ->
-	if (v =~ /^[@'"]|[@'"]$/) {
-		log.warning "Bad $k value: $v"
-	}
-	if (k =~ /^[A-Z]/) {
-		log.warning "Invalid usage: upper-case script parameter --def $k has no effect"
-	}
 }
 
 if (_args.db) {
@@ -567,7 +580,7 @@ if (renameLog.size() > 0) {
 	// mark episodes as 'acquired'
 	if (myepisodes) tryLogCatch {
 		log.fine 'Update MyEpisodes'
-		executeScript('update-mes', [login:myepisodes.join(':'), addshows:true], destinationFiles)
+		executeScript('update-mes', [login: myepisodes.join(':'), addshows: true], destinationFiles)
 	}
 
 	// pushover only supports plain text messages
@@ -705,7 +718,7 @@ if (clean && !testRun) {
 		cleanerInput = cleanerInput.findAll{ f -> f.exists() }
 		if (cleanerInput.size() > 0) {
 			log.fine 'Clean clutter files and empty folders'
-			executeScript('cleaner', args.size() == 0 ? [root:true, ignore: ignore] : [root:false, ignore: ignore], cleanerInput)
+			executeScript('cleaner', args.size() == 0 ? [root: true, ignore: ignore] : [root: false, ignore: ignore], cleanerInput)
 		}
 	}
 }
