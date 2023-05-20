@@ -4,7 +4,13 @@
 def xattrFiles = []
 def xattrFolders = [] as Set
 
-args.flatten{ f -> f.isDirectory() ? f.listFiles() as List : f }.each{ f ->
+args.flatten{ f -> f.isDirectory() ? f.listFiles{ true } : f }.each{ f ->
+	// sanity check input file path
+	if (!f.exists()) {
+		log.warning "File does not exist: $f"
+		return
+	}
+
 	// read / write custom xattr values
 	_def.each{ k, v -> setXattrKey(f, k, v) }
 
