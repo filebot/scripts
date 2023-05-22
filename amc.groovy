@@ -6,7 +6,7 @@ log.fine("Run script [$_args.script] at [$now]")
 
 
 
-log.warning """
+help """
 [PSA] Important Discussion of Proposed Changes:
 https://www.filebot.net/forums/viewtopic.php?t=13406
 """
