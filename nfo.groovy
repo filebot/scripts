@@ -212,7 +212,20 @@ def fileFragment(element, file) {
 
 
 
-args.getFiles{ it.video }.each{ f ->
+def videoFiles = args.getFiles{ it.video }
+
+// require input arguments
+if (args.size() == 0) {
+	die "Illegal usage: no input arguments"
+}
+
+// require video files
+if (videoFiles.size() == 0) {
+	die "Illegal usage: no video files"
+}
+
+
+videoFiles.each{ f ->
 	def m = f.metadata
 	switch(m) {
 		case Movie:
