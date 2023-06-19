@@ -84,11 +84,10 @@ def refreshPlexLibrary(server, port, token, files) {
 }
 
 
-
 /**
- * Emby helpers
+ * Jellyfin helpers
  */
-def refreshEmbyLibrary(server, port, token) {
+def refreshJellyfinLibrary(server, port, token) {
 	// use HTTPS if hostname is specified, use HTTP if IP is specified
 	def protocol = server ==~ /localhost|[0-9.:]+/ ? 'http' : 'https'
 	def url = "${protocol}://${server}:${port ?: htpc.emby[protocol]}/Library/Refresh"
@@ -98,38 +97,6 @@ def refreshEmbyLibrary(server, port, token) {
 	log.finest "POST: $url"
 	new URL(url).post([:], [:])
 }
-
-
-
-/**
- * Sonarr helpers
- */
-def rescanSonarrSeries(server, port, apikey, seriesId) {
-	// use HTTPS if hostname is specified, use HTTP if IP is specified
-	def protocol = server ==~ /localhost|[0-9.:]+/ ? 'http' : 'https'
-	def url = new URL("$protocol://$server:$port")
-	def requestHeader = ['X-Api-Key': apikey]
-
-	def series = new JsonSlurper().parseText(new URL(url, '/api/series').get(requestHeader).text)
-	def id = series.find{ it.tvdbId == seriesId }?.id
-
-	def command = [name: 'rescanSeries', seriesId: id]
-	new URL(url, '/api/command').post(JsonOutput.toJson(command).getBytes('UTF-8'), 'application/json', requestHeader)
-}
-
-
-
-/**
- * Sickbeard helpers
- */
-def rescanSickbeardSeries(server, port, apikey, seriesId) {
-	// use HTTPS if hostname is specified, use HTTP if IP is specified
-	def protocol = server ==~ /localhost|[0-9.:]+/ ? 'http' : 'https'
-	def url = "$protocol://$server:$port/api/$apikey?cmd=show.refresh&tvdbid=$seriesId"
-	log.finest "GET: $url"
-	new URL(url).get()
-}
-
 
 
 /**
