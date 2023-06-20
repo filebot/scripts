@@ -16,7 +16,7 @@ https://www.filebot.net/forums/viewtopic.php?t=13406
 // sanity check script parameters
 _def.each{ n, v ->
 	// mirror script parameters and print warnings for invalid or mistyped parameters 
-	if (n ==~ /plex|kodi|emby|jellyfin|pushbullet|pushover|discord|gmail|mail|mailto|myepisodes/) {
+	if (n ==~ /kodi|plex|jellyfin|emby|pushbullet|pushover|discord|gmail|mail|mailto|myepisodes/) {
 		log.finest "Parameter: $n = *****"
 	} else if (n ==~ /ut_dir|ut_file|ut_label|ut_title|ut_kind|ut_state|ut_state_allow|music|subtitles|artwork|reportError|storeReport|extractFolder|skipExtract|deleteAfterExtract|clean|exec|unsorted|ignore|minLengthMS|minFileSize|minFileAge|excludeLink|excludeList|movieFormat|seriesFormat|animeFormat|musicFormat|unsortedFormat|movieDB|seriesDB|animeDB|musicDB/) {
 		log.finest "Parameter: $n = $v"
@@ -55,10 +55,10 @@ artwork   = tryQuietly{ artwork.toBoolean() }
 clean     = tryQuietly{ clean.toBoolean() }
 exec      = tryQuietly{ exec.toString() }
 
-// array of kodi/plex/emby hosts
-kodi = tryQuietly{ any{kodi}{xbmc}.split(/[ ,;|]+/)*.split(/:(?=\d+$)/).collect{ it.length >= 2 ? [host: it[0], port: it[1] as int] : [host: it[0]] } }
+// array of kodi/plex/jellyfin hosts
+kodi = tryQuietly{ kodi.split(/[ ,;|]+/)*.split(/:(?=\d+$)/).collect{ it.length >= 2 ? [host: it[0], port: it[1] as int] : [host: it[0]] } }
 plex = tryQuietly{ plex.split(/[ ,;|]+/)*.split(/:/).collect{ it.length >= 3 ? [host: it[0], port: it[1] as int, token: it[2]] : it.length >= 2 ? [host: it[0], token: it[1]] : [host: it[0]] } }
-emby = tryQuietly{ any{jellyfin}{emby}.split(/[ ,;|]+/)*.split(/:/).collect{ it.length >= 3 ? [host: it[0], port: it[1] as int, token: it[2]] : it.length >= 2 ? [host: it[0], token: it[1]] : [host: it[0]] } }
+jellyfin = tryQuietly{ any{jellyfin}{emby}.split(/[ ,;|]+/)*.split(/:/).collect{ it.length >= 3 ? [host: it[0], port: it[1] as int, token: it[2]] : it.length >= 2 ? [host: it[0], token: it[1]] : [host: it[0]] } }
 
 // extra options, myepisodes updates and email notifications
 extractFolder      = tryQuietly{ extractFolder as File }
@@ -101,7 +101,7 @@ animeMapper = any{ _args.mapper }{ animeDB ==~ /(?i:AniDB)/ ? null : 'allOf{ epi
 
 
 // include artwork/nfo, pushover/pushbullet and ant utilities as required
-if (artwork || kodi || plex || emby) { include('lib/htpc') }
+if (artwork || kodi || plex || jellyfin) { include('lib/htpc') }
 if (pushover || pushbullet || gmail || mail || discord) { include('lib/web') }
 
 
@@ -542,7 +542,7 @@ if (exec) {
 def renameLog = getRenameLog()
 
 if (renameLog.size() > 0) {
-	// messages used for kodi / plex / emby pushover notifications
+	// messages used for kodi / plex / jellyfin pushover notifications
 	def getNotificationTitle = {
 		def count = renameLog.count{ k, v -> !v.isSubtitle() }
 		return "FileBot finished processing $count files"
@@ -569,9 +569,9 @@ if (renameLog.size() > 0) {
 		}
 	}
 
-	// make Emby scan for new content
-	if (emby) tryLogCatch {
-		emby.each{ instance ->
+	// make Jellyfin scan for new content
+	if (jellyfin) tryLogCatch {
+		jellyfin.each{ instance ->
 			log.fine "Notify Jellyfin [$instance.host]"
 			refreshJellyfinLibrary(instance.host, instance.port, instance.token)
 		}
