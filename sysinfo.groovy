@@ -166,6 +166,15 @@ try {
 	}
 }
 
+// System Property: net.filebot.web.WebRequest.v1=true
+try {
+	UserData.restoreUserDefinedSystemProperties{ name, value ->
+		println "System Property: $name=$value"
+	}
+} catch(Throwable error) {
+	// ignore
+}
+
 // CPU/MEM: 4 Core / 1 GB Max Memory / 15 MB Used Memory
 println String.format('CPU/MEM: %s Core / %s Max Memory / %s Used Memory', Runtime.runtime.availableProcessors(), Runtime.runtime.maxMemory().getDisplaySize(), (Runtime.runtime.totalMemory() - Runtime.runtime.freeMemory()).getDisplaySize())
 
