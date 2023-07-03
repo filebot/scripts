@@ -341,21 +341,21 @@ def resolveInput(f) {
 // flatten nested file structure
 def input = roots.findAll{ acceptFile(it) }.flatten{ resolveInput(it) }
 
-// update exclude list with all input that will be processed during this run
-if (excludeList && !testRun) {
-	try {
-		excludePathSet.append(excludeList, extractedArchives, input)
-	} catch(e) {
-		die "Failed to write excludes: $excludeList: $e"
-	}
-}
-
 // print exclude and input sets for logging
 input.each{ f ->
 	log.fine "Input: $f"
 	// print xattr metadata
 	if (f.metadata) {
 		log.fine "       └─ Metadata: $f.metadata"
+	}
+}
+
+// update exclude list with all input that will be processed during this run
+if (excludeList && !testRun) {
+	try {
+		excludePathSet.append(excludeList, extractedArchives, input)
+	} catch(e) {
+		die "Failed to write excludes: $excludeList: $e"
 	}
 }
 
