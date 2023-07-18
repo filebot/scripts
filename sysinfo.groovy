@@ -209,6 +209,20 @@ try {
 }
 
 
+// DOCKER: 524 MB Max Memory
+try {
+	def maxMemory = '/sys/fs/cgroup/memory.max'.toFile().getText() as long
+	println String.format('DOCKER: %s Max Memory', maxMemory.getDisplaySize())
+
+	// check if cgroup limit is lower than JVM limit
+	if (maxMemory < Runtime.runtime.maxMemory()) {
+		log.warning 'WARNING: cgroup memory limit is smaller than JRE memory limit'
+	}
+} catch(Throwable error) {
+	// silently fail on non-Unix platforms
+}
+
+
 // apfs [/] @ 30 GB | smbfs [/Volumes/Media] @ 1.4 TB
 try {
 	print 'STORAGE: '
