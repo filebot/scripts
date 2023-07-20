@@ -109,7 +109,7 @@ def refresh(f) {
 // import xattr metadata into Mac OS X Finder tags (UAYOR)
 def kMDItemUserTags(f) {
 	def xkey = 'com.apple.metadata:_kMDItemUserTags'
-	def info = getMediaInfo(f, '''{if (movie) 'Movie'};{if (episode) 'Episode'};{source};{vf};{sdhd}''')
+	def info = getMediaInfo(f, '''{if (movie) 'Movie'};{if (episode) 'Episode'};{y};{source};{vf};{hd}''')
 	def tags = info.split(';')*.trim().findAll{ it.length() > 0 }
 
 	def plist = XML{
