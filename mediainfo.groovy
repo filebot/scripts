@@ -7,11 +7,8 @@ if (_args.mode == /raw/) {
 
 	args.files.each{ f ->
 		try(MediaInfo mi = new MediaInfo()) {
-			mi.option("Language", "raw")
-			mi.option("Complete", "1")
-
 			def read = mi.openViaBuffer(f)
-			def raw = mi.inform()
+			def raw = mi.raw()
 
 			// print stats
 			log.finest "# $f [${read.displaySize} of ${f.displaySize}]"
