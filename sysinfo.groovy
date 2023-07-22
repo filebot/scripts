@@ -201,18 +201,18 @@ try {
 	println 'HW: ' + ['uname', '-a'].execute().text.trim()
 
 	def info = [] as Set
-	('/proc/cpuinfo' as File).splitEachLine(/\:\s+/){ row ->
-		if (row[0] =~ /^Hardware|^model.name/) {
-			info << row[1].trim()
+	csv('/proc/cpuinfo').each{ k, v ->
+		if (k =~ /^Hardware|^model.name/) {
+			info << v
 		}
 	}
 
 	def meminfo = [] as Set
-	('/proc/meminfo' as File).splitEachLine(/\:\s+/){ row ->
-		if (row[0] =~ /^Mem|^Swap/) {
-			def space = row[1].match(/\d+/).toLong().multiply(1024)
+	csv('/proc/meminfo').each{ k, v ->
+		if (k =~ /^Mem|^Swap/) {
+			def space = v.match(/\d+/).toLong().multiply(1024)
 			if (space > 0) {
-				info << row[0].trim() + ": " + space.displaySize
+				info << "${k}: ${space.displaySize}"
 			}
 		}
 	}
@@ -225,7 +225,7 @@ try {
 
 // DOCKER: 524 MB Max Memory
 try {
-	def maxMemory = ('/sys/fs/cgroup/memory.max' as File).text as long
+	def maxMemory = text('/sys/fs/cgroup/memory.max').toLong()
 	println "DOCKER: ${maxMemory.displaySize} Max Memory"
 
 	// check if cgroup limit is lower than JVM limit
