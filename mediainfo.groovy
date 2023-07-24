@@ -5,7 +5,7 @@
 if (_args.mode == /raw/) {
 	log.finest "# ${MediaInfo.version()}"
 
-	args.files.each{ f ->
+	args.files.findAll{ f -> f.video || f.audio }.each{ f ->
 		try(MediaInfo mi = new MediaInfo()) {
 			def read = mi.openViaBuffer(f)
 			def raw = mi.raw()
