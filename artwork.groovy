@@ -46,7 +46,11 @@ def fetchEpisodeArtwork(episode, episodeFile) {
 	}
 
 	log.fine "Fetch $i.image [$thumbnailFile]"
-	i.image.saveAs(thumbnailFile)
+	try {
+		i.image.saveAs(thumbnailFile)
+	} catch(e) {
+		log.severe "Failed to fetch artwork: $e.message"
+	}
 }
 
 
@@ -64,7 +68,11 @@ def fetchArtwork(object, category, language, file) {
 
 	def a = artwork[0]
 	log.fine "Fetch $a [$file]"
-	a.url.saveAs(file)
+	try {
+		a.url.saveAs(file)
+	} catch(e) {
+		log.severe "Failed to fetch artwork: $e.message"
+	}
 }
 
 
