@@ -217,7 +217,7 @@ try {
 		}
 	}
 
-	println "CPU/MEM: ${info.join('/')}"
+	println "CPU/MEM: ${info.join(' / ')}"
 } catch(Throwable error) {
 	// silently fail on non-Unix platforms
 }
