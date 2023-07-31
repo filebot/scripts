@@ -7,7 +7,7 @@ log.fine("Run script [$_args.script] at [$now]")
 
 
 help """
-[PSA] Important Discussion of Proposed Changes:
+[PSA] Important Discussion of Changes effective as of 28 Apr 2023:
 https://www.filebot.net/forums/viewtopic.php?t=13406
 """
 
