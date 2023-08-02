@@ -40,12 +40,12 @@ tools['fpcalc'] = { AcoustID.version().match(/[.\d]{3,}/) }
 import net.filebot.archive.*
 
 try {
-	if (Archive.Extractor =~ /SevenZipNativeBindings/) {
+	if (Archive.extractor =~ /SevenZipNativeBindings/) {
 		print '7-Zip-JBinding: '
 		SevenZipLoader.requireNativeLibraries()
 		println SevenZipLoader.NativeVersion
 	}
-	if (Archive.Extractor =~ /ShellExecutables/) {
+	if (Archive.extractor =~ /ShellExecutables/) {
 		ShellExecutables.Command.each{ c ->
 			tools[c] = { c.version().match(/[.\d]{3,}/) }
 		}
