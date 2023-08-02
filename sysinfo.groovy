@@ -176,7 +176,7 @@ try {
 // JAVA_OPTS: -Xmx512m -XX:ActiveProcessorCount=1
 ['JAVA_OPTS', 'FILEBOT_OPTS'].each{ variable ->
 	if (env[variable]) {
-		println "$name: ${env[variable]}"
+		println "$variable: ${env[variable]}"
 	}
 }
 
