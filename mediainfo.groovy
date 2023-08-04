@@ -17,7 +17,7 @@ if (_args.mode == /raw/) {
 			// write xattr
 			if (raw) {
 				f.xattr['net.filebot.mediainfo'] = raw
-				f.xattr['net.filebot.mediainfo.mtime'] = f.lastModified() as String	
+				f.xattr['net.filebot.mediainfo.mtime'] = f.lastModified() as String
 			}
 		}
 	}
