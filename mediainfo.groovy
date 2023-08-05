@@ -6,12 +6,12 @@ if (_args.mode == /raw/) {
 	log.finest "# ${MediaInfo.version()}"
 
 	return args.files.findAll{ f -> f.video || f.audio }.each{ f ->
-		try(MediaInfo mi = new MediaInfo()) {
-			def read = mi.openViaBuffer(f)
+		try(def mi = new MediaInfo()) {
+			def read = mi.read(f, 8192)
 			def raw = mi.raw()
 
 			// print stats
-			log.fine "\n# $f [${read.displaySize} of ${f.displaySize}]"
+			log.fine "\n# $f (${read.displaySize} of ${f.displaySize})"
 			log.info "\n$raw"
 
 			// write xattr
