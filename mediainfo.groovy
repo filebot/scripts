@@ -16,7 +16,7 @@ if (_args.mode == /raw/) {
 
 			// minify and write to xattr
 			if (raw) {
-				f.xattr['net.filebot.mediainfo'] = raw.split(/\R+/).findResults{ it.replaceFirst(/[ ]+[:][ ]+/, ':') }.join('\n')
+				f.xattr['net.filebot.mediainfo'] = raw.split(/\R+/).findResults{ it.replaceFirst(/[ ]+[:][ ]+/, '\t') }.join('\n')
 				f.xattr['net.filebot.mediainfo.mtime'] = f.lastModified() as String
 			}
 		}
