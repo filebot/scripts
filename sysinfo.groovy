@@ -116,13 +116,15 @@ try {
 	f.nameWithoutExtension.saveAs(f)
 
 	// ensure that libmediainfo can work with the file
-	def mi = any{ new MediaInfo() }{ null }
-	if (mi) {
-		mi.read(f, 32)
-		if (mi.raw().length() < 750) {
-			throw new EOFException("MediaInfo::read")
+	if (Settings.ApplicationRevisionNumber > 9970) {
+		def mi = any{ new MediaInfo() }{ null }
+		if (mi) {
+			mi.read(f, 32)
+			if (mi.raw().length() < 750) {
+				throw new EOFException("MediaInfo::read")
+			}
+			mi.close()
 		}
-		mi.close()
 	}
 
 	// ensure that file can be deleted
