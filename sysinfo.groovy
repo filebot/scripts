@@ -106,10 +106,27 @@ try {
 try {
 	print 'Unicode Filesystem: '
 
-	// create new temp file
-	def f = ApplicationFolder.TemporaryFiles.resolve('龍飛鳳舞.txt').toPath()
-	Files.createFile(f)
-	Files.delete(f)
+	// create new temporary file
+	def f = ApplicationFolder.TemporaryFiles.resolve('Drægōñ飛Phöníx舞.txt')
+
+	// ensure that file can be created
+	Files.exists(f.toPath()) || Files.createFile(f.toPath())
+
+	// ensure that file can be written
+	f.nameWithoutExtension.saveAs(f)
+
+	// ensure that libmediainfo can work with the file
+	def mi = any{ new MediaInfo() }{ null }
+	if (mi) {
+		mi.read(f, 32)
+		if (mi.raw().length() < 750) {
+			throw new EOFException("MediaInfo::read")
+		}
+		mi.close()
+	}
+
+	// ensure that file can be deleted
+	Files.delete(f.toPath())
 
 	println 'OK'
 } catch(Throwable error) {
