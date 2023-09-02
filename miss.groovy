@@ -10,21 +10,19 @@ if (args.size() == 0) {
 def episodes = []
 def shows = [] as LinkedHashSet
 
-args.getFiles().each{ f ->
-	if (f.isVideo()) {
-		def episode = f.metadata
-		def seriesInfo = any{ episode.seriesInfo }{ null }
+args.getFiles{ f -> f.video }.each{ f ->
+	def episode = f.metadata
+	def seriesInfo = any{ episode.seriesInfo }{ null }
 
-		if (episode instanceof Episode && seriesInfo instanceof SeriesInfo) {
-			log.finest "$seriesInfo | $episode | $f"
+	if (episode instanceof Episode && seriesInfo instanceof SeriesInfo) {
+		log.finest "$seriesInfo | $episode | $f"
 
-			shows += seriesInfo
+		shows += seriesInfo
 
-			if (episode instanceof MultiEpisode) {
-				episodes += episode.episodes as List
-			} else {
-				episodes += episode
-			}
+		if (episode instanceof MultiEpisode) {
+			episodes += episode.episodes as List
+		} else {
+			episodes += episode
 		}
 	}
 }
@@ -39,19 +37,29 @@ def episodeList = shows.collectMany{ s ->
 	def episodeList = tryLogCatch{
 		return getService(s.database).getEpisodeList(s.id, s.order as SortOrder, s.language as Locale)
 	}
-
-	// abort if we cannot receive the current episode list information
-	if (!episodeList) {
-		die "Failed to fetch episode list for $s.name [$s]"
+	if (episodeList) {
+		return episodeList	
 	}
+	// abort if we cannot receive the current episode list information
+	die "Failed to fetch episode list for $s.name [$s]"
+}
 
-	// ignore special episodes
-	return episodeList.findAll{ e -> e.episode }
-} as LinkedHashSet
+
+// check for episode information changes
+if (_args.strict) {
+	def actual = episodeList.collectEntries{ e -> [e.id, e as String] }
+	def expected = episodes.collectEntries{ e -> [e.id, e as String] }
+	expected.each{ k, v ->
+		if (v != actual[k]) {
+			help "* Episode #$k has changed: $v -> ${actual[k]}"
+		}
+	}
+}
 
 
-// print missing episodes
-def missingEpisodes = episodeList - episodes
+// print missing episodes (ignore special episodes)
+def regularEpisodes = episodeList.findAll{ e -> e.episode } as LinkedHashSet
+def missingEpisodes = regularEpisodes - episodes
 
 // support custom output formatting
 def format = _args.expressionFormat
