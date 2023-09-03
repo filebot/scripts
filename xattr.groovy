@@ -28,7 +28,13 @@ args.flatten{ f -> f.isDirectory() ? f.listFiles{ true } : f }.each{ f ->
 
 xattrFiles.each{ f ->
 	log.finest "$f"
-	f.xattr.each{ k, v -> log.fine "\t$k: $v" }
+	f.xattr.each{ k, v ->
+		if (v ==~ /[\p{Print}\p{Space}]*/) {
+			log.fine "\t$k: $v"
+		} else {
+			log.fine "\t$k: �"
+		}
+	}
 
 	if (_args.action =~ /clear/) {
 		clear(f)
