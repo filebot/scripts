@@ -32,7 +32,9 @@ xattrFiles.each{ f ->
 		if (v ==~ /[\p{Print}\p{Space}]*/) {
 			log.fine "\t$k: $v"
 		} else {
-			log.fine "\t$k: �"
+			// use 1 replacement character for each digit of magnitude
+			def holder = '�' * v.length().toString().length()
+			log.fine "\t$k: $holder"
 		}
 	}
 
