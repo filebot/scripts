@@ -180,30 +180,27 @@ def certificationFragment(element, info) {
 
 
 def fileFragment(element, file) {
+	def mi = file.mediaInfo
+
 	element.fileinfo {
 		streamdetails {
-			MediaInfo.snapshot(file).each{ kind, streams ->
-				def section = kind.toString().toLowerCase()
-				streams.each{ s ->
-					if (section == 'video') {
-						video {
-							codec((s.'Encoded_Library/Name' ?: s.'CodecID/Hint' ?: s.'Format').replaceAll(/[ ].+/, '').trim())
-							aspect(s.'DisplayAspectRatio')
-							width(s.'Width')
-							height(s.'Height')
-						}
-					}
-					if (section == 'audio') {
-						audio {
-							codec((s.'CodecID/Hint' ?: s.'Format').replaceAll(/\p{Punct}/, '').trim())
-							language(s.'Language/String3')
-							channels(s.'Channel(s)_Original' ?: s.'Channel(s)')
-						}
-					}
-					if (section == 'text') {
-						subtitle { language(s.'Language/String3') }
-					}
+			mi.Video.each{ s ->
+				video {
+					codec((s.'Encoded_Library/Name' ?: s.'CodecID/Hint' ?: s.'Format').replaceAll(/[ ].+/, '').trim())
+					aspect(s.'DisplayAspectRatio')
+					width(s.'Width')
+					height(s.'Height')
 				}
+			}
+			mi.Audio.each{ s ->
+				audio {
+					codec((s.'CodecID/Hint' ?: s.'Format').replaceAll(/\p{Punct}/, '').trim())
+					language(s.'Language/String3')
+					channels(s.'Channel(s)_Original' ?: s.'Channel(s)')
+				}
+			}
+			mi.Text.each{ s ->
+				subtitle { language(s.'Language/String3') }
 			}
 		}
 	}

@@ -7,11 +7,11 @@
  */
 if (args) {
 	args.getFiles{ it.isVideo() }.each{ f ->
-		println ' File / Object / MediaInfo '.center(80, '-')
+		println ' File / Object / Media '.center(80, '-')
 
 		println 'File:    ' + f
 		println 'Object:  ' + f.xattr['net.filebot.metadata']
-		println 'Media:   ' + any{ MediaInfo.snapshot(f) }{ null }
+		println 'Media:   ' + any{ f.mediaCharacteristics }{ null }
 
 		if (f.metadata) {
 			println ' Episode Metrics '.center(80, '-')

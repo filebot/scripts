@@ -256,7 +256,7 @@ def fetchMovieFanart(outputFile, movieInfo, type, diskType, override, locale) {
 
 def fetchMovieNfo(outputFile, i, movieFile) {
 	log.finest "Generate Movie NFO: $i.name [$i.id]"
-	def mi = tryLogCatch{ movieFile ? MediaInfo.snapshot(movieFile) : null }
+	def mi = tryLogCatch{ movieFile?.mediaInfo }
 	def xml = XML {
 		movie {
 			title(i.name)
@@ -299,28 +299,23 @@ def fetchMovieNfo(outputFile, i, movieFile) {
 			}
 			fileinfo {
 				streamdetails {
-					mi?.each { kind, streams ->
-						def section = kind.toString().toLowerCase()
-						streams.each { s ->
-							if (section == 'video') {
-								video {
-									codec((s.'Encoded_Library/Name' ?: s.'CodecID/Hint' ?: s.'Format').replaceAll(/[ ].+/, '').trim())
-									aspect(s.'DisplayAspectRatio')
-									width(s.'Width')
-									height(s.'Height')
-								}
-							}
-							if (section == 'audio') {
-								audio {
-									codec((s.'CodecID/Hint' ?: s.'Format').replaceAll(/\p{Punct}/, '').trim())
-									language(s.'Language/String3')
-									channels(s.'Channel(s)_Original' ?: s.'Channel(s)')
-								}
-							}
-							if (section == 'text') {
-								subtitle { language(s.'Language/String3') }
-							}
+					mi?.Video.each{ s ->
+						video {
+							codec((s.'Encoded_Library/Name' ?: s.'CodecID/Hint' ?: s.'Format').replaceAll(/[ ].+/, '').trim())
+							aspect(s.'DisplayAspectRatio')
+							width(s.'Width')
+							height(s.'Height')
 						}
+					}
+					mi?.Audio.each{ s ->
+						audio {
+							codec((s.'CodecID/Hint' ?: s.'Format').replaceAll(/\p{Punct}/, '').trim())
+							language(s.'Language/String3')
+							channels(s.'Channel(s)_Original' ?: s.'Channel(s)')
+						}
+					}
+					mi?.Text.each{ s ->
+						subtitle { language(s.'Language/String3') }
 					}
 				}
 			}
