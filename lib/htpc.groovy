@@ -350,6 +350,6 @@ def fetchMovieArtworkAndNfo(movieDir, movie, movieFile = null, override = false,
 
 def copyIfPossible(File src, File dst) {
 	if (src.exists() && !dst.exists()) {
-		src.copyAs(dst)
+		dst.bytes = src.bytes
 	}
 }
