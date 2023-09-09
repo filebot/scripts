@@ -262,8 +262,8 @@ try {
 	println any{
 		FileSystems.Default.FileStores.findResults{ drive ->
 			def fs = drive.type()
-			def label = drive.toString().replaceTrailingBrackets() ?: drive
-			def space = drive.usableSpace
+			def label = any{ drive.toString().replaceTrailingBrackets() }{ drive }
+			def space = any{ drive.usableSpace }{ 0 }
 			// exclude clutter
 			if (fs =~ /rootfs|tmpfs/ || label =~ /usr|etc|tmp|var|lib|boot|snap|private|docker|timemachine|backup|System|Recovery|Backups|GoogleDrive|home[0-9]+$/ || space == 0) {
 				return null
