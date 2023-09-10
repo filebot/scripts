@@ -84,15 +84,20 @@ try {
 	print 'Extended Attributes: '
 	if (Settings.useExtendedFileAttributes()) {
 		// create new temp file
-		def f = ApplicationFolder.TemporaryFiles.resolve('xattr.txt')
-		f.createNewFile() && f.deleteOnExit()
+		def f = ApplicationFolder.TemporaryFiles.resolve('Drægōñ飛Phöníx舞.txt')
+
+		// ensure that file can be created
+		Files.exists(f.toPath()) || Files.createFile(f.toPath())
 
 		// xattr write, read and verify
 		def xattr = new MetaAttributes(f)
 		def value = new Date()
 		xattr.setObject(value)
-
 		assert xattr.getObject() == value
+
+		// ensure that file can be deleted
+		Files.delete(f.toPath())
+
 		println 'OK'
 	} else {
 		println 'DISABLED'
@@ -127,8 +132,9 @@ try {
 		}
 	}
 
-	// ensure that file can be deleted
-	Files.delete(f.toPath())
+	// ensure that file operations work
+	Files.delete(StandardRenameAction.COPY.rename(f, f.dir / 'Drægōñ飛Phöníx舞 (1).txt').toPath())
+	Files.delete(StandardRenameAction.MOVE.rename(f, f.dir / 'Drægōñ飛Phöníx舞 (2).txt').toPath())
 
 	println 'OK'
 } catch(Throwable error) {
