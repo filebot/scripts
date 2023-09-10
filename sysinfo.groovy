@@ -138,6 +138,7 @@ try {
 
 
 // GIO and GVFS
+import net.filebot.platform.posix.*
 import net.filebot.platform.gnome.*
 
 if (Settings.useGVFS() && !java.awt.GraphicsEnvironment.Headless) {
