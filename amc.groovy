@@ -385,7 +385,7 @@ def forceGroup() {
 			log.fine "Process as Unsorted [$label]"
 			return AutoDetection.Group.None
 		default:
-			log.fine "Group files by content type [Movie | Series | Music | Other]"
+			log.fine "Group files by movie or series"
 			return null
 	}
 }
