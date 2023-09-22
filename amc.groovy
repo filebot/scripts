@@ -381,10 +381,11 @@ def forceGroup() {
 		case ~/.*(?i:Audio|Music|Music.Video).*/:
 			log.fine "Process as Music [$label]"
 			return AutoDetection.Group.Music
-		case ~/.*(?i:games|book|other|ignore).*/:
+		case ~/.*(?i:games|book|other|ignore|unsorted).*/:
 			log.fine "Process as Unsorted [$label]"
 			return AutoDetection.Group.None
 		default:
+			log.fine "Group files by content type [Movie | Series | Music | Other]"
 			return null
 	}
 }
