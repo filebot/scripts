@@ -50,7 +50,7 @@ outputFolder = _args.absoluteOutputFolder
 // enable/disable features as specified via --def parameters
 unsorted  = tryQuietly{ unsorted.toBoolean() }
 music     = tryQuietly{ music.toBoolean() }
-subtitles = tryQuietly{ subtitles.split(/\W+/) as List }
+subtitles = tryQuietly{ subtitles.matchAll(/\w\w+/) }
 artwork   = tryQuietly{ artwork.toBoolean() }
 clean     = tryQuietly{ clean.toBoolean() }
 exec      = tryQuietly{ exec.toString() }
