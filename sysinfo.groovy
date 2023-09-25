@@ -258,6 +258,9 @@ try {
 	if (maxMemory < jre.maxMemory()) {
 		log.warning 'WARNING: cgroup memory limit is smaller than JRE memory limit'
 	}
+	if (maxMemory < 2e9) {
+		log.warning 'WARNING: cgroup memory limit is smaller than 2 GB'
+	}
 } catch(Throwable error) {
 	// silently fail on non-Unix platforms
 }
