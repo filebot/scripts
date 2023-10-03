@@ -39,10 +39,13 @@ xattrFiles.each{ f ->
 	}
 
 	if (_args.action =~ /clear/) {
-		clear(f)
+		clearXattr(f)
+	}
+	if (_args.action =~ /dump/) {
+		dumpXattr(f)
 	}
 	if (_args.action =~ /refresh/) {
-		refresh(f)
+		refreshMetadata(f)
 	}
 	if (_args.action =~ /import/) {
 		kMDItemUserTags(f)
@@ -67,6 +70,7 @@ if (!xattrFiles && !xattrFolders) {
 
 
 
+
 // hide system xattr keys
 def isSystemKey(k) {
 	k.startsWith('com.apple.') && _args.strict
@@ -86,14 +90,23 @@ def setXattrKey(f, k, v) {
 
 
 // clear xattr metadata
-def clear(f) {
+def clearXattr(f) {
 	log.info "[CLEAR] $f.metadata [$f]"
 	f.xattr.clear()
 }
 
 
+// dump xattr metadata as plain/text files
+def dumpXattr(f) {
+	f.xattr.list().each{ k ->
+		def v = f.xattr.read(k).saveAs("${f}#${k}")
+		log.info "[DUMP] ${v} (${v.displaySize})"
+	}
+}
+
+
 // refresh xattr metadata
-def refresh(f) {
+def refreshMetadata(f) {
 	def e = f.metadata
 	if (e instanceof Episode) {
 		def i = e.seriesInfo
