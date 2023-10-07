@@ -31,7 +31,7 @@ def isClutter = { f ->
 	def fsize = f.length()
 
 	// path contains blacklisted terms or extension is blacklisted
-	if (f.extension ==~ exts && fsize < maxsize)
+	if (f.extension?.findWordMatch(exts) && fsize < maxsize)
 		return true
 
 	if (f.path.findWordMatch(terms) && fsize < maxsize)
