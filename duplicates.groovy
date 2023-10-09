@@ -55,10 +55,11 @@ def group(files) {
 		def m = f.metadata
 		if (m == null) {
 			log.finest "[XATTR NOT FOUND] $f"
+			return null
 		}
 		// Strict Mode: group by metadata
 		// Non-Lenient Mode: group by metadata and video format and HDR type
-		return !m || _args.strict ? m : [m, getMediaInfo(f, '{vf} {hdr}')]
+		return _args.strict ? m : [m, getMediaInfo(f, '{vf} {hdr}')]
 	}
 }
 
