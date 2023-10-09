@@ -53,6 +53,9 @@ def group(files) {
 	// Logical Duplicates: Group by Xattr Metadata Object
 	return files.findAll{ it.isVideo() }.groupBy{ f ->
 		def m = f.metadata
+		if (m == null) {
+			log.finest "[XATTR NOT FOUND] $f"
+		}
 		// Strict Mode: group by metadata
 		// Non-Lenient Mode: group by metadata and video format and HDR type
 		return !m || _args.strict ? m : [m, getMediaInfo(f, '{vf} {hdr}')]
