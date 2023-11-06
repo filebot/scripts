@@ -507,16 +507,22 @@ if (unsorted && !testRun) {
 		log.fine "Processing ${unsortedFiles.size()} unsorted files"
 
 		def rfs = rename(map: unsortedFiles.collectEntries{ original ->
-			def destination = getMediaInfo(original, unsortedFormat) as File
+			def target = getMediaInfo(original, unsortedFormat)
 
 			// sanity check user-defined unsorted format
-			if (destination == null) {
-				die "Invalid usage: --def unsortedFormat [$unsortedFormat] must yield a valid target file path for unsorted file [$original]"
+			if (target == null || target.endsWith('/') || target.endsWith('\\')) {
+				die "Invalid usage: --def unsortedFormat [$unsortedFormat] must yield a valid target file path for unsorted file [$original] and not [$target]"
+			}
+
+			// fix the extension for custom unsorted formats that do not print the file extension
+			if (!target.extension && original.extension) {
+				target += '.' + original.extension
 			}
 
 			// resolve relative paths
+			def destination = target as File
 			if (!destination.isAbsolute()) {
-				destination = outputFolder.resolve(destination.path)
+				destination = outputFolder.resolve(target)
 			}
 
 			return [original, destination]
