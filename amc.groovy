@@ -510,7 +510,7 @@ if (unsorted && !testRun) {
 			def destination = getMediaInfo(original, unsortedFormat) as File
 
 			// sanity check user-defined unsorted format
-			if (destination == null || destination.isDirectory()) {
+			if (destination == null || (destination.isAbsolute() && destination.isDirectory())) {
 				die "Invalid usage: --def unsortedFormat [$unsortedFormat] must yield a valid target file path for unsorted file [$original]"
 			}
 
