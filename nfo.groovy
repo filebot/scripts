@@ -186,7 +186,7 @@ def fileFragment(element, file) {
 		streamdetails {
 			mi.Video.each{ s ->
 				video {
-					codec((s.'Encoded_Library/Name' ?: s.'CodecID/Hint' ?: s.'Format').replaceAll(/[ ].+/, '').trim())
+					codec(s.'Encoded_Library/Name' ?: s.'CodecID/Hint' ?: s.'Format')
 					aspect(s.'DisplayAspectRatio')
 					width(s.'Width')
 					height(s.'Height')
@@ -194,13 +194,15 @@ def fileFragment(element, file) {
 			}
 			mi.Audio.each{ s ->
 				audio {
-					codec((s.'CodecID/Hint' ?: s.'Format').replaceAll(/\p{Punct}/, '').trim())
+					codec(s.'CodecID/Hint' ?: s.'Format')
 					language(s.'Language/String3')
 					channels(s.'Channel(s)_Original' ?: s.'Channel(s)')
 				}
 			}
 			mi.Text.each{ s ->
-				subtitle { language(s.'Language/String3') }
+				subtitle {
+					language(s.'Language/String3')
+				}
 			}
 		}
 	}
