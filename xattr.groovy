@@ -29,7 +29,7 @@ args.flatten{ f -> f.isDirectory() ? f.listFiles{ true } : f }.each{ f ->
 xattrFiles.each{ f ->
 	log.finest "$f"
 	f.xattr.each{ k, v ->
-		if (v ==~ /[\p{Print}\p{Space}]*/) {
+		if (v ==~ /(?U)[\p{Print}\p{Space}]*/) {
 			log.fine "\t$k: $v"
 		} else {
 			// use 1 replacement character for each digit of magnitude
