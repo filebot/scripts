@@ -1,35 +1,32 @@
 #!/usr/bin/env filebot -script
 
 
-import java.util.concurrent.*
-import net.filebot.hash.*
+def hashType = any{ _args.mode.toUpperCase() }{ 'CRC32' }
 
 
-def hashType = HashType.SFV
-def xattrkey = 'CRC32'
-
-def files = args.getFiles{ it.isVideo() || it.isAudio() }
-
-def threadPoolSize = Runtime.getRuntime().availableProcessors()
-def executor = Executors.newFixedThreadPool(threadPoolSize)
-
-executor.invokeAll(files.collect{ f ->
+parallel(args.files.collect{ f ->
 	return {
-		def attr_hash = f.xattr[xattrkey]
-		def calc_hash = VerificationUtilities.computeHash(f, hashType)
+		def attr_hash = f.xattr[hashType]
+		def calc_hash = f.hash(hashType)
 
-		log.info "$attr_hash $calc_hash $f"
+		if (attr_hash) {
+			log.finest "$attr_hash $calc_hash $f"
 
-		if (attr_hash == null) {
-			log.warning "Set xattr $xattrkey for [$f]"
-			f.xattr[xattrkey] = calc_hash
+			// abort if a mismatch has been found
+			if (attr_hash != calc_hash) {
+				die "$hashType mismatch: $attr_hash does not match: $calc_hash $f"
+			}
+		} else {
+			// compute checksum if it cannot be read from xattr
+			log.warning "Set $hashType xattr: $calc_hash $f"
+
+			f.xattr[hashType] = calc_hash
+			f.xattr[hashType + '.mtime'] = f.lastModified() as String
 
 			// verify that xattr has been set correctly
-			if (f.xattr[xattrkey] != calc_hash) {
-				die "Failed to set xattr $xattrkey for [$f]"
+			if (f.xattr[hashType] != calc_hash) {
+				die "Failed to set $hashType xattr: $f"
 			}
-		} else if (attr_hash != calc_hash) {
-			die "$xattrkey mismatch (expected $attr_hash, actual: $calc_hash) for [$f]"
 		}
 	}
-})*.get()
+})

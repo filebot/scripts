@@ -2,8 +2,8 @@
 
 
 // require mkvtoolnix and atomicparsley
-mkvpropedit   = any{ mkvpropedit   }{ 'mkvpropedit'   }
-atomicparsley = any{ atomicparsley }{ 'AtomicParsley' }
+mkvpropedit   = any{ mkvpropedit   }{ WriteTags.Command.mkvpropedit.getCommand()   }
+atomicparsley = any{ atomicparsley }{ WriteTags.Command.AtomicParsley.getCommand() }
 
 
 def mkv(f, m) {
@@ -13,11 +13,20 @@ def mkv(f, m) {
 	def cover = null
 
 	if (m instanceof Episode) {
+		// e.g. https://www.matroska.org/files/tags/simpsons-s01e05.xml
 		xml = XML {
 			Tags {
 				Tag {
 					Targets {
 						TargetTypeValue('70')
+					}
+					Simple {
+						Name('CONTENT_TYPE')
+						String('TV Show')
+					}
+					Simple {
+						Name('TITLE')
+						String(m.seriesName)
 					}
 					if (m.seriesInfo.database =~ /TheTVDB/) {
 						Simple {
@@ -50,21 +59,88 @@ def mkv(f, m) {
 						String(m.episode ?: 0)
 					}
 					Simple {
+						Name('TITLE')
+						String(m.title)
+					}
+					Simple {
+						Name('DATE_RELEASED')
+						String(m.airdate)
+					}
+					Simple {
+						Name('GENRE')
+						String(m.seriesInfo.genres.join(';'))
+					}
+					Simple {
+						Name('PUBLISHER')
+						String(m.seriesInfo.network)
+					}
+					Simple {
+						Name('DIRECTOR')
+						String(m.info?.director)
+					}
+					Simple {
+						Name('SYNOPSIS')
+						String(m.info?.overview)
+					}
+					Simple {
 						Name('XATTR')
 						String(m.toJsonString())
 					}
 				}
 			}
 		}
-		cover = poster(m.series?.poster)
+		cover = poster(m)
 	}
 
 	if (m instanceof Movie) {
+		// e.g. https://www.matroska.org/files/tags/dune.xml
 		xml = XML {
 			Tags {
 				Tag {
 					Targets {
-						TargetTypeValue('70')
+						TargetTypeValue('50')
+					}
+					Simple {
+						Name('CONTENT_TYPE')
+						String('Movie')
+					}
+					Simple {
+						Name('TITLE')
+						String(m.name)
+					}
+					Simple {
+						Name('DATE_RELEASED')
+						String(m.info?.released ?: m.year)
+					}
+					Simple {
+						Name('DIRECTOR')
+						String(m.info?.director)
+					}
+					Simple {
+						Name('GENRE')
+						String(m.info?.genres.join(';'))
+					}
+					Simple {
+						Name('KEYWORDS')
+						String(m.info?.collection)
+					}
+					Simple {
+						Name('SUMMARY')
+						String(m.info?.tagline)
+					}
+					Simple {
+						Name('SYNOPSIS')
+						String(m.info?.overview)
+					}
+					if (m instanceof MoviePart) {
+						Simple {
+							Name('PART_NUMBER')
+							String(m.partIndex)
+						}
+						Simple {
+							Name('TOTAL_PARTS')
+							String(m.partCount)
+						}
 					}
 					if (m.imdbId > 0) {
 						Simple {
@@ -85,7 +161,7 @@ def mkv(f, m) {
 				}
 			}
 		}
-		cover = poster(m.info?.poster)
+		cover = poster(m)
 	}
 
 	if (xml) {
@@ -124,11 +200,11 @@ def mp4(f, m) {
 			'--TVEpisodeNum' : m.episode,
 			'--TVSeasonNum'  : m.season,
 			'--description'  : m.title,
-			'--genre'        : m.seriesInfo?.genres[0],
-			'--TVNetwork'    : m.seriesInfo?.network,
+			'--genre'        : m.seriesInfo.genres.join(';'),
+			'--TVNetwork'    : m.seriesInfo.network,
 			'--artist'       : m.info?.director,
 			'--longdesc'     : m.info?.overview,
-			'--artwork'      : poster(m.series?.poster)
+			'--artwork'      : poster(m)
 		]
 	}
 
@@ -138,10 +214,10 @@ def mp4(f, m) {
 			'--year'        : m.info?.released?.toInstant() ?: m.year,
 			'--artist'      : m.info?.director,
 			'--grouping'    : m.info?.collection,
-			'--genre'       : m.info?.genres[0],
+			'--genre'       : m.info?.genres.join(';'),
 			'--description' : m.info?.tagline,
 			'--longdesc'    : m.info?.overview,
-			'--artwork'     : poster(m.info?.poster)
+			'--artwork'     : poster(m)
 		]
 	}
 
@@ -162,21 +238,30 @@ def mp4(f, m) {
 }
 
 
-def poster(url) {
+def poster(m) {
+	def url = null
+
+	if (m instanceof Episode) {
+		url = any{ m.series.poster }{ null }
+	}
+	if (m instanceof Movie) {
+		url = any{ m.info.poster }{ null }
+	}
+
 	if (url) {
 		try {
-			def bytes = url.cache().get()
-			def image = javax.imageio.ImageIO.read(new ByteArrayInputStream(bytes))
-
-			def file = File.createTempFile('poster', '.png')
-			file.deleteOnExit()
-
-			javax.imageio.ImageIO.write(image, 'png', file)
-			return file
+			def image = url.cache().getImage()
+			if (image) {
+				def file = File.createTempFile('poster', '.png')
+				file.deleteOnExit()
+				return image.saveAs(file)
+			}
 		} catch(e) {
-			log.finest "$e.message [$url]"
+			log.warning "$e.message [$url]"
 		}
 	}
+
+	log.finest "[POSTER NOT FOUND] $m"
 	return null
 }
 

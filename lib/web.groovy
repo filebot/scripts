@@ -11,7 +11,6 @@ def Email(host, port, username, password) {
 }
 
 class EmailClient {
-
     def username
     def password
     def host

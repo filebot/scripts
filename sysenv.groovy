@@ -1,17 +1,33 @@
 #!/usr/bin/env filebot -script
 
 
-println '\n# Environment Variables #'
+log.fine '\n# Local Time #'
+log.info "$now"
+
+log.fine '\n# Process Tree #'
+try {
+	def t = []
+	for (def p = ProcessHandle.current(); p != null; p = p.parent().orElse(null)) {
+		t.push p.info()
+	}
+	t.findResults{ p -> p.command().orElse(null) }.eachWithIndex{ p, i ->
+		log.info "${i == 0 ? p : '   ' * (i-1) + '└─ ' + p}"
+	}
+} catch(Throwable e) {
+	log.warning "$e"
+}
+
+log.fine '\n# Environment Variables #'
 _environment.toSorted{ it.key }.each{ k, v ->
-	println "$k: $v"
+	log.info "$k: $v"
 }
 
-println '\n# Java System Properties #'
+log.fine '\n# Java System Properties #'
 _system.toSorted{ it.key }.each{ k, v ->
-	println "$k: $v"
+	log.info "$k: $v"
 }
 
-println '\n# Arguments #'
+log.fine '\n# Arguments #'
 _args.argumentArray.eachWithIndex{ a, i ->
-	println "args[$i] = $a"
+	log.info "args[$i] = $a"
 }

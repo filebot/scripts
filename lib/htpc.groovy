@@ -31,23 +31,63 @@ def postKodiRPC(host, port, json) {
 /**
  * Plex helpers
  */
-def refreshPlexLibrary(server, port, token) {
+def encodeQueryString(parameters) {
+	def query = parameters.findAll{ k, v -> k && v }.collect{ k, v -> k + '=' + URLEncoder.encode(v, 'UTF-8') }.join('&')
+	return query ? '?' + query : ''
+}
+
+def refreshPlexLibrary(server, port, token, files) {
 	// use HTTPS if hostname is specified, use HTTP if IP is specified
 	def protocol = server ==~ /localhost|[0-9.:]+/ ? 'http' : 'https'
-	def url = "${protocol}://${server}:${port ?: htpc.plex.http}/library/sections/all/refresh"
-	if (token) {
-		url += "?X-Plex-Token=$token"
+	def endpoint = "${protocol}://${server}:${port ?: htpc.plex.http}/library/sections"
+	// pass authentication token via query parameters
+	def auth = ['X-Plex-Token': token]
+
+	// try to narrow down the rescan request to a specific library and folder path
+	def requests = [] as SortedSet
+	if (files) {
+		// request remote library information
+		def libraryRoot = [:].withDefault{ [] }
+		def xml = new XmlSlurper().parse(endpoint + encodeQueryString(auth))
+		xml.'Directory'.'Location'.collect{ location ->
+			def key = location.'..'.'@key'.text()
+			def path = location.'@path'.text()
+			def root = path.split(/[\\\/]/).last()
+			libraryRoot[root] += [key: key, path: path]
+		}
+
+		def folders = files.findResults{ f -> f.dir } as SortedSet
+		folders.collect{ f -> f.path.split(/[\\\/]/).tail() }.each{ components ->
+			components.eachWithIndex{ c, i ->
+				libraryRoot[c].each{ r ->
+					def sectionKey = r.key
+					def remotePath = r.path
+					// scan specific library path
+					if (i < components.size() - 1) {
+						remotePath += '/' + components[i+1..-1].join('/')
+					}
+					requests += endpoint + '/' + sectionKey + '/refresh' + encodeQueryString(path: remotePath, *: auth)
+				}
+			}
+		}
 	}
-	log.finest "GET: $url"
-	new URL(url).get()
+
+	// refresh all libraries as a last resort
+	if (requests.empty) {
+		requests += endpoint + '/all/refresh' + encodeQueryString(auth)
+	}
+
+	requests.each{ url ->
+		log.finest "GET: $url"
+		new URL(url).get()
+	}
 }
 
 
-
 /**
- * Emby helpers
+ * Jellyfin helpers
  */
-def refreshEmbyLibrary(server, port, token) {
+def refreshJellyfinLibrary(server, port, token) {
 	// use HTTPS if hostname is specified, use HTTP if IP is specified
 	def protocol = server ==~ /localhost|[0-9.:]+/ ? 'http' : 'https'
 	def url = "${protocol}://${server}:${port ?: htpc.emby[protocol]}/Library/Refresh"
@@ -59,76 +99,46 @@ def refreshEmbyLibrary(server, port, token) {
 }
 
 
-
-/**
- * Sonarr helpers
- */
-def rescanSonarrSeries(server, port, apikey, seriesId) {
-	// use HTTPS if hostname is specified, use HTTP if IP is specified
-	def protocol = server ==~ /localhost|[0-9.:]+/ ? 'http' : 'https'
-	def url = new URL("$protocol://$server:$port")
-	def requestHeader = ['X-Api-Key': apikey]
-
-	def series = new JsonSlurper().parseText(new URL(url, '/api/series').get(requestHeader).text)
-	def id = series.find{ it.tvdbId == seriesId }?.id
-
-	def command = [name: 'rescanSeries', seriesId: id]
-	new URL(url, '/api/command').post(JsonOutput.toJson(command).getBytes('UTF-8'), 'application/json', requestHeader)
-}
-
-
-
-/**
- * Sickbeard helpers
- */
-def rescanSickbeardSeries(server, port, apikey, seriesId) {
-	// use HTTPS if hostname is specified, use HTTP if IP is specified
-	def protocol = server ==~ /localhost|[0-9.:]+/ ? 'http' : 'https'
-	def url = "$protocol://$server:$port/api/$apikey?cmd=show.refresh&tvdbid=$seriesId"
-	log.finest "GET: $url"
-	new URL(url).get()
-}
-
-
-
 /**
  * TheTVDB artwork/nfo helpers
  */
-def fetchSeriesBanner(outputFile, seriesId, bannerType, bannerType2, season, override, locale) {
+def fetchSeriesBanner(outputFile, series, bannerType, bannerType2, season, override, locale) {
 	if (outputFile.exists() && !override) {
-		log.finest "Banner already exists: $outputFile"
 		return outputFile
 	}
 
-	// select and fetch banner
-	def artwork = TheTVDB.getArtwork(seriesId, bannerType, locale)
-	def banner = artwork.find{ it.matches(bannerType2, season) }
-	if (banner == null) {
-		log.finest "Banner not found: $outputFile / $bannerType:$bannerType2"
+	def artwork = series.getArtwork(bannerType, locale)
+	if (artwork == null) {
 		return null
 	}
+
+	def banner = artwork.find{ it.matches(bannerType2, season) }
+	if (banner == null) {
+		return null
+	}
+
 	log.finest "Fetching $outputFile => $banner"
 	return banner.url.saveAs(outputFile)
 }
 
-def fetchSeriesFanart(outputFile, seriesId, type, season, override, locale) {
+def fetchSeriesFanart(outputFile, series, type, season, override, locale) {
 	if (outputFile.exists() && !override) {
-		log.finest "Fanart already exists: $outputFile"
 		return outputFile
 	}
 
-	def artwork = FanartTV.getArtwork(seriesId, "tv", locale)
+	def artwork = FanartTV.getArtwork(series.id, "tv", locale)
 	def fanart = artwork.find{ it.matches(type, season) }
 	if (fanart == null) {
-		log.finest "Fanart not found: $outputFile / $type"
 		return null
 	}
+
 	log.finest "Fetching $outputFile => $fanart"
 	return fanart.url.saveAs(outputFile)
 }
 
 def fetchSeriesNfo(outputFile, i, locale) {
-	log.finest "Generate Series NFO: $i.name [$i.id]"
+	// generate nfo file
+	log.finest "Generate Series NFO: $i.name [$i]"
 	def xml = XML {
 		tvshow {
 			title(i.name)
@@ -146,49 +156,62 @@ def fetchSeriesNfo(outputFile, i, locale) {
 			premiered(i.startDate)
 			status(i.status)
 			studio(i.network)
-			tvdb(id:i.id, 'http://www.thetvdb.com/?tab=series&id=' + i.id)
-			episodeguide {
-				url(post:'yes', cache:'auth.json', 'https://api.thetvdb.com/login?{"apikey":"439DFEBA9D3059C6","id":' + i.id + '}|Content-Type=application/json')
-			}
+			episodeguide(i.id)
+			tvdb(id:i.id, 'https://thetvdb.com/series/' + i.slug)
 		}
 	}
 
 	xml.saveAs(outputFile)
 }
 
-def fetchSeriesArtworkAndNfo(seriesDir, seasonDir, seriesId, season, override = false, locale = Locale.ENGLISH) {
+def getSeriesID(series, locale) {
+	if (series.database =~ /TheTVDB/) {
+		return TheTVDB.getSeriesInfo(series.id, locale)
+	}
+	if (series.database =~ /TheMovieDB/) {
+		def eid = TheMovieDB_TV.getExternalIds(series.id).'tvdb_id'
+		if (eid) {
+			return TheTVDB.getSeriesInfo(eid as int, locale)
+		}
+	}
+	return null
+}
+
+def fetchSeriesArtworkAndNfo(seriesDir, seasonDir, series, season, override = false, locale = Locale.ENGLISH) {
 	tryLogCatch {
+		def sid = getSeriesID(series, locale)
+
+		if (sid == null) {
+			log.finest "Artwork not supported: $series"
+			return
+		}
+
 		// fetch nfo
-		def seriesInfo = TheTVDB.getSeriesInfo(seriesId, locale)
-		fetchSeriesNfo(seriesDir.resolve('tvshow.nfo'), seriesInfo, locale)
+		fetchSeriesNfo(seriesDir.resolve('tvshow.nfo'), sid, locale)
 
-		// fetch series banner, fanart, posters, etc
-		['680x1000', null].findResult{ fetchSeriesBanner(seriesDir.resolve('poster.jpg'), seriesId, 'poster', it, null, override, locale) }
-		['graphical', null].findResult{ fetchSeriesBanner(seriesDir.resolve('banner.jpg'), seriesId, 'series', it, null, override, locale) }
+		// series artwork
+		fetchSeriesBanner(seriesDir.resolve('poster.jpg'), sid, 'posters', 'series', null, override, locale)
+		fetchSeriesBanner(seriesDir.resolve('banner.jpg'), sid, 'banners', 'series', null, override, locale)
+		fetchSeriesBanner(seriesDir.resolve('fanart.jpg'), sid, 'backgrounds', 'series', null, override, locale)
 
-		// fetch highest resolution fanart
-		['1920x1080', '1280x720', null].findResult{ fetchSeriesBanner(seriesDir.resolve('fanart.jpg'), seriesId, 'fanart', it, null, override, locale) }
-
-		// fetch season banners
+		// season artwork
 		if (seasonDir != seriesDir) {
-			fetchSeriesBanner(seasonDir.resolve('poster.jpg'), seriesId, 'season', 'season', season, override, locale)
-			fetchSeriesBanner(seasonDir.resolve('banner.jpg'), seriesId, 'seasonwide', 'seasonwide', season, override, locale)
-
-			// folder image (resuse series poster if possible)
-			copyIfPossible(seasonDir.resolve('poster.jpg'), seasonDir.resolve('folder.jpg'))
+			fetchSeriesBanner(seasonDir.resolve('poster.jpg'), sid, 'posters', 'season', season, override, locale)
+			fetchSeriesBanner(seasonDir.resolve('banner.jpg'), sid, 'banners', 'season', season, override, locale)
 		}
 
-		// fetch fanart
-		['hdclearart', 'clearart'].findResult{ type -> fetchSeriesFanart(seriesDir.resolve('clearart.png'), seriesId, type, null, override, locale) }
-		['hdtvlogo', 'clearlogo'].findResult{ type -> fetchSeriesFanart(seriesDir.resolve('logo.png'), seriesId, type, null, override, locale) }
-		fetchSeriesFanart(seriesDir.resolve('landscape.jpg'), seriesId, 'tvthumb', null, override, locale)
+		// external series artwork
+		['hdclearart', 'clearart'].findResult{ type -> fetchSeriesFanart(seriesDir.resolve('clearart.png'), sid, type, null, override, locale) }
+		['hdtvlogo', 'clearlogo'].findResult{ type -> fetchSeriesFanart(seriesDir.resolve('logo.png'), sid, type, null, override, locale) }
+		fetchSeriesFanart(seriesDir.resolve('landscape.jpg'), sid, 'tvthumb', null, override, locale)
 
-		// fetch season fanart
+		// external season artwork
 		if (seasonDir != seriesDir) {
-			fetchSeriesFanart(seasonDir.resolve('landscape.jpg'), seriesId, 'seasonthumb', season, override, locale)
+			fetchSeriesFanart(seasonDir.resolve('landscape.jpg'), sid, 'seasonthumb', season, override, locale)
 		}
 
-		// folder image (resuse series poster if possible)
+		// folder image (resuse series / season poster if possible)
+		copyIfPossible(seasonDir.resolve('poster.jpg'), seasonDir.resolve('folder.jpg'))
 		copyIfPossible(seriesDir.resolve('poster.jpg'), seriesDir.resolve('folder.jpg'))
 	}
 }
@@ -233,7 +256,7 @@ def fetchMovieFanart(outputFile, movieInfo, type, diskType, override, locale) {
 
 def fetchMovieNfo(outputFile, i, movieFile) {
 	log.finest "Generate Movie NFO: $i.name [$i.id]"
-	def mi = tryLogCatch{ movieFile ? MediaInfo.snapshot(movieFile) : null }
+	def mi = tryLogCatch{ movieFile?.mediaInfo }
 	def xml = XML {
 		movie {
 			title(i.name)
@@ -276,28 +299,23 @@ def fetchMovieNfo(outputFile, i, movieFile) {
 			}
 			fileinfo {
 				streamdetails {
-					mi?.each { kind, streams ->
-						def section = kind.toString().toLowerCase()
-						streams.each { s ->
-							if (section == 'video') {
-								video {
-									codec((s.'Encoded_Library/Name' ?: s.'CodecID/Hint' ?: s.'Format').replaceAll(/[ ].+/, '').trim())
-									aspect(s.'DisplayAspectRatio')
-									width(s.'Width')
-									height(s.'Height')
-								}
-							}
-							if (section == 'audio') {
-								audio {
-									codec((s.'CodecID/Hint' ?: s.'Format').replaceAll(/\p{Punct}/, '').trim())
-									language(s.'Language/String3')
-									channels(s.'Channel(s)_Original' ?: s.'Channel(s)')
-								}
-							}
-							if (section == 'text') {
-								subtitle { language(s.'Language/String3') }
-							}
+					mi?.Video.each{ s ->
+						video {
+							codec((s.'Encoded_Library/Name' ?: s.'CodecID/Hint' ?: s.'Format').replaceAll(/[ ].+/, '').trim())
+							aspect(s.'DisplayAspectRatio')
+							width(s.'Width')
+							height(s.'Height')
 						}
+					}
+					mi?.Audio.each{ s ->
+						audio {
+							codec((s.'CodecID/Hint' ?: s.'Format').replaceAll(/\p{Punct}/, '').trim())
+							language(s.'Language/String3')
+							channels(s.'Channel(s)_Original' ?: s.'Channel(s)')
+						}
+					}
+					mi?.Text.each{ s ->
+						subtitle { language(s.'Language/String3') }
 					}
 				}
 			}
@@ -332,6 +350,6 @@ def fetchMovieArtworkAndNfo(movieDir, movie, movieFile = null, override = false,
 
 def copyIfPossible(File src, File dst) {
 	if (src.exists() && !dst.exists()) {
-		src.copyAs(dst)
+		dst.bytes = src.bytes
 	}
 }

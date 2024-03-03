@@ -1,22 +1,30 @@
 #!/usr/bin/env filebot -script
 
 
-// use args to list history only for the given folders if desired
+// select all files or only files from the given folder
 def accept(from, to) {
-	return args.empty || (args.any{ to.absolutePath.startsWith(it.absolutePath) } && to.exists())
+	return to.exists() && (args.empty || args.any{ a -> to.absolutePath.startsWith(a.absolutePath) })
 }
 
 
-// read history file
-def history = getPersistentRenameLog()
+// read history file and select current entries
+def history = getPersistentRenameLog().findAll{ from, to -> accept(from, to) }
+
 
 // sanity check
 if (history.empty) {
 	die "No History", ExitCode.NOOP
 }
 
+
+// select files from history and then pipe them to -mediainfo --format or -find -exec as input
+if (_args.format || _args.exec || _args.apply) {
+	getMediaInfo(file: history.values())
+	return
+}
+
+
+// print history as TSV file
 history.each{ from, to ->
-	if (accept(from, to)) {
-		println "${from}\t${to}"
-	}
+	println "${from}\t${to}"
 }

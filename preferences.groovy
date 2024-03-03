@@ -1,49 +1,26 @@
 #!/usr/bin/env filebot -script
 
 
-def prefs = java.util.prefs.Preferences.userRoot()
+def prefs = UserData.root()
 
-
-def printPreferences = {
-	log.fine "Print $prefs"
-	def buffer = new ByteArrayOutputStream()
-	prefs.exportSubtree(buffer)
-	println buffer.toString('UTF-8')
+// import preferences
+args.each{ f ->
+	log.fine "Import [$prefs] from [$f]"
+	prefs.restore(f.bytes)
 }
 
-
-def importPreferences = { f ->
-	log.fine "Import $prefs from $f"
-	prefs.importPreferences(f.newInputStream())
-}
-
-
-def exportPreferences = { f ->
-	log.fine "Export $prefs to $f"
-	prefs.exportSubtree(f.newOutputStream())
-}
-
-
-def clearPreferences = {
-	log.fine "Clear $prefs"
-	prefs.childrenNames().each{ prefs.node(it).removeNode() }
-	prefs.clear();
-}
-
-
-
-
-if (args) {
-	args.each{ f -> importPreferences(f) }
-} 
-
+// export preferences
 if (_args.output) {
-	def f = new File(_args.output, System.getProperty('user.name') + '.prefs.xml').getCanonicalFile()
-	exportPreferences(f)
+	def f = new File(_args.output, 'preferences.xml')
+	log.fine "Export [$prefs] to [$f]"
+	prefs.export().saveAs(f)
 }
 
+// clear preferences
 if (_args.action == 'clear') {
-	clearPreferences()
+	log.fine "Clear [$prefs]"
+	prefs.clear()
 }
 
-printPreferences()
+// print preferences to console output
+println prefs.export().getText()

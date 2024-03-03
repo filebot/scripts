@@ -2,19 +2,25 @@
 
 
 // FileBot 2.62 (r993)
-println Settings.getApplicationIdentifier()
+println Settings.ApplicationIdentifier
+
+
+def sys = System.Properties
+def env = System.Env
+def jre = Runtime.Runtime
 
 
 // JNA Native: 3.5.0
+import com.sun.jna.*
+
 try {
 	print 'JNA Native: '
-	println com.sun.jna.Native.getNativeVersion()
+	println Native.NativeVersion
 } catch(Throwable error) {
 	println error
 }
 
-
-// MediaInfo: MediaInfoLib - v0.7.48
+// MediaInfo: 23.07
 try {
 	print 'MediaInfo: '
 	println MediaInfo.version().removeAll(/[^\d_.]/)
@@ -23,21 +29,24 @@ try {
 }
 
 
-// Tools: fpcalc/1.5.0
+// Tools: fpcalc/1.5.1 7zz/21.06
 def tools = [:]
 
-// fpcalc version 1.5.0
+// fpcalc/1.5.0
 tools['fpcalc'] = { AcoustID.version().match(/[.\d]{3,}/) }
 
+
 // 7-Zip-JBinding: OK
+import net.filebot.archive.*
+
 try {
-	if (net.filebot.archive.Archive.extractor =~ /SevenZipNativeBindings/) {
+	if (Archive.extractor =~ /SevenZipNativeBindings/) {
 		print '7-Zip-JBinding: '
-		net.filebot.archive.SevenZipLoader.requireNativeLibraries()
-		println net.filebot.archive.SevenZipLoader.getNativeVersion()
+		SevenZipLoader.requireNativeLibraries()
+		println SevenZipLoader.NativeVersion
 	}
-	if (net.filebot.archive.Archive.extractor =~ /ShellExecutables/) {
-		net.filebot.archive.ShellExecutables.Command.each{ c ->
+	if (Archive.extractor =~ /ShellExecutables/) {
+		ShellExecutables.Command.each{ c ->
 			tools[c] = { c.version().match(/[.\d]{3,}/) }
 		}
 	}
@@ -45,10 +54,13 @@ try {
 	println error
 }
 
-// ffprobe version 3.3.7
+// ffprobe/4.1.9
 try {
-	if (MediaCharacteristicsParser.getDefault() =~ /ffprobe/) {
-		tools['ffprobe'] = { new net.filebot.media.FFProbe().version().match(/version=(\S+)/) }
+	if (MediaCharacteristicsParser.Default =~ /ffprobe/) {
+		tools['ffprobe'] = { FFProbe.version().match(/version=(\S+)/) }
+	}
+	if (MediaInfoTable.mediainfo) {
+		tools['mediainfo'] = { MediaInfoTable.mediainfo.version().removeAll(/[^\d_.]/) }
 	}
 } catch(Throwable error) {
 	// ignore
@@ -56,7 +68,7 @@ try {
 
 // mkvpropedit v50.0.0
 try {
-	net.filebot.postprocess.Tag.Command.each{ c -> 
+	WriteTags.Command.each{ c -> 
 		tools[c] = { c.version().match(/[.\d]+/) }
 	}
 } catch(Throwable error) {
@@ -72,15 +84,20 @@ try {
 	print 'Extended Attributes: '
 	if (Settings.useExtendedFileAttributes()) {
 		// create new temp file
-		def f = ApplicationFolder.TemporaryFiles.resolve('xattr.txt')
-		f.createNewFile() && f.deleteOnExit()
+		def f = ApplicationFolder.TemporaryFiles.resolve('Drægōñ飛Phöníx舞.txt')
+
+		// ensure that file can be created
+		Files.exists(f.toPath()) || Files.createFile(f.toPath())
 
 		// xattr write, read and verify
 		def xattr = new MetaAttributes(f)
 		def value = new Date()
 		xattr.setObject(value)
-
 		assert xattr.getObject() == value
+
+		// ensure that file can be deleted
+		Files.delete(f.toPath())
+
 		println 'OK'
 	} else {
 		println 'DISABLED'
@@ -94,23 +111,46 @@ try {
 try {
 	print 'Unicode Filesystem: '
 
-	// create new temp file
-	def f = ApplicationFolder.TemporaryFiles.resolve('龍飛鳳舞.txt').toPath()
-	Files.createFile(f)
-	Files.delete(f)
+	// create new temporary file
+	def f = ApplicationFolder.TemporaryFiles.resolve('Drægōñ飛Phöníx舞.txt')
+
+	// ensure that file can be created
+	Files.exists(f.toPath()) || Files.createFile(f.toPath())
+
+	// ensure that file can be written
+	f.nameWithoutExtension.saveAs(f)
+
+	// ensure that libmediainfo can work with the file
+	if (Settings.ApplicationRevisionNumber > 9970) {
+		def mi = any{ new MediaInfo() }{ null }
+		if (mi) {
+			mi.read(f, 32)
+			if (mi.raw().length() < 750) {
+				throw new EOFException("MediaInfo::read")
+			}
+			mi.close()
+		}
+	}
+
+	// ensure that file operations work
+	Files.delete(StandardRenameAction.COPY.rename(f, f.dir / 'Drægōñ飛Phöníx舞 (1).txt').toPath())
+	Files.delete(StandardRenameAction.MOVE.rename(f, f.dir / 'Drægōñ飛Phöníx舞 (2).txt').toPath())
 
 	println 'OK'
 } catch(Throwable error) {
 	println error
-	log.warning "WARNING: sun.jnu.encoding = ${System.getProperty('sun.jnu.encoding')}"
+	log.warning "WARNING: sun.jnu.encoding = ${sys.'sun.jnu.encoding'}"
 }
 
 
 // GIO and GVFS
-if (Settings.useGVFS() && !java.awt.GraphicsEnvironment.isHeadless()) {
+import net.filebot.platform.posix.*
+import net.filebot.platform.gnome.*
+
+if (Settings.useGVFS() && !java.awt.GraphicsEnvironment.Headless) {
 	try {
 		print 'GVFS: '
-		println net.filebot.platform.gnome.GVFS.getDefaultVFS()
+		println GVFS.getDefaultVFS()
 	} catch(Throwable error) {
 		println error
 	}
@@ -118,9 +158,11 @@ if (Settings.useGVFS() && !java.awt.GraphicsEnvironment.isHeadless()) {
 
 
 // Script Bundle: 2016-08-03 (r389)
+import net.filebot.cli.*
+
 try {
 	print 'Script Bundle: '
-	def manifest = net.filebot.cli.ScriptSource.GITHUB_STABLE.getScriptProvider(null).getManifest()
+	def manifest = ScriptSource.GITHUB_STABLE.getScriptProvider().Manifest
 	def r = manifest['Build-Revision']
 	def d = manifest['Build-Date']
 	println "$d (r$r)"
@@ -130,64 +172,95 @@ try {
 
 
 // Groovy Engine: 2.1.7
-println 'Groovy: ' + groovy.lang.GroovySystem.getVersion()
+println 'Groovy: ' + GroovySystem.Version
 
 // Java(TM) SE Runtime Environment 1.6.0_30 (headless)
-println 'JRE: ' + Settings.getJavaRuntimeIdentifier()
+println 'JRE: ' + Settings.JavaRuntimeIdentifier
 
 // OpenJFX 14.0.2.1+1
-def jfx = [version: System.getProperty('javafx.runtime.version'), error: System.getProperty('javafx.runtime.error')]
-if (jfx.version) {
-	println "JFX: OpenJFX $jfx.version"
-} else if (jfx.error) {
-	println "JFX: $jfx.error"
+['javafx.runtime.version', 'javafx.runtime.error'].each{ property ->
+	if (sys[property]) {
+		println "JFX: ${sys[property]}"
+	}
 }
 
 // 32-bit Java HotSpot(TM) Client VM
 try {
 	print 'JVM: '
-	println "${com.sun.jna.Platform.is64Bit() ? 64 : 32}-bit ${System.getProperty('java.vm.name')}"
+	def bit = Platform.is64Bit() ? '64-Bit' : '32-Bit'
+	def jvm = sys.'java.vm.name'
+	println(jvm =~ bit ? jvm : "$bit $jvm")
+
+	// Synology NAS ships with Zero VM (which is extremely slow and has a very low default memory limit)
+	if (jvm =~ /Zero.VM/) {
+		log.warning "WARNING: BAD JVM = Zero VM"
+	}
 } catch(Throwable error) {
 	println error
 }
 
 // JAVA_OPTS: -Xmx512m -XX:ActiveProcessorCount=1
-['JAVA_OPTS', 'FILEBOT_OPTS'].each{ name ->
-	def value = System.getenv(name)
-	if (value) {
-		println "$name: $value"
+['JAVA_OPTS', 'FILEBOT_OPTS'].each{ variable ->
+	if (env[variable]) {
+		println "$variable: ${env[variable]}"
 	}
 }
 
+// System Property: net.filebot.web.WebRequest.v1=true
+try {
+	UserData.restoreUserDefinedSystemProperties{ name, value ->
+		println "System Property: $name=$value"
+	}
+} catch(Throwable error) {
+	// ignore
+}
+
 // CPU/MEM: 4 Core / 1 GB Max Memory / 15 MB Used Memory
-println String.format('CPU/MEM: %s Core / %s Max Memory / %s Used Memory', Runtime.runtime.availableProcessors(), Runtime.runtime.maxMemory().getDisplaySize(), (Runtime.runtime.totalMemory() - Runtime.runtime.freeMemory()).getDisplaySize())
+println "CPU/MEM: ${jre.availableProcessors()} Core / ${jre.maxMemory().displaySize} Max Memory / ${(jre.totalMemory() - jre.freeMemory()).displaySize} Used Memory"
 
 // Windows 7 (x86)
-println String.format('OS: %s (%s)', System.getProperty('os.name'), System.getProperty('os.arch'))
+println "OS: ${sys.'os.name'} (${sys.'os.arch'})"
 
 
 // Linux diskstation 3.2.40 #23739 Fri Jun 8 12:48:05 CST 2018 armv7l GNU/Linux synology_armada370_213j
 try {
 	println 'HW: ' + ['uname', '-a'].execute().text.trim()
 
-	def cpuinfo = [] as Set
-	'/proc/cpuinfo'.toFile().splitEachLine(/\:\s+/){ row ->
-		if (row[0] =~ /^Hardware|^model.name/) {
-			cpuinfo << row[1].trim()
+	def info = [] as Set
+	csv('/proc/cpuinfo').each{ k, v ->
+		if (k =~ /^Hardware|^model.name/) {
+			info << v
 		}
 	}
 
 	def meminfo = [] as Set
-	'/proc/meminfo'.toFile().splitEachLine(/\:\s+/){ row ->
-		if (row[0] =~ /^Mem|^Swap/) {
-			def space = row[1].match(/\d+/).toLong().multiply(1024)
+	csv('/proc/meminfo').each{ k, v ->
+		if (k =~ /^Mem|^Swap/) {
+			def space = v.match(/\d+/).toLong().multiply(1024)
 			if (space > 0) {
-				meminfo << row[0].trim() + ": " + space.getDisplaySize()
+				info << "${k}: ${space.displaySize}"
 			}
 		}
 	}
 
-	println String.format('CPU/MEM: %s [%s]', cpuinfo.join(' | '), meminfo.join(' | '))
+	println "CPU/MEM: ${info.join(' / ')}"
+} catch(Throwable error) {
+	// silently fail on non-Unix platforms
+}
+
+
+// DOCKER: 524 MB Max Memory
+try {
+	def maxMemory = text('/sys/fs/cgroup/memory.max').toLong()
+	println "DOCKER: ${maxMemory.displaySize} Max Memory"
+
+	// check if cgroup limit is lower than JVM limit
+	if (maxMemory < jre.maxMemory()) {
+		log.warning 'WARNING: cgroup memory limit is smaller than JRE memory limit'
+	}
+	if (maxMemory < 2e9) {
+		log.warning 'WARNING: cgroup memory limit is smaller than 2 GB'
+	}
 } catch(Throwable error) {
 	// silently fail on non-Unix platforms
 }
@@ -197,12 +270,12 @@ try {
 try {
 	print 'STORAGE: '
 	println any{
-		FileSystems.getDefault().getFileStores().findResults{
-			def fs = it.type()
-			def label = it.toString().replaceTrailingBrackets() ?: it
-			def space = it.usableSpace
+		FileSystems.Default.FileStores.findResults{ drive ->
+			def fs = drive.type()
+			def label = any{ drive.toString().replaceTrailingBrackets() }{ drive }
+			def space = any{ drive.usableSpace }{ 0 }
 			// exclude clutter
-			if (fs =~ /rootfs|tmpfs/ || label =~ /usr|etc|tmp|var|lib|boot|snap|private|docker|System|Recovery|Backups/ || space == 0) {
+			if (fs =~ /rootfs|tmpfs/ || label =~ /usr|etc|tmp|var|lib|boot|snap|private|docker|timemachine|backup|System|Recovery|Backups|GoogleDrive|home[0-9]+$/ || space == 0) {
 				return null
 			}
 			return "$fs [$label] @ $space.displaySize"
@@ -213,25 +286,29 @@ try {
 }
 
 
-// root
-if (!Settings.isWindowsApp() && !Settings.isMacApp()) {
-	println 'USER: ' + System.getProperty('user.name')
+// uid=1024(admin) gid=100(users) groups=100(users),101(administrators)
+if (!Settings.WindowsApp && !Settings.MacApp) {
+	try {
+		println 'UID/GID: ' + ['id'].execute().text.trim()
+	} catch(Throwable error) {
+		// cannot happen on Unix platforms
+	}
 }
 
 
 // C:\Users\FileBot\AppData\Roaming\FileBot
-if (!Settings.isUWP()) {
+if (!Settings.UWP) {
 	println 'DATA: ' + ApplicationFolder.AppData.get()
 }
 
 
 // SPK
-println 'Package: ' + Settings.getApplicationDeployment().toUpperCase()
+println 'Package: ' + Settings.ApplicationDeployment.upper()
 
 
 // Confinement: Devmode
-if (System.getenv('SNAP')) {
-	if (FileSystems.getDefault().getFileStores().iterator().hasNext()) {
+if (env.'SNAP') {
+	if (FileSystems.Default.FileStores[0]) {
 		println 'Confinement: Devmode'
 	} else {
 		println 'Confinement: Strict # Restricted File System Access'
@@ -249,16 +326,19 @@ try {
 
 
 // CHECK FOR UPDATES
-if (!Settings.isAutoUpdateEnabled()) {
-	try {
-		def update = new XmlSlurper().parse('https://app.filebot.net/update.xml')
-		def rev = update.revision.text() as int
-		def app = update.name.text()
+try {
+	def update = xml('https://app.filebot.net/update.xml')
 
-		if (rev > Settings.getApplicationRevisionNumber()) {
-			println '\n' + " UPDATE AVAILABLE: $app (r$rev) ".center(80, '-') + '\n'
-		}
-	} catch(Throwable error) {
-		println error
+	def rev = update.revision.text() as int
+	def app = update.name.text()
+
+	if (rev > Settings.ApplicationRevisionNumber) {
+		println '\n' + " UPDATE AVAILABLE: $app (r$rev) ".center(80, '-') + '\n'
+	}
+} catch(Throwable error) {
+	println error
+
+	if (error =~ /UnknownHost|SSL/) {
+		println "DNS Network Error: Please contact your ISP or use CloudFlare DNS 1.1.1.1 instead of the default DNS provided by your ISP."
 	}
 }

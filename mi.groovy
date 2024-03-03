@@ -27,7 +27,7 @@ def header = model.keySet().join(separator)
 def format = model.values().collect{ "{$it}" }.join(separator)
 
 // open output file
-def outputFile = any{ _args.output }{ 'MediaIndex.tsv' }.toFile().getCanonicalFile()
+def outputFile = any{ _args.output }{ 'media-index.tsv' }.toFile().getCanonicalFile()
 
 outputFile.withWriter('UTF-8'){ output ->
 	// print to console

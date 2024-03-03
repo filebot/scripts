@@ -4,15 +4,47 @@
 osdbUser = any{ osdbUser }{ console.printf('Enter OpenSubtitles username: '); console.readLine() }
 osdbPwd = any{ osdbPwd }{ console.printf('Enter OpenSubtitles password: '); console.readLine() }
 
+
 /* --------------------------------------------------------------------- */
 
-if (osdbUser) {
-	console.printf('Testing OpenSubtitles... ')
-	WebServices.setLogin(WebServices.LOGIN_OPENSUBTITLES, osdbUser, osdbPwd)
-	WebServices.OpenSubtitles.login()
-	console.printf('OK\n')
-} else if (osdbUser.empty && osdbPwd.empty) {
-	console.printf('Clear OpenSubtitles login details... ')
-	WebServices.setLogin(WebServices.LOGIN_OPENSUBTITLES, null, null)
-	console.printf('OK\n')
+
+// user preferences are per-user and not per-device
+log.fine "Store user preferences to [${UserData.root()}]"
+
+
+// set login details
+if (osdbUser && osdbPwd) {
+	log.config('Set OpenSubtitles login details')
+	try {
+		WebServices.setLogin(WebServices.OpenSubtitles, osdbUser, osdbPwd)
+		printAccountInformation()
+	} catch(e) {
+		if (e.message == /401 Unauthorized/) {
+			log.warning 'Your login details are incorrect. Please go to www.opensubtitles.org (and not www.opensubtitles.com) to check your login details and reset your password if necessary.'
+		}
+		die e.message
+	}
+}
+
+
+// clear login details
+if (!osdbUser && !osdbPwd) {
+	log.config('Reset OpenSubtitles login details')
+	WebServices.setLogin(WebServices.OpenSubtitles, null, null)
+}
+
+
+
+
+/**
+ * Log in and retrieve account details.
+ */
+void printAccountInformation() {
+	console.printf('Checking... ')
+	def info = WebServices.OpenSubtitles.getServerInfo()
+	console.printf('OK\n\n')
+
+	info.download_limits.each{ n, v ->
+		log.config("$n: $v")
+	}
 }
