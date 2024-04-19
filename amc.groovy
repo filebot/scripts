@@ -127,6 +127,9 @@ if (testRun && clean) {
 if (testRun && unsorted) {
 	log.warning "[TEST] --def unsorted is incompatible with --action TEST and has been disabled"
 }
+if (testRun && exec) {
+	log.warning "[TEST] --def exec is incompatible with --action TEST and has been disabled"
+}
 
 if (outputFolder == null) {
 	die "Invalid usage: The --output folder option is required"
