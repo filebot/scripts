@@ -56,7 +56,12 @@ def fetchMovieNfo(m, f) {
 
 def fetchSeriesNfo(m, f) {
 	def seriesFolder = f.dir.dir
-	def nfoFile = seriesFolder / seriesFolder.name + '.nfo'
+	if (!seriesFolder || !seriesFolder.name) {
+		log.finest "[SKIP] Invalid series folder: $f"
+		return
+	}
+
+	def nfoFile = seriesFolder / m.seriesInfo.name + '.nfo'
 	if (nfoFile.exists()) {
 		log.finest "[SKIP] NFO already exists: $nfoFile"
 		return
