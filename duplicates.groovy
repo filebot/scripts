@@ -45,8 +45,9 @@ def group(files) {
 				// 3. Group by CRC32 via Xattr
 				help "## Same Header: $hash (${hash_fs.size()})"
 				hash_fs.groupBy{ it.value[0].CRC32 }.each{ crc, crc_fs ->
-					help "### Same CRC: $crc (${crc_fs.size()})"
-					groups.put([size, hash, crc], crc_fs.collectMany{ it.value })
+					def duplicates = crc_fs.value.flatten()
+					help "### Same CRC: $crc ${duplicates} (${duplicates.size()})"
+					groups.put([size, hash, crc], duplicates)
 				}
 			}
 		}
