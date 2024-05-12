@@ -35,18 +35,20 @@ def group(files) {
 				groups.put(size_fs[0].key, size_fs[0].value)
 				return
 			}
+			log.finest "# Same Size: ${size} (${size_fs.size()})"
+
 			// 2. Group by MovieHash
-			help "# Same Size: ${size} (${size_fs.size()})"
 			size_fs.groupBy{ it.value[0].hash('moviehash') }.each{ hash, hash_fs ->
 				if (hash_fs.size() == 1) {
 					groups.put(hash_fs[0].key, hash_fs[0].value)
 					return
 				}
+				log.finest "## Same Header: $hash (${hash_fs.size()})"
+
 				// 3. Group by CRC32 via Xattr
-				help "## Same Header: $hash (${hash_fs.size()})"
 				hash_fs.groupBy{ it.value[0].CRC32 }.each{ crc, crc_fs ->
 					def duplicates = crc_fs.value.flatten()
-					help "### Same CRC: $crc ${duplicates} (${duplicates.size()})"
+					log.finest "### Same CRC: $crc ${duplicates} (${duplicates.size()})"
 					groups.put([size, hash, crc], duplicates)
 				}
 			}
@@ -93,10 +95,10 @@ def duplicates = []
 
 group(files).each{ g, fs ->
 	if (g && fs.size() > 1) {
-		log.info "[*] $g"
+		log.finest "[*] $g"
 		order(fs).unique().eachWithIndex{ f, i ->
 			if (i == 0) {
-				log.finest "[+] 1. $f"
+				log.info "[+] 1. $f"
 			} else {
 				log.warning "[-] ${i+1}. $f"
 				duplicates += f
@@ -113,7 +115,7 @@ if (duplicates.size() == 0) {
 
 
 // continue with post-processing
-log.fine "${duplicates.size()} duplicates"
+log.info "${duplicates.size()} duplicates"
 
 
 // select duplicate files and then pipe them to -rename as input
@@ -133,7 +135,7 @@ if (_args.format || _args.exec || _args.apply) {
 // delete duplicate files
 if (delete) {
 	duplicates.each{ f ->
-		log.info "[DELETE] $f"
+		log.warning "[DELETE] $f"
 		f.trash()
 	}
 }
