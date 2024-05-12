@@ -36,13 +36,16 @@ def group(files) {
 				return
 			}
 			// 2. Group by MovieHash
+			help "# Same Size: ${size} (${size_fs.size()})"
 			size_fs.groupBy{ it.value[0].hash('moviehash') }.each{ hash, hash_fs ->
 				if (hash_fs.size() == 1) {
 					groups.put(hash_fs[0].key, hash_fs[0].value)
 					return
 				}
 				// 3. Group by CRC32 via Xattr
+				help "## Same Header: $hash (${hash_fs.size()})"
 				hash_fs.groupBy{ it.value[0].CRC32 }.each{ crc, crc_fs ->
+					help "### Same CRC: $crc (${crc_fs.size()})"
 					groups.put([size, hash, crc], crc_fs.collectMany{ it.value })
 				}
 			}
