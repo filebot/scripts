@@ -118,7 +118,7 @@ def fetchSeriesBanner(outputFile, series, bannerType, bannerType2, season, overr
 	}
 
 	log.finest "Fetching $outputFile => $banner"
-	return banner.url.saveAs(outputFile)
+	return banner.url.cache().saveAs(outputFile)
 }
 
 def fetchSeriesFanart(outputFile, series, type, season, override, locale) {
@@ -133,7 +133,7 @@ def fetchSeriesFanart(outputFile, series, type, season, override, locale) {
 	}
 
 	log.finest "Fetching $outputFile => $fanart"
-	return fanart.url.saveAs(outputFile)
+	return fanart.url.cache().saveAs(outputFile)
 }
 
 def fetchSeriesNfo(outputFile, i, locale) {
@@ -235,7 +235,7 @@ def fetchMovieArtwork(outputFile, movieInfo, category, override, locale) {
 		return null
 	}
 	log.finest "Fetching $outputFile => $selection"
-	return selection.url.saveAs(outputFile)
+	return selection.url.cache().saveAs(outputFile)
 }
 
 def fetchMovieFanart(outputFile, movieInfo, type, diskType, override, locale) {
@@ -251,7 +251,7 @@ def fetchMovieFanart(outputFile, movieInfo, type, diskType, override, locale) {
 		return null
 	}
 	log.finest "Fetching $outputFile => $fanart"
-	return fanart.url.saveAs(outputFile)
+	return fanart.url.cache().saveAs(outputFile)
 }
 
 def fetchMovieNfo(outputFile, i, movieFile) {

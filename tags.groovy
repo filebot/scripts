@@ -165,8 +165,7 @@ def mkv(f, m) {
 	}
 
 	if (xml) {
-		def tags = File.createTempFile('tags', '.xml')
-		tags.deleteOnExit()
+		def tags = getTemporaryFolder('tags').createFile("${m.id}.xml")
 
 		log.finest(xml)
 		xml.saveAs(tags)
@@ -252,8 +251,7 @@ def poster(m) {
 		try {
 			def image = url.cache().getImage()
 			if (image) {
-				def file = File.createTempFile('poster', '.png')
-				file.deleteOnExit()
+				def file = getTemporaryFolder('tags').createFile("${m.id}.png")
 				return image.saveAs(file)
 			}
 		} catch(e) {

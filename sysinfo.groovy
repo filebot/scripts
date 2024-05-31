@@ -84,7 +84,7 @@ try {
 	print 'Extended Attributes: '
 	if (Settings.useExtendedFileAttributes()) {
 		// create new temp file
-		def f = ApplicationFolder.TemporaryFiles.resolve('Drægōñ飛Phöníx舞.txt')
+		def f = getTemporaryFolder('sysinfo').createFile('Drægōñ飛Phöníx舞.txt')
 
 		// ensure that file can be created
 		Files.exists(f.toPath()) || Files.createFile(f.toPath())
@@ -112,7 +112,7 @@ try {
 	print 'Unicode Filesystem: '
 
 	// create new temporary file
-	def f = ApplicationFolder.TemporaryFiles.resolve('Drægōñ飛Phöníx舞.txt')
+	def f = getTemporaryFolder('sysinfo').createFile('Drægōñ飛Phöníx舞.txt')
 
 	// ensure that file can be created
 	Files.exists(f.toPath()) || Files.createFile(f.toPath())
@@ -298,7 +298,7 @@ if (!Settings.WindowsApp && !Settings.MacApp) {
 
 // C:\Users\FileBot\AppData\Roaming\FileBot
 if (!Settings.UWP) {
-	println 'DATA: ' + ApplicationFolder.AppData.get()
+	println 'DATA: ' + ApplicationFolder.AppData.getDirectory()
 }
 
 
