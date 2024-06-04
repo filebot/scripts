@@ -54,7 +54,7 @@ def group(files) {
 					log.finest "### Same CRC: $crc (${crc_fs.size()})"
 
 					def duplicates = crc_fs.value.flatten()
-					log.fine "${'\n┌' + duplicates[0] + duplicates[1..<-1].collect{ f -> '│' + f + '\n' } +'└' + duplicates[-1] + '\n'}"
+					log.fine "${'\n┌ ' + duplicates[0] + duplicates[1..<-1].collect{ f -> '\n├ ' + f }.join() +'\n└ ' + duplicates[-1] + '\n'}"
 
 					// CHECK FOR HASH COLLISION (VERY SLOW) IN DELETE MODE ONLY
 					def collision = delete && duplicates.tail().any{ f ->
