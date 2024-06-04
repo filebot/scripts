@@ -248,7 +248,7 @@ def acceptFile(f) {
 		return false
 	}
 
-	if (f.name.findWordMatch(/(Sample|Trailer(?!.Park.Boys)|(?<![+][ _.])Extras|Featurettes|Extra.Episodes|Bonus.Features|Music.Video|Scrapbook|Behind.the.Scenes|Extended.Scenes|Deleted.Scenes|Mini.Series|s\d{2}c\d{2}|S\d+EXTRA|\d+xEXTRA|SP\d+|NCED|NCOP|(OP|ED)\d+|Formula.1.\d{4})|(?<=[-])(s|t|sample|trailer|deleted|featurette|scene|other|behindthescenes)(?=[.])/)) {
+	if (f.name.findWordMatch(/(Sample|Trailer(?!.Park.Boys)|(?<![+][ _.])Extras(?!\P{Alnum}{1,3}[s]?\d{1,2}[ex]\d{2,4})|Featurettes|Extra.Episodes|Bonus.Features|Music.Video|Scrapbook|Behind.the.Scenes|Extended.Scenes|Deleted.Scenes|Mini.Series|s\d{2}c\d{2}|S\d+EXTRA|\d+xEXTRA|SP\d+|NCED|NCOP|(OP|ED)\d+|Formula.1.\d{4})|(?<=[-])(s|t|sample|trailer|deleted|featurette|scene|other|behindthescenes)(?=[.])/)) {
 		log.finest "Ignore extra: $f"
 		return false
 	}
