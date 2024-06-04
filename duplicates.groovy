@@ -47,8 +47,28 @@ def group(files) {
 
 				// 3. Group by CRC32 via Xattr
 				hash_fs.groupBy{ it.value[0].CRC32 }.each{ crc, crc_fs ->
+					if (crc_fs.size() == 1) {
+						groups.put(crc_fs[0].key, crc_fs[0].value)
+						return
+					}
+					log.finest "### Same CRC: $crc (${crc_fs.size()})"
+
 					def duplicates = crc_fs.value.flatten()
-					log.finest "### Same CRC: $crc ${duplicates} (${duplicates.size()})"
+					log.fine "${'\n┌' + duplicates[0] + duplicates[1..<-1].collect{ f -> '│' + f + '\n' } +'└' + duplicates[-1] + '\n'}"
+
+					// CHECK FOR HASH COLLISION (VERY SLOW) IN DELETE MODE ONLY
+					def collision = delete && duplicates.tail().any{ f ->
+						log.finest "#### CHECK BYTE FOR BYTE: $f (${f.displaySize})"
+						def mismatch = f.mismatch(duplicates.head())
+						if (mismatch >= 0) {
+							log.severe "MISMATCH AT BYTE ${mismatch} [${f} ≠ ${duplicates.head()}]"
+							return true
+						}
+						return false
+					}
+					if (collision) {
+						die "HASH COLLISION DETECTED"
+					}
 					groups.put([size, hash, crc], duplicates)
 				}
 			}
