@@ -1,4 +1,4 @@
-#!/usr/bin/env filebot -script
+#!/usr/bin/env -S filebot -script
 
 
 osdbUser = any{ osdbUser }{ console.printf('Enter OpenSubtitles username: '); console.readLine() }

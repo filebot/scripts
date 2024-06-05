@@ -1,4 +1,4 @@
-#!/usr/bin/env filebot -script
+#!/usr/bin/env -S filebot -script
 
 
 import static net.filebot.subtitle.SubtitleUtilities.*

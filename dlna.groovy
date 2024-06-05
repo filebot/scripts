@@ -1,4 +1,4 @@
-#!/usr/bin/env filebot -script
+#!/usr/bin/env -S filebot -script
 
 
 device = any{ _args.db }{ '*' }            // --db 'http://192.168.1.101:50001/desc/device.xml'

@@ -1,4 +1,4 @@
-#!/usr/bin/env filebot -script
+#!/usr/bin/env -S filebot -script
 
 
 // FileBot 2.62 (r993)

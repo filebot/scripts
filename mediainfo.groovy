@@ -1,4 +1,4 @@
-#!/usr/bin/env filebot -script
+#!/usr/bin/env -S filebot -script
 
 
 // raw / slow mode (i.e. use libmediainfo and write xattr)

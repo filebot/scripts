@@ -1,4 +1,4 @@
-#!/usr/bin/env filebot -script
+#!/usr/bin/env -S filebot -script
 
 
 delete = 'DELETE'.equalsIgnoreCase(_args.action)

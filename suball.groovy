@@ -1,4 +1,4 @@
-#!/usr/bin/env filebot -script
+#!/usr/bin/env -S filebot -script
 
 
 def languages = any{ _args.lang.split(/\W+/) }{ ['en'] } as List

@@ -1,4 +1,4 @@
-#!/usr/bin/env filebot -script
+#!/usr/bin/env -S filebot -script
 
 
 def deleteRootFolder = any{ root.toBoolean() }{ false }

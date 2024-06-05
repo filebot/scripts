@@ -1,4 +1,4 @@
-#!/usr/bin/env filebot -script
+#!/usr/bin/env -S filebot -script
 
 
 def hashType = any{ _args.mode.toUpperCase() }{ 'CRC32' }
