@@ -11,11 +11,9 @@ def jre = Runtime.Runtime
 
 
 // JNA Native: 3.5.0
-import com.sun.jna.*
-
 try {
 	print 'JNA Native: '
-	println Native.NativeVersion
+	println com.sun.jna.Native.NativeVersion
 } catch(Throwable error) {
 	println error
 }
@@ -144,13 +142,10 @@ try {
 
 
 // GIO and GVFS
-import net.filebot.platform.posix.*
-import net.filebot.platform.gnome.*
-
 if (Settings.useGVFS() && !java.awt.GraphicsEnvironment.Headless) {
 	try {
 		print 'GVFS: '
-		println GVFS.getDefaultVFS()
+		println net.filebot.platform.posix.GVFS.getDefaultVFS()
 	} catch(Throwable error) {
 		println error
 	}
@@ -158,18 +153,7 @@ if (Settings.useGVFS() && !java.awt.GraphicsEnvironment.Headless) {
 
 
 // Script Bundle: 2016-08-03 (r389)
-import net.filebot.cli.*
-
-try {
-	print 'Script Bundle: '
-	def manifest = ScriptSource.GITHUB_STABLE.getScriptProvider().Manifest
-	def r = manifest['Build-Revision']
-	def d = manifest['Build-Date']
-	println "$d (r$r)"
-} catch(Throwable error) {
-	println error
-}
-
+println net.filebot.cli.ScriptSource.GITHUB_STABLE.Manifest
 
 // Groovy Engine: 2.1.7
 println 'Groovy: ' + GroovySystem.Version
