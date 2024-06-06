@@ -35,7 +35,13 @@ def group(files) {
 				groups.put(size_fs[0].key, size_fs[0].value)
 				return
 			}
+
 			log.finest "# Same Size: ${size} (${size_fs.size()})"
+
+			if (size <= 0) {
+				size_fs.value.flatten().each{ f -> log.fine "Ignore empty file: ${f} (${f.displaySize})" }
+				return
+			}
 
 			// 2. Group by MovieHash
 			size_fs.groupBy{ it.value[0].hash('moviehash') }.each{ hash, hash_fs ->
@@ -43,6 +49,7 @@ def group(files) {
 					groups.put(hash_fs[0].key, hash_fs[0].value)
 					return
 				}
+
 				log.finest "## Same Header: $hash (${hash_fs.size()})"
 
 				// 3. Group by CRC32 via Xattr
@@ -51,6 +58,7 @@ def group(files) {
 						groups.put(crc_fs[0].key, crc_fs[0].value)
 						return
 					}
+
 					log.finest "### Same CRC: $crc (${crc_fs.size()})"
 
 					def duplicates = crc_fs.value.flatten()
