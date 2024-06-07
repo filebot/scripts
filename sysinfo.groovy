@@ -171,7 +171,7 @@ println 'JRE: ' + Settings.JavaRuntimeIdentifier
 // 32-bit Java HotSpot(TM) Client VM
 try {
 	print 'JVM: '
-	def bit = Platform.is64Bit() ? '64-Bit' : '32-Bit'
+	def bit = com.sun.jna.Platform.is64Bit() ? '64-Bit' : '32-Bit'
 	def jvm = sys.'java.vm.name'
 	println(jvm =~ bit ? jvm : "$bit $jvm")
 
