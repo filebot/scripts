@@ -1,8 +1,8 @@
 #!/usr/bin/env -S filebot -script
 
 
-osdbUser = any{ osdbUser }{ console.printf('Enter OpenSubtitles username: '); console.readLine() }
-osdbPwd = any{ osdbPwd }{ console.printf('Enter OpenSubtitles password: '); console.readLine() }
+osdbUser = any{ osdbUser }{ printf('Enter OpenSubtitles username: '); console.readLine() }
+osdbPwd = any{ osdbPwd }{ printf('Enter OpenSubtitles password: '); console.readLine() }
 
 
 /* --------------------------------------------------------------------- */
@@ -40,9 +40,9 @@ if (!osdbUser && !osdbPwd) {
  * Log in and retrieve account details.
  */
 void printAccountInformation() {
-	console.printf('Checking... ')
+	printf('Checking... ')
 	def info = WebServices.OpenSubtitles.getServerInfo()
-	console.printf('OK\n\n')
+	printf('OK\n\n')
 
 	info.download_limits.each{ n, v ->
 		log.config("$n: $v")
