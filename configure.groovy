@@ -51,4 +51,6 @@ void printAccountInformation() {
 	info.download_limits.each{ n, v ->
 		log.config("$n: $v")
 	}
+
+	WebServices.OpenSubtitles.logout()
 }
