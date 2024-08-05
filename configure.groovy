@@ -19,8 +19,12 @@ if (osdbUser && osdbPwd) {
 		WebServices.setLogin(WebServices.OpenSubtitles, osdbUser, osdbPwd)
 		printAccountInformation()
 	} catch(e) {
-		if (e.message == /401 Unauthorized/) {
-			log.warning 'Your login details are incorrect. Please go to www.opensubtitles.org (and not www.opensubtitles.com) to check your login details and reset your password if necessary.'
+		if (e.message =~ /401 Unauthorized/) {
+			if (WebServices.OpenSubtitles.class =~ /XmlRpc/) {
+				log.warning 'Your login details are incorrect. Please go to www.opensubtitles.org (XML-RPC API; not www.opensubtitles.com) to check your login details and reset your password if necessary/'
+			} else {
+				log.warning 'Your login details are incorrect. Please go to www.opensubtitles.com (REST API; not www.opensubtitles.org) to check your login details and reset your password if necessary.'
+			}
 		}
 		die e.message
 	}
