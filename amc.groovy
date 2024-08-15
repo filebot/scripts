@@ -147,13 +147,16 @@ if (ut.dir) {
 		die "Invalid usage: input file path must be passed via script parameters $ut or via file arguments $args but not both"
 	}
 	if (ut.dir == '/') {
-		die "Invalid usage: No! Are you insane? You can't just pass in the entire filesystem. Think long and hard about what you just tried to do."
+		die "Invalid usage: No! Are you insane? You can't just pass in the entire filesystem as input folder. Think long and hard about what you just tried to do."
 	}
 	if (ut.dir.toFile() in outputFolder.listPath()) {
 		die "Invalid usage: output folder [$outputFolder] must not start with input folder [$ut.dir]"
 	}
 	if (outputFolder in ut.dir.toFile().listPath()) {
 		log.warning "Invalid usage: input folder [$ut.dir] must not start with output folder [$outputFolder]"
+	}
+	if (ut.kind == null) {
+		log.warning "Invalid usage: --def ut_dir and --def ut_kind must be specified in tandem"
 	}
 } else if (args.size() == 0) {
 	die "Invalid usage: no input"
