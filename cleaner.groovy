@@ -90,8 +90,9 @@ args.folders.toSorted().reverse().each{ d ->
 	}
 
 	// skip non-empty folder
-	if (d.hasFile{ f -> f.isDirectory() || !isClutter(f) }) {
-		log.finest "Keep $d (not empty)"
+	def children = d.listFiles{ f -> f.isDirectory() || !isClutter(f) }
+	if (children) {
+		log.finest "Keep $d $children.name (not empty)"
 		return
 	}
 
