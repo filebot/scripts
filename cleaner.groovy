@@ -16,7 +16,8 @@ def testRun = _args.action.equalsIgnoreCase('test')
 // sanity checks
 if (args.size() == 0) {
 	die "Illegal usage: no input"
-} else if (args.any{ it in File.listRoots() }) {
+}
+if (args.any{ it in File.listRoots() }) {
 	die "Illegal usage: input $args must not include a filesystem root"
 }
 
@@ -59,7 +60,7 @@ def clean = { f ->
 
 // memoize media folder status for performance
 def hasMediaFiles = { dir ->
-	return dir.isDirectory() && dir.getFiles().any{ f -> (f.isVideo() || f.isAudio()) && !isClutter(f) }
+	return dir.getFiles{ f -> (f.isVideo() || f.isAudio()) && !isClutter(f) }
 }.memoize()
 
 
