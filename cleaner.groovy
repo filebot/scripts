@@ -17,7 +17,7 @@ def testRun = _args.action.equalsIgnoreCase('test')
 if (args.size() == 0) {
 	die "Illegal usage: no input"
 }
-if (args.any{ it in File.listRoots() }) {
+if (args.any{ a -> a in File.listRoots() }) {
 	die "Illegal usage: input $args must not include a filesystem root"
 }
 
