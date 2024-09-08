@@ -21,7 +21,11 @@ try {
 // MediaInfo: 23.07
 try {
 	print 'MediaInfo: '
-	println MediaInfo.version().removeAll(/[^\d_.]/)
+	if (Settings.ApplicationRevisionNumber > 9970) {
+		println MediaInfoTool.INSTANCE.version().removeAll(/[^\d_.]/)
+	} else {
+		println MediaInfo.version().removeAll(/[^\d_.]/)
+	}
 } catch(Throwable error) {
 	println error
 }
