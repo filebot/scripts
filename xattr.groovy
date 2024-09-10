@@ -20,7 +20,7 @@ args.flatten{ f -> f.isDirectory() ? f.listFiles{ true } : f }.each{ f ->
 	}
 
 	// manage .xattr folders
-	if (f.name == /net.filebot.metadata/) {
+	if (f.name == /net.filebot.metadata/ || f.name == /net.filebot.mediainfo/) {
 		xattrFolders += f.dir.dir
 	}
 }
@@ -63,10 +63,20 @@ xattrFolders.each{ dir ->
 }
 
 
+if (xattrFiles && _args.action =~ /clear/) {
+	['mediainfo', 'ffprobe', 'CRC32'].each{ n ->
+		def cache = Cache.getCache(n, CacheType.Monthly)
+		if (cache.keys) {
+			help "[CLEAR] ${n} cache (${cache.keys.size()})"
+			cache.clear()
+		}
+	}
+}
+
+
 if (!xattrFiles && !xattrFolders) {
 	log.warning "No xattr metadata found"
 }
-
 
 
 
