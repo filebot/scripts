@@ -5,14 +5,6 @@
 log.fine("Run script [$_args.script] at [$now]")
 
 
-
-help """
-[PSA] Important Discussion of Changes effective as of 28 Apr 2023:
-https://www.filebot.net/forums/viewtopic.php?t=13406
-"""
-
-
-
 // sanity check script parameters
 _def.each{ n, v ->
 	// mirror script parameters and print warnings for invalid or mistyped parameters 
