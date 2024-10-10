@@ -48,8 +48,14 @@ void printAccountInformation() {
 	def info = WebServices.OpenSubtitles.getServerInfo()
 	printf('OK\n\n')
 
-	info.download_limits.each{ n, v ->
-		log.config("$n: $v")
+	if (WebServices.OpenSubtitles.class =~ /XmlRpc/) {
+		info.download_limits.each{ n, v ->
+			log.config("$n: $v")
+		}
+	} else {
+		info.each{ n, v ->
+			log.config("$n: $v")
+		}
 	}
 
 	WebServices.OpenSubtitles.logout()
