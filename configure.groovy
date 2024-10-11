@@ -49,12 +49,12 @@ void printAccountInformation() {
 	printf('OK\n\n')
 
 	if (WebServices.OpenSubtitles.class =~ /XmlRpc/) {
-		info.download_limits.each{ n, v ->
-			log.config("$n: $v")
+		info.download_limits.each{ k, v ->
+			log.config("$k: $v")
 		}
 	} else {
-		info.each{ n, v ->
-			log.config("$n: $v")
+		info.each{ k, v ->
+			log.config("$k: $v")
 		}
 	}
 
