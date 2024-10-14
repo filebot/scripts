@@ -139,7 +139,7 @@ def refreshMetadata(f) {
 
 // import xattr metadata into Mac OS X Finder tags (UAYOR)
 def kMDItemUserTags(f) {
-	def tags = getMediaInfo(f, '{movie; /Movie/}|{episode; /Episode/}|{y}|{source}|{vf}|{hd}').tokenize('|').findResults{ it }
+	def tags = getMediaInfo(f, _args.format ?: '{movie; /Movie/}|{episode; /Episode/}|{y}|{source}|{vf}|{hd}').tokenize('|').findResults{ it }
 
 	def plist = XML{
 		plist(version:'1.0') {
