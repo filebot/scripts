@@ -5,7 +5,6 @@ def languages = any{ _args.lang.split(/\W+/) }{ ['en'] } as List
 
 def minAgeDays = any{ minAgeDays.toDouble() }{  0d }
 def maxAgeDays = any{ maxAgeDays.toDouble() }{ 30d }
-def maxAgeDaysLimit = any{ maxAgeDaysLimit.toBoolean() }{ true }
 
 def minFileSize = any{ minFileSize.toLong() }{ 50 * 1000 * 1000L }
 def minLengthMS = any{ minLengthMS.toLong() }{ 10 *   60 * 1000L }
@@ -15,12 +14,6 @@ def ignoreTextLanguage = any{ ignoreTextLanguage }{ languages.join('|') }
 
 def minAgeTimeStamp = now.time - (minAgeDays.toDouble() * 24 * 60 * 60 * 1000L) as long
 def maxAgeTimeStamp = now.time - (maxAgeDays.toDouble() * 24 * 60 * 60 * 1000L) as long
-
-
-// sanity check
-if (maxAgeDaysLimit && (maxAgeDays == null || maxAgeDays.toDouble() > 30)) {
-	die "maxAgeDays must be between 0 and 30"
-}
 
 
 def accept = { f ->
