@@ -416,7 +416,14 @@ groups.each{ group, files ->
 	// fetch subtitles (but not for anime)
 	if ((group.isMovie() || group.isSeries()) && subtitles != null && files.findAll{ it.isVideo() }.size() > 0) {
 		subtitles.each{ languageCode ->
-			def subtitleFiles = getMissingSubtitles(file: files, lang: languageCode, strict: true, output: 'srt', encoding: 'UTF-8', format: 'MATCH_VIDEO_ADD_LANGUAGE_TAG') ?: []
+			def subtitleFiles = getMissingSubtitles(file: files.findAll{ f ->
+				if (f.video && f.mediaCharacteristics.subtitleLanguage.contains(languageCode)) {
+					log.finest "Subtitles: Skip video file that already has embedded [$languageCode] subtitles: $f"
+					return false
+				}
+				// fetch subtitles only for files that do not already have embedded subtitles
+				return true
+			}, lang: languageCode, strict: true, output: 'srt', encoding: 'UTF-8', format: 'MATCH_VIDEO_ADD_LANGUAGE_TAG') ?: []
 			files += subtitleFiles
 			temporaryFiles += subtitleFiles
 		}
