@@ -1,7 +1,7 @@
 #!/usr/bin/env -S filebot -script
 
 
-def folder = ApplicationFolder.AppData.get()
+def folder = ApplicationFolder.AppData.getDirectory()
 def logFiles = folder.getFiles{ it.extension == 'log' }.toSorted{ it.lastModified() }
 
 
