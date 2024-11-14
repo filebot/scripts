@@ -27,16 +27,19 @@ if (_args.mode == /raw/) {
 // default / fast mode (i.e. use local cache or xattr or libmediainfo)
 args.files.each{ f ->
 	log.fine "\n# $f"
+	try {
+		f.mediaInfo.each{ kind ->
+			kind.each{ stream ->
+				log.finest "\n${stream.StreamKind} #${stream.StreamKindID}"
 
-	f.mediaInfo.each{ kind ->
-		kind.each{ stream -> 
-			log.finest "\n${stream.StreamKind} #${stream.StreamKindID}"
-
-			// find optimal padding
-			def pad = stream.keySet().flatten().collect{ it.length() }.max()
-			stream.each{ k,v -> 
-				log.info "${k.padRight(pad)} : $v"
+				// find optimal padding
+				def pad = stream.keySet().flatten().collect{ it.length() }.max()
+				stream.each{ k,v ->
+					log.info "${k.padRight(pad)} : $v"
+				}
 			}
 		}
+	} catch (error) {
+		log.severe "$error.message"
 	}
 }
