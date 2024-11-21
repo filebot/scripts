@@ -344,7 +344,7 @@ input.each{ f ->
 	log.fine "Input: $f"
 	// print xattr metadata
 	if (f.metadata) {
-		log.fine "       └─ Metadata: $f.metadata"
+		log.fine "       └─ xattr metadata: $f.metadata"
 	}
 }
 
