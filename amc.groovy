@@ -417,7 +417,7 @@ groups.each{ group, files ->
 	if ((group.isMovie() || group.isSeries()) && subtitles != null && files.findAll{ it.isVideo() }.size() > 0) {
 		subtitles.each{ languageCode ->
 			def subtitleFiles = getMissingSubtitles(file: files.findAll{ f ->
-				if (f.video && f.mediaCharacteristics.subtitleLanguage.contains(languageCode)) {
+				if (f.video && f.mediaCharacteristics?.subtitleLanguage?.contains(languageCode)) {
 					log.finest "Subtitles: Skip video file that already has embedded [$languageCode] subtitles: $f"
 					return false
 				}
