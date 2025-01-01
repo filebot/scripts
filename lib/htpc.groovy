@@ -142,7 +142,7 @@ def fetchSeriesNfo(outputFile, i, locale) {
 	def xml = XML {
 		tvshow {
 			title(i.name)
-			sorttitle([i.name, i.startDate as String].findAll{ it?.length() > 0 }.findResults{ it.sortName() }.join(' :: '))
+			sorttitle([i.name, i.startDate].findResults{ it?.toString()?.sortName() }.join(' :: '))
 			year(i.startDate?.year)
 			rating(i.rating)
 			votes(i.ratingCount)
@@ -261,7 +261,7 @@ def fetchMovieNfo(outputFile, i, movieFile) {
 		movie {
 			title(i.name)
 			originaltitle(i.originalName)
-			sorttitle([i.collection, i.name, i.released as String].findAll{ it?.length() > 0 }.findResults{ it.sortName() }.join(' :: '))
+			sorttitle((i.collection && i.released ? [i.collection, i.released, i.name] : [i.name, i.released]).findResults{ it?.toString()?.sortName() }.join(' :: '))
 			set(i.collection)
 			year(i.released?.year)
 			rating(i.rating)
