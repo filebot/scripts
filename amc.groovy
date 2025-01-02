@@ -169,10 +169,13 @@ if (args.size() == 0) {
 	def f = ut.file as File
 	def single = ut.kind != 'multi'
 
-	if (single && d && f) {
-		roots = [(f.absolute ? f : d / f).canonicalFile] // single-file torrent
-	} else {
-		roots = [d.canonicalFile] // multi-file torrent
+	// single-file torrent vs multi-file torrent
+	roots = [single && d && f ? f.absolute ? f : d / f : d]
+
+	try {
+		roots = roots*.canonicalFile
+	} catch (e) {
+		die "Invalid input file path: $e.message $roots"
 	}
 }
 
