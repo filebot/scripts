@@ -340,7 +340,7 @@ def resolveInput(f) {
 
 
 // flatten nested file structure
-def input = roots.findAll{ acceptFile(it) }.flatten{ resolveInput(it) }
+def input = roots.findAll{ acceptFile(it) }.collect{ resolveInput(it) }.flatten()
 
 // print exclude and input sets for logging
 input.each{ f ->
