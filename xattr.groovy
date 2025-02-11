@@ -4,7 +4,7 @@
 def xattrFiles = []
 def xattrFolders = [] as Set
 
-args.flatten{ f -> f.isDirectory() ? f.listFiles{ true } : f }.each{ f ->
+args.flatten{ f -> f.isDirectory() ? f.listFiles(File::exists) : f }.each{ f ->
 	// sanity check input file path
 	if (!f.exists()) {
 		log.warning "File does not exist: $f"
@@ -15,7 +15,7 @@ args.flatten{ f -> f.isDirectory() ? f.listFiles{ true } : f }.each{ f ->
 	_def.each{ k, v -> setXattrKey(f, k, v) }
 
 	// select files with xattr metadata
-	if (f.xattr.keySet().any{ k -> !isSystemKey(k) }) {
+	if (!_args.strict || f.xattr.list().any{ k -> isUserKey(k) }) {
 		xattrFiles += f
 	}
 
@@ -41,15 +41,18 @@ xattrFiles.each{ f ->
 	if (_args.action =~ /clear/) {
 		clearXattr(f)
 	}
+	if (_args.action =~ /export/) {
+		exportXattr(f)
+	}
 	if (_args.action =~ /dump/) {
 		dumpXattr(f)
 	}
 	if (_args.action =~ /refresh/) {
 		refreshMetadata(f)
 	}
-	if (_args.action =~ /import/) {
+	if (_args.action =~ /finder/) {
 		kMDItemUserTags(f)
-	}	
+	}
 }
 
 
@@ -59,7 +62,10 @@ xattrFolders.each{ dir ->
 	}
 	if (_args.action =~ /prune/) {
 		pruneXattrFolder(dir)
-	}	
+	}
+	if (_args.action =~ /import/) {
+		dir.dir.listFiles(File::isFile).each{ f -> importXattr(f) }
+	}
 }
 
 
@@ -82,8 +88,8 @@ if (!xattrFiles && !xattrFolders) {
 
 
 // hide system xattr keys
-def isSystemKey(k) {
-	k.startsWith('com.apple.') && _args.strict
+def isUserKey(k) {
+	return k.startsWith('net.filebot.') ||  k ==~ /\w+/
 }
 
 
@@ -105,6 +111,26 @@ def clearXattr(f) {
 	f.xattr.clear()
 }
 
+// import .xattr folders into native xattr
+def importXattr(f) {
+	def xattrFolder = f.dir / '.xattr' / f.name
+	if (xattrFolder.exists()) {
+		xattrFolder.listFiles(File::isFile).each{ v ->
+			if (isUserKey(v.name)) {
+				log.info "[IMPORT] ${v}"
+				f.xattr[v.name] = v.getText('UTF-8')
+			}
+		}
+	}
+}
+
+// export native xattr into .xattr folders
+def exportXattr(f) {
+	f.xattr.list().findAll{ k -> isUserKey(k) }.each{ k ->
+		def v = f.xattr.read(k).saveAs(f.dir / '.xattr' / f.name / k)
+		log.info "[EXPORT] ${v}"
+	}
+}
 
 // dump xattr metadata as plain/text files
 def dumpXattr(f) {
@@ -137,7 +163,7 @@ def refreshMetadata(f) {
 }
 
 
-// import xattr metadata into Mac OS X Finder tags (UAYOR)
+// export xattr metadata into Mac OS X Finder tags (UAYOR)
 def kMDItemUserTags(f) {
 	def tags = getMediaInfo(f, _args.format ?: '{movie; /Movie/}|{episode; /Episode/}|{y}|{source}|{vf}|{hd}').tokenize('|').findResults{ it }
 
@@ -151,7 +177,7 @@ def kMDItemUserTags(f) {
 		}
 	}
 
-	log.info "[IMPORT] Write tag plist to xattr [com.apple.metadata:_kMDItemUserTags]: $plist"
+	log.info "[FINDER] Write tag plist to xattr [com.apple.metadata:_kMDItemUserTags]: $plist"
 	f.xattr['com.apple.metadata:_kMDItemUserTags'] = plist
 }
 
