@@ -164,7 +164,9 @@ def crewFragment(element, info) {
 		} else if (p.actor) { 
 			element.actor {
 				name(p.name)
-				role(p.character)
+				if (p.character) {
+					role(p.character)
+				}
 			}
 		} else if (p.department == 'Writing') {
 			element.credits("$p.name ($p.job)")
