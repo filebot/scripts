@@ -198,7 +198,7 @@ if (excludeList) {
 		try {
 			excludePathSet.load(excludeList)
 		} catch(e) {
-			die "Failed to read excludes: $excludeList: $e.message"
+			die "Failed to read excludes: $excludeList: $e"
 		}
 		log.fine "Use excludes: $excludeList (${excludePathSet.size()})"
 	} else {
@@ -208,7 +208,7 @@ if (excludeList) {
 				die "Failed to create excludes: $excludeList"
 			}
 		} catch(e) {
-			die "Failed to create excludes: $excludeList: $e.message"
+			die "Failed to create excludes: $excludeList: $e"
 		}
 	}
 }
