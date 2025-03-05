@@ -3,12 +3,13 @@
 
 device = any{ _args.db }{ '*' }            // --db 'http://192.168.1.101:50001/desc/device.xml'
 query  = any{ _args.query }{ '0' }         // --q 'ObjectID'
+filter = any{ ~_args.filter }{ null }      // --filter 'Alias'
 agent  = any{ agent }{ 'DLNADOC/1.50' }    // --def agent='User-Agent'
 mx     = any{ mx }{ 2 }                    // --def mx='5'
 
 
 
-def browse(controlURL, objectID, depth) {
+def browse(controlURL, objectID, path = []) {
 	def envelope = controlURL.post(
 		"""<?xml version="1.0"?>
 		<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
@@ -32,16 +33,20 @@ def browse(controlURL, objectID, depth) {
 
 	def xml = new XmlSlurper().parseText(response)
 	xml.item.each{ item ->
-		log.fine "${'\t' * depth}[ObjectID=${item.'@id'}] ${item.title}"
-		item.children().each{ element ->
-			if (element.attributes()) {
-				log.finest "${'\t' * depth}└─ ${element.name()} ${element.attributes().collect{ k, v -> k.removeBrackets() + '=' + v }} ${element.text()}"
+		if (filter == null || path.title =~ filter || item.title =~ filter) {
+			log.fine "${'\t' * path.size()}[ObjectID=${item.'@id'}] ${item.title}"
+			item.children().each{ element ->
+				if (element.attributes()) {
+					log.finest "${'\t' * path.size()}└─ ${element.name()} ${element.attributes().collect{ k, v -> k.removeBrackets() + '=' + v }} ${element.text()}"
+				}
 			}
 		}
 	}
 	xml.container.each{ container ->
-		log.info "${'\t' * depth}[ObjectID=${container.'@id'}] ${container.title}"
-		browse(controlURL, container.'@id', depth + 1)
+		if (filter == null || path.title =~ filter || container.title =~ filter) {
+			log.info "${'\t' * path.size()}[ObjectID=${container.'@id'}] ${container.title}"
+		}
+		browse(controlURL, container.'@id', [*path, container])
 	}
 }
 
@@ -60,7 +65,7 @@ def crawl(deviceURL) {
 	def controlURL = xml.device.serviceList.service.each{ service ->
 		if (service.serviceType.text() == 'urn:schemas-upnp-org:service:ContentDirectory:1') {
 			try {
-				browse(deviceURL / service.controlURL.text(), query, 0)	
+				browse(deviceURL / service.controlURL.text(), query)	
 			} catch(e) {
 				log.severe "${e.message}"
 			}
