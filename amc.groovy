@@ -50,7 +50,7 @@ exec      = tryQuietly{ exec.toString() }
 // array of kodi/plex/jellyfin hosts
 kodi = tryQuietly{ kodi.split(/[ ,;|]+/)*.split(/:(?=\d+$)/).collect{ it.length >= 2 ? [host: it[0], port: it[1] as int] : [host: it[0]] } }
 plex = tryQuietly{ plex.split(/[ ,;|]+/)*.split(/:/).collect{ it.length >= 3 ? [host: it[0], port: it[1] as int, token: it[2]] : it.length >= 2 ? [host: it[0], token: it[1]] : [host: it[0]] } }
-jellyfin = tryQuietly{ any{jellyfin}{emby}.split(/[ ,;|]+/)*.split(/:/).collect{ it.length >= 3 ? [host: it[0], port: it[1] as int, token: it[2]] : it.length >= 2 ? [host: it[0], token: it[1]] : [host: it[0]] } }
+jellyfin = tryQuietly{ allOf{jellyfin}{emby}*.split(/[ ,;|]+/).flatten()*.split(/:/).collect{ it.length >= 3 ? [host: it[0], port: it[1] as int, token: it[2]] : it.length >= 2 ? [host: it[0], token: it[1]] : [host: it[0]] } }
 
 // extra options, myepisodes updates and email notifications
 extractFolder      = tryQuietly{ extractFolder as File }
@@ -587,7 +587,7 @@ if (renameLog.size() > 0) {
 	// make Jellyfin scan for new content
 	if (jellyfin) tryLogCatch {
 		jellyfin.each{ instance ->
-			log.fine "Notify Jellyfin [$instance.host]"
+			log.fine "Notify Emby / Jellyfin [$instance.host]"
 			refreshJellyfinLibrary(instance.host, instance.port, instance.token)
 		}
 	}
