@@ -210,9 +210,9 @@ def fetchSeriesArtworkAndNfo(seriesDir, seasonDir, series, season, override = fa
 			fetchSeriesFanart(seasonDir.resolve('landscape.jpg'), sid, 'seasonthumb', season, override, locale)
 		}
 
-		// folder image (resuse series / season poster if possible)
-		copyIfPossible(seasonDir.resolve('poster.jpg'), seasonDir.resolve('folder.jpg'))
-		copyIfPossible(seriesDir.resolve('poster.jpg'), seriesDir.resolve('folder.jpg'))
+		// primary poster as folder image
+		fetchPrimaryPoster(sid.poster, seasonDir.resolve('folder.jpg'))
+		fetchPrimaryPoster(sid.poster, seriesDir.resolve('folder.jpg'))
 	}
 }
 
@@ -343,13 +343,13 @@ def fetchMovieArtworkAndNfo(movieDir, movie, movieFile = null, override = false,
 		['hdmovielogo', 'movielogo'].findResult { type -> fetchMovieFanart(movieDir.resolve('logo.png'), movieInfo, type, null, override, locale) }
 		['bluray', 'dvd', null].findResult { diskType -> fetchMovieFanart(movieDir.resolve('disc.png'), movieInfo, 'moviedisc', diskType, override, locale) }
 
-		// folder image (reuse movie poster if possible)
-		copyIfPossible(movieDir.resolve('poster.jpg'), movieDir.resolve('folder.jpg'))
+		// primary poster as folder image
+		fetchPrimaryPoster(movieInfo.poster, movieDir.resolve('folder.jpg'))
 	}
 }
 
-def copyIfPossible(File src, File dst) {
-	if (src.exists() && !dst.exists()) {
-		dst.bytes = src.bytes
+def fetchPrimaryPoster(url, file) {
+	if (url && !file.exists()) {
+		url.cache().saveAs(file)
 	}
 }
