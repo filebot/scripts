@@ -189,6 +189,9 @@ def fetchSeriesArtworkAndNfo(seriesDir, seasonDir, series, season, override = fa
 		// fetch nfo
 		fetchSeriesNfo(seriesDir.resolve('tvshow.nfo'), sid, locale)
 
+		// primary poster as folder image
+		fetchPrimaryPoster(sid.poster, seriesDir.resolve('folder.jpg'))
+
 		// series artwork
 		fetchSeriesBanner(seriesDir.resolve('poster.jpg'), sid, 'posters', 'series', null, override, locale)
 		fetchSeriesBanner(seriesDir.resolve('banner.jpg'), sid, 'banners', 'series', null, override, locale)
@@ -196,6 +199,7 @@ def fetchSeriesArtworkAndNfo(seriesDir, seasonDir, series, season, override = fa
 
 		// season artwork
 		if (seasonDir != seriesDir) {
+			fetchSeriesBanner(seasonDir.resolve('folder.jpg'), sid, 'posters', 'season', season, override, locale)
 			fetchSeriesBanner(seasonDir.resolve('poster.jpg'), sid, 'posters', 'season', season, override, locale)
 			fetchSeriesBanner(seasonDir.resolve('banner.jpg'), sid, 'banners', 'season', season, override, locale)
 		}
@@ -209,10 +213,6 @@ def fetchSeriesArtworkAndNfo(seriesDir, seasonDir, series, season, override = fa
 		if (seasonDir != seriesDir) {
 			fetchSeriesFanart(seasonDir.resolve('landscape.jpg'), sid, 'seasonthumb', season, override, locale)
 		}
-
-		// primary poster as folder image
-		fetchPrimaryPoster(sid.poster, seasonDir.resolve('folder.jpg'))
-		fetchPrimaryPoster(sid.poster, seriesDir.resolve('folder.jpg'))
 	}
 }
 
@@ -335,6 +335,9 @@ def fetchMovieArtworkAndNfo(movieDir, movie, movieFile = null, override = false,
 		// fetch nfo
 		fetchMovieNfo(movieDir.resolve('movie.nfo'), movieInfo, movieFile)
 
+		// primary poster as folder image
+		fetchPrimaryPoster(movieInfo.poster, movieDir.resolve('folder.jpg'))
+
 		// fetch series banner, fanart, posters, etc
 		fetchMovieArtwork(movieDir.resolve('poster.jpg'), movieInfo, 'posters', override, locale)
 		fetchMovieArtwork(movieDir.resolve('fanart.jpg'), movieInfo, 'backdrops', override, Locale.ROOT) // prefer no language backdrops
@@ -342,9 +345,6 @@ def fetchMovieArtworkAndNfo(movieDir, movie, movieFile = null, override = false,
 		['hdmovieclearart', 'movieart'].findResult { type -> fetchMovieFanart(movieDir.resolve('clearart.png'), movieInfo, type, null, override, locale) }
 		['hdmovielogo', 'movielogo'].findResult { type -> fetchMovieFanart(movieDir.resolve('logo.png'), movieInfo, type, null, override, locale) }
 		['bluray', 'dvd', null].findResult { diskType -> fetchMovieFanart(movieDir.resolve('disc.png'), movieInfo, 'moviedisc', diskType, override, locale) }
-
-		// primary poster as folder image
-		fetchPrimaryPoster(movieInfo.poster, movieDir.resolve('folder.jpg'))
 	}
 }
 
