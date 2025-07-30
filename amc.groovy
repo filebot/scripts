@@ -631,8 +631,8 @@ if (renameLog.size() > 0) {
 						table tr td:last-child{border-top-right-radius:4px;border-bottom-right-radius:4px}
 						table tr:last-child td{border-bottom:none}
 						table tr:hover td{background:#f2f2f2}
-						table{width:100%}
-						section{overflow:auto;font-family:Arial,Helvetica,sans-serif;color:#666;background:#eaebec;border:#ccc 1px solid;border-radius:4px;box-shadow:0 1px 2px #d1d1d1}
+						table{width:100%;color:#666;font-family:Arial,Helvetica,sans-serif}
+						section{overflow:auto;background:#eaebec;border:#ccc 1px solid;border-radius:4px;box-shadow:0 1px 2px #d1d1d1}
 					''')
 					title(getReportTitle())
 				}
