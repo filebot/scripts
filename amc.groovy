@@ -625,7 +625,7 @@ if (renameLog.size() > 0) {
 						table th{padding:15px 15px 12px 15px;background:#ededed}
 						table th{text-align:center;padding-left:20px}
 						table tr{text-align:left;padding-left:20px}
-						table td{padding:15px;border-top:1px solid #ffffff33;border-bottom:1px solid #e0e0e0;border-left:1px solid #e0e0e0;background:#fafafa;white-space:nowrap}
+						table td{padding:15px;background:#fafafa;white-space:nowrap}
 						table td:first-child{text-align:left;padding-left:20px;border-left:none}
 						table tr td:first-child{border-top-left-radius:4px;border-bottom-left-radius:4px}
 						table tr td:last-child{border-top-right-radius:4px;border-bottom-right-radius:4px}
