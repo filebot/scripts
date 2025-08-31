@@ -27,6 +27,13 @@ args.withIndex().each{ f, i ->
 		log.finest "Argument[$i]: $f"
 	} else {
 		log.warning "Argument[$i]: File does not exist: $f"
+
+		// users like to forget that script parameters require --def name=value syntax
+		f.path.findAll(/(?<=[\/\\])[a-z_]+[=]/).each{ n ->
+			_args.arguments.findAll{ a -> a.startsWith(n) }.each{ a ->
+				log.warning "* $a seems to be a --def name=value script parameter but --def is missing and so the argument is interpreted as input file argument"
+			}
+		}
 	}
 }
 
