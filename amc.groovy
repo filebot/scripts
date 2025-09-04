@@ -572,8 +572,8 @@ if (renameLog.size() > 0) {
 
 	def getNotificationMessage = { prefix = '• ', postfix = '\n' -> 
 		return ut.title ?: (
-			args ?: (input.findAll{ !it.isSubtitle() } ?: input).collect{ relativeInputPath(it) as File }.root
-		).nameWithoutExtension.unique().collect{ prefix + it }.join(postfix).trim()
+			(input.findAll{ !it.isSubtitle() } ?: input).collect{ relativeInputPath(it).before(/[\\\/]/) }
+		).unique().collect{ prefix + it }.join(postfix).trim()
 	}.memoize()
 
 	// make Kodi scan for new content and display notification message
@@ -616,7 +616,7 @@ if (renameLog.size() > 0) {
 	// messages used for email / pushbullet reports
 	def getReportSubject = { getNotificationMessage('', '; ') }
 	def getReportTitle = { '[FileBot] ' + getReportSubject() }
-	def getReportMessage = { 
+	def getReportMessage = {
 		'''<!DOCTYPE html>\n''' + XML {
 			html {
 				head {
