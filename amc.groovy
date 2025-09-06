@@ -572,7 +572,7 @@ if (renameLog.size() > 0) {
 
 	def getNotificationMessage = { prefix = '• ', postfix = '\n' -> 
 		return ut.title ?: (
-			(input.findAll{ !it.isSubtitle() } ?: input).collect{ relativeInputPath(it).before(/[\\\/]/) }
+			(input.findAll{ !it.isSubtitle() } ?: input).collect{ relativeInputPath(it).nameWithoutExtension.before(/[\\\/]/) }
 		).unique().collect{ prefix + it }.join(postfix).trim()
 	}.memoize()
 
