@@ -154,9 +154,6 @@ if (ut.dir) {
 	if (outputFolder in ut.dir.toFile().listPath()) {
 		log.warning "Invalid usage: input folder [$ut.dir] must not start with output folder [$outputFolder]"
 	}
-	if (ut.kind == null) {
-		log.warning "Invalid usage: --def ut_dir and --def ut_kind must be specified in tandem"
-	}
 } else if (args.size() == 0) {
 	die "Invalid usage: no input"
 } else if (args.any{ f -> f in outputFolder.listPath() }) {
@@ -174,10 +171,9 @@ if (args.size() == 0) {
 	// assume we're called with utorrent parameters (account for older and newer versions of uTorrents)
 	def d = ut.dir as File
 	def f = ut.file as File
-	def single = ut.kind != 'multi'
 
 	// single-file torrent vs multi-file torrent
-	roots = [single && d && f ? f.absolute ? f : d / f : d]
+	roots = [ut.kind != 'multi' && d && f ? f.absolute ? f : d / f : d]
 
 	try {
 		roots = roots*.canonicalFile
@@ -738,7 +734,7 @@ if (clean && !testRun) {
 
 	// deleting remaining files only makes sense after moving files
 	if (_args.action ==~ /(?i:MOVE)/) {
-		def cleanerInput = args.size() > 0 ? args : ut.kind == 'multi' && ut.dir ? [ut.dir as File] : []
+		def cleanerInput = args.size() > 0 ? args : (ut.kind == 'multi' || (ut.kind == null && ut.file == null)) && ut.dir ? [ut.dir as File] : []
 		cleanerInput = cleanerInput.findAll{ f -> f.exists() }
 		if (cleanerInput.size() > 0) {
 			log.fine 'Clean clutter files and empty folders'
