@@ -73,7 +73,7 @@ if (xattrFiles && _args.action =~ /clear/) {
 	['mediainfo', 'ffprobe', 'CRC32'].each{ n ->
 		def cache = Cache.getCache(n, CacheType.Monthly)
 		if (cache.keys) {
-			help "[CLEAR] ${n} cache (${cache.keys.size()})"
+			help "[CLEAR] ${cache} cache (${cache.keys.size()})"
 			cache.clear()
 		}
 	}

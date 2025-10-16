@@ -5,6 +5,13 @@
 if (_args.mode == /raw/) {
 	log.finest "# ${MediaInfo.version()}"
 
+	// reset cache to force xattr reads
+	def cache = Cache.getCache('mediainfo', CacheType.Monthly)
+	if (cache.keys) {
+		help "[CLEAR] ${cache} cache (${cache.keys.size()})"
+		cache.clear()
+	}
+
 	return args.files.findAll{ f -> f.video || f.audio }.each{ f ->
 		try(def mi = new MediaInfo()) {
 			def read = mi.read(f, 8192)
