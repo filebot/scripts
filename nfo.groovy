@@ -13,17 +13,29 @@ def fetchMovieNfo(m, f) {
 
 	def xml = XML {
 		movie {
+			id(i.id)
 			title(i.name)
 			originaltitle(i.originalName)
 			set(i.collection)
 			year(i.released?.year)
-			rating(i.rating)
-			votes(i.votes)
+			premiered(i.released)
 			mpaa(i.certification)
 			plot(i.overview)
 			tagline(i.tagline)
 			runtime(i.runtime)
-			id(i.id)
+
+			ratings {
+				rating(name: 'themoviedb', max: '10') {
+					value(i.rating)
+					votes(i.votes)
+				}
+			}
+
+			if (i.collection) {
+				set {
+					name(i.collection)
+				}
+			}
 
 			i.genres.each{ g ->
 				genre(g)
@@ -46,6 +58,7 @@ def fetchMovieNfo(m, f) {
 				imdb(id:'tt' + i.imdbId.pad(7), 'https://www.imdb.com/title/tt' + i.imdbId.pad(7))
 			}
 			tmdb(id:i.id, 'https://www.themoviedb.org/movie/' + i.id)
+			uniqueid(type:'tmdb', i.id)
 		}
 	}
 
@@ -72,13 +85,7 @@ def fetchSeriesNfo(m, f) {
 
 	def xml = XML {
 		tvshow {
-			if (s.database == 'TheTVDB') {
-				uniqueid(type:'tvdb', s.id)
-			}
-			if (s.database == 'TheMovieDB::TV') {
-				uniqueid(type:'tmdb', s.id)
-			}
-
+			id(s.id)
 			title(s.name)
 			year(s.startDate?.year)
 			rating(s.rating)
@@ -90,7 +97,6 @@ def fetchSeriesNfo(m, f) {
 			status(s.status)
 			studio(s.network)
 			episodeguide(s.id)
-			id(s.id)
 
 			s.genres.each{ g ->
 				genre(g)
@@ -98,6 +104,13 @@ def fetchSeriesNfo(m, f) {
 
 			certificationFragment(delegate, s)
 			crewFragment(delegate, s)
+
+			if (s.database == 'TheTVDB') {
+				uniqueid(type:'tvdb', s.id)
+			}
+			if (s.database == 'TheMovieDB::TV') {
+				uniqueid(type:'tmdb', s.id)
+			}
 		}
 	}
 
@@ -125,13 +138,7 @@ def fetchEpisodeNfo(m, f) {
 			}
 
 			episodedetails {
-				if (s.database == 'TheTVDB') {
-					uniqueid(type:'tvdb', e.id)
-				}
-				if (s.database == 'TheMovieDB::TV') {
-					uniqueid(type:'tmdb', e.id)
-				}
-
+				id(e.id)
 				title(e.title)
 				season(e.season)
 				episode(e.episode)
@@ -141,6 +148,13 @@ def fetchEpisodeNfo(m, f) {
 
 				crewFragment(delegate, e)
 				fileFragment(delegate, f)
+
+				if (s.database == 'TheTVDB') {
+					uniqueid(type:'tvdb', e.id)
+				}
+				if (s.database == 'TheMovieDB::TV') {
+					uniqueid(type:'tmdb', e.id)
+				}
 			}
 		}
 	}
@@ -166,6 +180,12 @@ def crewFragment(element, info) {
 				name(p.name)
 				if (p.character) {
 					role(p.character)
+				}
+				if (p.order) {
+					order(p.order)
+				}
+				if (p.image) {
+					thumb(p.image)
 				}
 			}
 		} else if (p.department == 'Writing') {
