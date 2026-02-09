@@ -32,8 +32,9 @@ def fetchMovieNfo(m, f) {
 			}
 
 			if (i.collection) {
-				set {
-					name(i.collection)
+				set(id: m.collection.id) {
+					name(m.collection.name)
+					overview(m.collection.overview)
 				}
 			}
 
