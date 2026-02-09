@@ -218,6 +218,10 @@ def fileFragment(element, file) {
 					aspect(s.'DisplayAspectRatio')
 					width(s.'Width')
 					height(s.'Height')
+					hdrtype(s.'HDR_Format_Commercial' ?: s.'HDR_Format')
+					framerate(s.'FrameRate')
+					bitrate(s.'BitRate')
+					duration(s.'Duration'.toFloat().div(60000).round(4))
 				}
 			}
 			mi.Audio.each{ s ->
@@ -225,6 +229,7 @@ def fileFragment(element, file) {
 					codec(s.'CodecID/Hint' ?: s.'Format')
 					language(s.'Language/String3')
 					channels(s.'Channel(s)_Original' ?: s.'Channel(s)')
+					bitrate(s.'BitRate')
 				}
 			}
 			mi.Text.each{ s ->
