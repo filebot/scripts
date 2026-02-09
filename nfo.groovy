@@ -23,6 +23,7 @@ def fetchMovieNfo(m, f) {
 			plot(i.overview)
 			tagline(i.tagline)
 			runtime(i.runtime)
+			status(i.status)
 
 			ratings {
 				rating(name: 'themoviedb', max: '10') {
@@ -49,6 +50,16 @@ def fetchMovieNfo(m, f) {
 			}
 			i.productionCompanies.each{ c ->
 				studio(c)
+			}
+
+			m.artwork.findAll{ a -> a.matches(/posters/) }.take(1).each{ a ->
+				thumb(aspect: 'poster', a.url)
+			}
+
+			m.artwork.findAll{ a -> a.matches(/backdrops/) }.take(1).each{ a ->
+				fanart {
+					thumb(a.url)
+				}
 			}
 
 			certificationFragment(delegate, i)
