@@ -113,6 +113,21 @@ def fetchSeriesNfo(m, f) {
 			s.genres.each{ g ->
 				genre(g)
 			}
+			s.country.each{ c ->
+				country(c)
+			}
+
+			s.artwork.findAll{ a -> a.matches(/posters/) }.take(1).each{ a ->
+				thumb(aspect: 'poster', a.url)
+			}
+			s.artwork.findAll{ a -> a.matches(/logos/) }.take(1).each{ a ->
+				thumb(aspect: 'clearlogo', a.url)
+			}
+			s.artwork.findAll{ a -> a.matches(/backdrops/) }.take(1).each{ a ->
+				fanart {
+					thumb(a.url)
+				}
+			}
 
 			certificationFragment(delegate, s)
 			crewFragment(delegate, s)
@@ -152,11 +167,13 @@ def fetchEpisodeNfo(m, f) {
 			episodedetails {
 				id(e.id)
 				title(e.title)
+				showtitle(s.name)
 				season(e.season)
 				episode(e.episode)
 				aired(e.airdate)
+				premiered(e.airdate)
 				plot(e.overview)
-				thumb(aspect:'thumb', e.image)
+				thumb(e.image)
 
 				crewFragment(delegate, e)
 				fileFragment(delegate, f)
