@@ -16,7 +16,6 @@ def fetchMovieNfo(m, f) {
 			id(i.id)
 			title(i.name)
 			originaltitle(i.originalName)
-			set(i.collection)
 			year(i.released?.year)
 			premiered(i.released)
 			mpaa(i.certification)
@@ -70,7 +69,7 @@ def fetchMovieNfo(m, f) {
 				imdb(id:'tt' + i.imdbId.pad(7), 'https://www.imdb.com/title/tt' + i.imdbId.pad(7))
 			}
 			tmdb(id:i.id, 'https://www.themoviedb.org/movie/' + i.id)
-			uniqueid(type:'tmdb', i.id)
+			uniqueid(type:'tmdb', default:'true', i.id)
 		}
 	}
 
@@ -133,10 +132,10 @@ def fetchSeriesNfo(m, f) {
 			crewFragment(delegate, s)
 
 			if (s.database == 'TheTVDB') {
-				uniqueid(type:'tvdb', s.id)
+				uniqueid(type:'tvdb', default:'true', s.id)
 			}
 			if (s.database == 'TheMovieDB::TV') {
-				uniqueid(type:'tmdb', s.id)
+				uniqueid(type:'tmdb', default:'true', s.id)
 			}
 		}
 	}
@@ -179,10 +178,10 @@ def fetchEpisodeNfo(m, f) {
 				fileFragment(delegate, f)
 
 				if (s.database == 'TheTVDB') {
-					uniqueid(type:'tvdb', e.id)
+					uniqueid(type:'tvdb', default:'true', e.id)
 				}
 				if (s.database == 'TheMovieDB::TV') {
-					uniqueid(type:'tmdb', e.id)
+					uniqueid(type:'tmdb', default:'true', e.id)
 				}
 			}
 		}
