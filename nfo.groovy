@@ -178,10 +178,10 @@ def fetchEpisodeNfo(m, f) {
 				fileFragment(delegate, f)
 
 				if (s.database == 'TheTVDB') {
-					uniqueid(type:'tvdb', default:'true', e.id)
+					uniqueid(type:'tvdb', default:'true', series: s.id, season: e.season, episode: e.episode, e.id)
 				}
 				if (s.database == 'TheMovieDB::TV') {
-					uniqueid(type:'tmdb', default:'true', e.id)
+					uniqueid(type:'tmdb', default:'true', series: s.id, season: e.season, episode: e.episode, e.id)
 				}
 			}
 		}
