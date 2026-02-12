@@ -2,7 +2,7 @@
 
 
 def fetchMovieNfo(m, f) {
-	def nfoFile = f.dir / f.nameWithoutExtension + '.nfo'
+	def nfoFile = f.dir / 'movie.nfo'
 	if (nfoFile.exists()) {
 		log.finest "[SKIP] NFO already exists: $nfoFile"
 		return
@@ -85,7 +85,7 @@ def fetchSeriesNfo(m, f) {
 		return
 	}
 
-	def nfoFile = seriesFolder / m.seriesInfo.name + '.nfo'
+	def nfoFile = seriesFolder / 'tvshow.nfo'
 	if (nfoFile.exists()) {
 		log.finest "[SKIP] NFO already exists: $nfoFile"
 		return
