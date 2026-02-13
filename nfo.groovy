@@ -109,6 +109,10 @@ def fetchSeriesNfo(m, f) {
 			studio(s.network)
 			episodeguide(s.id)
 
+			s.episodes.collectEntries{ e -> [e.episode ? e.season : 0, e.group] }.each{ seasonNumber, seasonName ->
+				namedseason(number: seasonNumber, seasonName)
+			}
+
 			s.genres.each{ g ->
 				genre(g)
 			}
