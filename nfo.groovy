@@ -171,8 +171,8 @@ def fetchEpisodeNfo(m, f) {
 
 			episodedetails {
 				id(e.id)
-				title(e.title)
 				showtitle(s.name)
+				title(e.title)
 				if (episodePart.group) {
 					group(episodePart.group)
 				}
