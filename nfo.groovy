@@ -173,6 +173,9 @@ def fetchEpisodeNfo(m, f) {
 				id(e.id)
 				title(e.title)
 				showtitle(s.name)
+				if (episodePart.group) {
+					group(episodePart.group)
+				}
 				season(episodePart.episode ? episodePart.season : 0)
 				episode(episodePart.episode ?: episodePart.special)
 				aired(e.airdate)
