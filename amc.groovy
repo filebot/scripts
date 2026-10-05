@@ -8,7 +8,7 @@ log.fine("Run script [$_args.script] at [$now]")
 // sanity check script parameters
 _def.each{ n, v ->
 	// mirror script parameters and print warnings for invalid or mistyped parameters 
-	if (n ==~ /kodi|plex|jellyfin|emby|pushbullet|pushover|discord|gmail|mail|mailto|myepisodes/) {
+	if (n ==~ /kodi|plex|jellyfin|emby|pushbullet|pushover|discord|gmail|mail|mailto/) {
 		log.finest "Parameter: $n = *****"
 	} else if (n ==~ /ut_dir|ut_file|ut_label|ut_title|ut_kind|ut_state|ut_state_allow|music|subtitles|artwork|reportError|storeReport|extractFolder|skipExtract|deleteAfterExtract|clean|exec|unsorted|ignore|minLengthMS|minFileSize|minFileAge|excludeLink|excludeList|movieFormat|seriesFormat|animeFormat|musicFormat|unsortedFormat|movieDB|seriesDB|animeDB|musicDB/) {
 		log.finest "Parameter: $n = $v"
@@ -60,13 +60,12 @@ plex = tryQuietly{ plex.split(/[ ,;|]+/)*.split(/:/).collect{ it.length >= 3 ? [
 emby = tryQuietly{ emby.split(/[ ,;|]+/)*.split(/:/).collect{ it.length >= 3 ? [host: it[0], port: it[1] as int, token: it[2]] : it.length >= 2 ? [host: it[0], token: it[1]] : [host: it[0]] } }
 jellyfin = tryQuietly{ jellyfin.split(/[ ,;|]+/)*.split(/:/).collect{ it.length >= 3 ? [host: it[0], port: it[1] as int, token: it[2]] : it.length >= 2 ? [host: it[0], token: it[1]] : [host: it[0]] } }
 
-// extra options, myepisodes updates and email notifications
+// extra options, email notifications, etc
 extractFolder      = tryQuietly{ extractFolder as File }
 skipExtract        = tryQuietly{ skipExtract.toBoolean() }
 deleteAfterExtract = tryQuietly{ deleteAfterExtract.toBoolean() }
 excludeList        = tryQuietly{ def f = excludeList as File; f.absolute ? f : outputFolder.resolve(f.path) }
 excludeLink        = tryQuietly{ excludeLink.toBoolean() }
-myepisodes         = tryQuietly{ myepisodes.split(':', 2) as List }
 gmail              = tryQuietly{ gmail.split(':', 2) as List }
 mail               = tryQuietly{ mail.split(':', 5) as List }
 pushover           = tryQuietly{ pushover.split(':', 2) as List }
@@ -604,12 +603,6 @@ if (renameLog.size() > 0) {
 			log.fine "Notify Jellyfin [$instance.host]"
 			refreshJellyfinLibrary(instance.host, instance.port, instance.token)
 		}
-	}
-
-	// mark episodes as 'acquired'
-	if (myepisodes) tryLogCatch {
-		log.fine 'Update MyEpisodes'
-		executeScript('update-mes', [login: myepisodes.join(':'), addshows: true], destinationFiles)
 	}
 
 	// pushover only supports plain text messages
