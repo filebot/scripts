@@ -303,6 +303,20 @@ if (!Settings.UWP) {
 println 'Package: ' + Settings.ApplicationDeployment.upper()
 
 
+// FLATPAK
+if (env.'FLATPAK_ID') {
+	try{
+		def f = '/.flatpak-info' as File
+		if (f.isFile()) {
+			println "FLATPAK: [Context] " + f.text.match(/(?<=\[Context\][^\]]+)filesystems=.+/)
+			println "FLATPAK: [Session Bus Policy] " + f.text.match(/(?<=\[Session Bus Policy\][^\]]+)org.freedesktop.Flatpak=.+/)
+		}
+	} catch(Throwable error) {
+		// ignore
+	}
+}
+
+
 // Confinement: Devmode
 if (env.'SNAP') {
 	if (FileSystems.Default.FileStores[0]) {
